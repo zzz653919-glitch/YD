@@ -92,7 +92,7 @@
     'Mahsulot savatga qo‘shildi': 'Товар добавлен в корзину', 'Mahsulot savatdan olib tashlandi': 'Товар удалён из корзины', 'Sevimlilarga qo‘shildi': 'Добавлено в избранное', 'Mahsulot sevimlilardan olib tashlandi': 'Удалено из избранного',
     'Eng ko‘pi bilan 3 ta mahsulotni solishtirish mumkin': 'Можно сравнить не более 3 товаров', 'Sevimlilarga qo‘shish': 'В избранное', 'Sevimlilarda': 'В избранном',
     'Sahifa topilmadi': 'Страница не найдена', 'Siz izlagan sahifa mavjud emas yoki ko‘chirilgan.': 'Такой страницы нет или она перемещена.', 'Bosh sahifaga qaytish': 'Вернуться на главную',
-    'Mahsulot topilmadi.': 'Товар не найден.', 'O‘xshash eshiklar': 'Похожие двери', 'Rasmni kattalashtirish': 'Увеличить фото', 'Dark rejimga o‘tish': 'Тёмная тема', 'Light rejimga o‘tish': 'Светлая тема',
+    'Mahsulot topilmadi.': 'Товар не найден.', 'Aksiya': 'Акция', 'Maxsus takliflar va chegirmalar': 'Специальные предложения и скидки', 'O‘xshash eshiklar': 'Похожие двери', 'Rasmni kattalashtirish': 'Увеличить фото', 'Dark rejimga o‘tish': 'Тёмная тема', 'Light rejimga o‘tish': 'Светлая тема',
     'Yuqoriga qaytish': 'Наверх', 'Telegram orqali bog‘lanish': 'Связаться через Telegram', 'Sahifa yuklanmadi. Internetni tekshirib, qayta urinib ko‘ring.': 'Страница не загрузилась. Проверьте интернет.',
     'Biz haqimizda ': 'О нас', 'YasinDoors — faqat MDF eshiklarga ixtisoslashgan kompaniya.': 'YasinDoors — компания, специализирующаяся только на MDF дверях.', 'Faqat MDF eshiklar': 'Только MDF двери',
     'Katalogni ko‘rish': 'Смотреть каталог', 'MDF sifati va dizayn': 'Качество MDF и дизайн', 'Ishlab chiqarish jarayoni': 'Процесс производства', 'Material va dizayn': 'Материал и дизайн',
@@ -347,6 +347,10 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     $('#homeTabs').innerHTML = tabs.map(([k, n]) => `<button class="chip" data-act="htab" data-k="${k}" aria-pressed="${k === homeTab}">${n}</button>`).join('');
     const f = HOME_TABS.find(x => x[0] === homeTab)[2], list = PRODUCTS.filter(f).slice(0, 6);
     $('#featured').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3></div>`;
+    const sale = PRODUCTS.filter(p => p.discountPercent || p.old).slice(0, 3); // maxsus takliflar: faqat haqiqiy chegirmalar
+    let off = $('#offers');
+    if (sale.length && !off) { $('#collection').insertAdjacentHTML('afterend', '<section class="section" id="offers"><div class="container"><div class="head reveal in"><p class="eyebrow">Aksiya</p><h2>Maxsus takliflar va chegirmalar</h2></div><div class="grid" id="offersGrid"></div></div></section>'); off = $('#offers'); }
+    if (off) { off.hidden = !sale.length; $('#offersGrid').innerHTML = sale.map(card).join(''); }
     const cols = [...new Map(PRODUCTS.map(p => [p.color, p])).values()];
     $('#colorsSec').hidden = !cols.length;
     $('#swatches').innerHTML = cols.map(p => `<a class="sw" href="doors.html?f=${encodeURIComponent(p.color)}"><i style="background:${esc(p.hex)}"></i>${esc(p.colorName)}</a>`).join('');
