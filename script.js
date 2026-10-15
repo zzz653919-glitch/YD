@@ -163,15 +163,15 @@
     const detail = p.style === 'classic' ? bevel(134, 76, 60, 124) + bevel(206, 76, 60, 124) + bevel(134, 218, 60, 130) + bevel(206, 218, 60, 130)
       : (p.tags.includes('minimal') ? groove(200) : [150, 175, 200, 225, 250].map(groove).join(''));
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><defs>
-<linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1ede6"/><stop offset="1" stop-color="#ddd6ca"/></linearGradient>
-<linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ad987b"/><stop offset="1" stop-color="#6c5c48"/></linearGradient>
+<linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ece6dc"/><stop offset="1" stop-color="#cfc6b6"/></linearGradient>
+<linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b5851"/><stop offset="1" stop-color="#2a2927"/></linearGradient>
 <linearGradient id="s" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient>
 <linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f6f6"/><stop offset=".5" stop-color="#9c9c9c"/><stop offset="1" stop-color="#e4e4e4"/></linearGradient>
 <linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
 <filter id="g" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="${wood ? '.012 .3' : '.6'}" numOctaves="3" seed="${p.id}"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.1 -.42"/></filter>
 <filter id="b" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="6"/></filter></defs>
 <rect width="400" height="500" fill="url(#w)"/><rect y="380" width="400" height="120" fill="url(#f)"/>
-<rect y="364" width="400" height="16" fill="#f7f4ef"/><rect y="378" width="400" height="2" fill="#000" opacity=".16"/>
+<rect y="364" width="400" height="16" fill="#faf8f4"/><rect y="378" width="400" height="2" fill="#000" opacity=".16"/>
 <polygon points="116,380 284,380 372,500 28,500" fill="url(#l)" opacity=".32"/>
 <rect x="298" y="46" width="44" height="336" fill="#000" opacity=".18" filter="url(#b)"/>
 <rect x="100" y="40" width="200" height="340" fill="#f3efe9"/><rect x="100" y="40" width="200" height="340" fill="none" stroke="#000" stroke-opacity=".12"/>
@@ -630,33 +630,12 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   if (page === 'doors') safe(initDoors);
   if (page === 'contact') safe(initContact);
 
-  /* ---------- 14. Zamonaviy effektlar: dog‘lar, marquee, spotlight, 3D tilt ---------- */
-  function initFx() {
-    const calm = matchMedia('(prefers-reduced-motion:reduce)').matches, fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
-    const hero = $('.hero');
-    if (hero && !$('.blob', hero)) hero.insertAdjacentHTML('afterbegin', '<i class="blob blob--a" aria-hidden="true"></i><i class="blob blob--b" aria-hidden="true"></i>');
-    if (page === 'home' && hero && !$('.marq')) {
-      const words = ['100% MDF', 'Premium sifat', 'Individual dizayn', 'Zamonaviy uslub', 'Aniq o‘lcham', 'Ishonchli o‘rnatish'], row = words.map(w => `<span>${t(w)}</span>`).join('');
-      hero.insertAdjacentHTML('afterend', `<div class="marq" aria-hidden="true"><div class="marq__t">${row}${row}</div></div>`);
-    }
-    if (calm || !fine) return;
-    document.addEventListener('pointermove', e => { // spotlight + yengil 3D burilish
-      const c = e.target.closest && e.target.closest('.card,.box,.timeline li'); if (!c) return;
-      const r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-      c.style.setProperty('--mx', x + 'px'); c.style.setProperty('--my', y + 'px');
-      if (c.classList.contains('card')) { c.style.setProperty('--ty2d', ((x / r.width - .5) * 6).toFixed(2) + 'deg'); c.style.setProperty('--tx2d', ((.5 - y / r.height) * 6).toFixed(2) + 'deg'); }
-    }, { passive: true });
-    const fr = $('.hero__frame');
-    if (fr) { const v = fr.parentElement;
-      v.addEventListener('pointermove', e => { const r = v.getBoundingClientRect(); fr.style.setProperty('--ry', ((e.clientX - r.left) / r.width - .5) * 14 + 'deg'); fr.style.setProperty('--rx', (.5 - (e.clientY - r.top) / r.height) * 10 + 'deg'); }, { passive: true });
-      v.addEventListener('pointerleave', () => { fr.style.setProperty('--ry', '0deg'); fr.style.setProperty('--rx', '0deg'); });
-    }
-  }
-  try { initFx(); } catch (e) { console.error(e); }
+  /* ---------- 14. Yengil effektlar: sarlavha, hero ---------- */
+  // Dog‘lar, marquee, 3D burilish olib tashlandi — dizayn sokin va tez ishlashi uchun.
 
   /* ---------- 15. Yana effektlar: kirish animatsiyasi, hero rang tanlash, raqamlar, kursor nuri, magnit tugmalar ---------- */
   function initFx2() {
-    const calm = matchMedia('(prefers-reduced-motion:reduce)').matches, fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+    const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
     // 1) Kirish: eshik ochilishi (sessiyada bir marta, faqat bosh sahifa)
     let seen = false; try { seen = sessionStorage.getItem('intro') === '1'; sessionStorage.setItem('intro', '1'); } catch { /* ignore */ }
     if (page === 'home' && !seen && !calm) {
@@ -687,18 +666,6 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { run(x.target); io.unobserve(x.target); } }), { threshold: .5 });
       $$('.stat b').forEach(b => io.observe(b));
     }
-    if (calm || !fine) return;
-    // 4) Kursor nuri
-    document.body.insertAdjacentHTML('beforeend', '<div class="cglow" aria-hidden="true"></div>');
-    const g = $('.cglow'); let gx = 0, gy = 0, raf = 0;
-    addEventListener('pointermove', e => { gx = e.clientX; gy = e.clientY; g.classList.add('on'); if (!raf) raf = requestAnimationFrame(() => { g.style.transform = `translate(${gx}px,${gy}px)`; raf = 0; }); }, { passive: true });
-    document.addEventListener('pointerleave', () => g.classList.remove('on'));
-    // 5) Magnit tugmalar
-    document.addEventListener('pointermove', e => {
-      const b = e.target.closest && e.target.closest('.hero__btns .btn, .cta .btn'); if (!b) return;
-      const r = b.getBoundingClientRect(); b.style.transform = `translate(${((e.clientX - r.left) / r.width - .5) * 10}px,${((e.clientY - r.top) / r.height - .5) * 8}px)`;
-    }, { passive: true });
-    document.addEventListener('pointerout', e => { const b = e.target.closest && e.target.closest('.hero__btns .btn, .cta .btn'); if (b) b.style.transform = ''; });
   }
   try { initFx2(); } catch (e) { console.error(e); }
   initReveal();
