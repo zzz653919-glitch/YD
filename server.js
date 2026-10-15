@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const express = require('express');
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const TG_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || '').trim(), TG_CHAT = (process.env.TELEGRAM_CHAT_ID || '').trim(); // faqat .env dan; frontendga chiqmaydi
 const ADMIN_ENABLED = ADMIN_PASSWORD.length >= 8; // 8 belgidan kam parol bilan admin panel o‘chiq turadi
 
 /* ---------- Saqlash: data/*.json fayllari (yozishda avval vaqtinchalik faylga, keyin almashtiriladi) ---------- */
@@ -24,6 +25,7 @@ function save(file, data) {
 }
 function logError(where, err) { // xatolar data/errors.log fayliga yoziladi (token yashiriladi)
   let line = `${new Date().toISOString()} [${where}] ${(err && (err.stack || err.message)) || err}`;
+  if (TG_TOKEN) line = line.split(TG_TOKEN).join('***'); // Telegram tokeni logga tushmaydi
   console.error(line);
   try {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -98,6 +100,19 @@ const adminProduct = p => ({ ...p, effectivePrice: effectivePrice(p), discountSt
 
 /* ---------- Bildirishnomalar, faoliyat tarixi ---------- */
 const persist = { notifications: () => save('notifications.json', notifications), activity: () => save('activity.json', activity), movements: () => save('movements.json', movements), messages: () => save('messages.json', messages) };
+/* ---------- Telegram: yangi zakaz va xabarlar adminga yuboriladi (token faqat serverda) ---------- */
+const tgEsc = v => String(v ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+function sendTelegram(html) { // zakaz saqlanganidan keyin chaqiriladi; xato bo‘lsa zakazga ta’sir qilmaydi
+  if (!TG_TOKEN || !TG_CHAT) return Promise.resolve(false);
+  return fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(8000),
+    body: JSON.stringify({ chat_id: TG_CHAT, text: html.slice(0, 4000), parse_mode: 'HTML', disable_web_page_preview: true })
+  }).then(async r => { if (!r.ok) throw new Error(`Telegram HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`); return true; })
+    .catch(e => { logError('telegram', e); return false; });
+}
+const orderText = o => `🆕 <b>Yangi zakaz ${tgEsc(o.id)}</b>\n👤 ${tgEsc(o.name)}\n📞 ${tgEsc(o.phone)}\n📍 ${tgEsc(o.address)}\n\n` +
+  o.items.map(i => `• ${tgEsc(i.name)} × ${i.qty} — ${money(i.price * i.qty)}`).join('\n') +
+  `\n\nYetkazib berish: ${o.delivery ? money(o.delivery) : 'bepul'}\n<b>Jami: ${money(o.total)}</b>` + (o.note ? `\n💬 ${tgEsc(o.note)}` : '');
 function notify(type, title, text, link) {
   notifications.unshift({ id: uid(), ts: new Date().toISOString(), type, title, text, link, read: false });
   if (notifications.length > 500) notifications.length = 500;
@@ -210,6 +225,7 @@ app.post('/api/contact', (req, res) => { // aloqa formasi: xabar saqlanadi, admi
   const m = { id: 'M-' + String(seq.m).padStart(4, '0'), createdAt: new Date().toISOString(), name, phone: `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10, 12)}`, message, read: false };
   messages.unshift(m); persist.messages();
   notify('message', 'Yangi xabar', `${name}: ${message.slice(0, 80)}`, '#messages');
+  sendTelegram(`✉️ <b>Yangi xabar ${tgEsc(m.id)}</b>\n👤 ${tgEsc(name)}\n📞 ${tgEsc(m.phone)}\n\n${tgEsc(message)}`);
   res.json({ ok: true });
 });
 
@@ -254,6 +270,7 @@ app.post('/api/order', async (req, res) => {
   }
   orders.unshift(order); save('orders.json', orders); saveStock();
   notify('order', 'Yangi zakaz', `${order.id} · ${name} · ${money(total)}`, '#orders?id=' + order.id); // admin panelda bildirishnoma
+  sendTelegram(orderText(order)); // kutilmaydi: Telegram sekin bo‘lsa ham mijozga javob darhol qaytadi
   res.json({ ok: true, id: order.id });
 });
 

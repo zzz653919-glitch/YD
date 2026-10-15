@@ -4,7 +4,7 @@ MDF eshiklar internet-do'koni. Cart va Favorites brauzerda (localStorage). Zakaz
 
 ## Ishga tushirish
 1. `npm install`
-2. `.env` fayliga quyidagilarni yozing:
+2. `.env.example` dan `.env` nusxa oling va quyidagilarni yozing (`.env` GitHub'ga yuklanmaydi):
    ```
    TELEGRAM_BOT_TOKEN=...      # @BotFather dan
    TELEGRAM_CHAT_ID=...        # avval botingizga biror xabar yuboring

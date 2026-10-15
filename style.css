@@ -302,12 +302,12 @@ html.theming::view-transition-new(root){animation:themeIn .65s ease-out}
 /* ===== 16. Ultra Premium tema: mat qora · grafit · ivory · bej · metallik oltin =====
    Yagona vizual qatlam: o'zgaruvchilar → tipografika → komponentlar → bo'limlar → mobil. */
 :root{--bg:#f6f2ea;--bg2:#ece4d5;--bg3:#ddd2bc;--tx:#11110f;--tx2:#58534a;--card:#fffdf8;--line:rgba(17,17,15,.12);
-  --glass:rgba(246,242,234,.78);--glass2:rgba(255,253,248,.62);--acc:#8f6d32;--acc2:#b8924d;--btn:#11110f;--btnTx:#f6f2ea;--graph:#1b1b19;--ink:#0a0a09;
+  --glass:rgba(246,242,234,.92);--glass2:rgba(255,253,248,.62);--acc:#8f6d32;--acc2:#b8924d;--btn:#11110f;--btnTx:#f6f2ea;--graph:#1b1b19;--ink:#0a0a09;
   --gold:linear-gradient(135deg,#ecd9a0,#b8924d 55%,#8f6d32);
   --sh1:0 1px 2px rgba(20,16,10,.04),0 14px 34px rgba(20,16,10,.08);--sh2:0 2px 6px rgba(20,16,10,.05),0 32px 70px rgba(20,16,10,.16);
   --r:6px;--t:.4s cubic-bezier(.2,.7,.2,1);--nh:80px}
 :root[data-theme="dark"]{--bg:#0a0a09;--bg2:#121211;--bg3:#1b1a18;--tx:#f4efe4;--tx2:#a8a193;--card:#151513;--line:rgba(244,239,228,.12);
-  --glass:rgba(10,10,9,.78);--glass2:rgba(40,38,34,.5);--acc:#d6b774;--acc2:#e6cf93;--btn:#f4efe4;--btnTx:#0a0a09;--graph:#141413;
+  --glass:rgba(10,10,9,.9);--glass2:rgba(40,38,34,.5);--acc:#d6b774;--acc2:#e6cf93;--btn:#f4efe4;--btnTx:#0a0a09;--graph:#141413;
   --sh1:0 1px 2px rgba(0,0,0,.5),0 14px 34px rgba(0,0,0,.45);--sh2:0 2px 6px rgba(0,0,0,.6),0 32px 70px rgba(0,0,0,.65)}
 /* tipografika */
 h1,h2,h3,h4,.logo__t b,.price,.sum dl.total,.nf b,.footer__word{font-family:'Cormorant Garamond','Times New Roman',serif}
@@ -463,3 +463,13 @@ html:not(.theming)::view-transition-new(root){animation:.5s cubic-bezier(.2,.7,.
 /* yuklanish skeletonlari (katalog kelguncha) */
 .grid.is-loading .sk{aspect-ratio:auto}
 @media(prefers-reduced-motion:reduce){html::view-transition-old(root),html::view-transition-new(root){animation:none}}
+/* bosish qulayligi: kichik havolalar va rang nuqtalari (≥44px zona) */
+.card__body h3 a{display:inline-block;padding:8px 0}.crumbs a{display:inline-block;padding:10px 4px}
+.footer ul a{display:inline-block;padding:8px 0}.hero__dots button{position:relative}.hero__dots button::after{content:"";position:absolute;inset:-9px}
+@media(pointer:coarse){.hero__dots button{width:32px;height:32px}.hero__dots{gap:14px}}
+/* tuzatish: sticky header balandligi o'zgarmasin — scroll ≈24px da sahifa titrab turardi (balandlik o'zgarishi scrollY ni qayta o'zgartirgan) */
+.header.scrolled{--nh:inherit}
+/* tuzatish: footer havolalari yorug' rejimda ham o'qilsin (avval to'q kulrang edi), yozuv mobilda kesilmasin */
+.footer ul a,.footer .social a{color:#b8b1a3}.footer ul a:hover{color:#fff}.footer .social a:hover{color:#111}
+.footer__word{font-size:clamp(40px,14vw,260px);letter-spacing:.04em;white-space:nowrap}
+@media(max-width:768px){.fab{width:44px;height:44px}.fabs{right:10px;gap:8px}}
