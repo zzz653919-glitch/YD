@@ -94,7 +94,8 @@ function publicProduct(p) { // faqat saytga kerakli maydonlar (tannarx, ta'minot
   const act = discountState(p) === 'active', price = effectivePrice(p);
   return { id: p.id, name: p.name, price, old: act ? p.price : (p.old && p.old > price ? p.old : null), discountPercent: act ? p.discountPercent : 0, discountEnd: act ? p.discountEnd : '',
     color: p.color, style: p.style, hex: p.hex, edge: p.edge, badge: p.badge, tags: p.tags, desc: p.desc, long: p.long, material: p.material,
-    colorName: p.colorName, styleName: p.styleName, stock: inStock(p), image: p.image, gallery: p.gallery || [] };
+    colorName: p.colorName, styleName: p.styleName, stock: inStock(p), image: p.image, gallery: p.gallery || [],
+    sizes: Object.fromEntries(['wMin', 'wMax', 'hMin', 'hMax'].filter(k => Number.isInteger(p[k])).map(k => [k, p[k]])) };
 }
 const adminProduct = p => ({ ...p, effectivePrice: effectivePrice(p), discountState: discountState(p), inStock: inStock(p), tracked: tracked(p), low: isLow(p) });
 
@@ -408,6 +409,11 @@ function parseProduct(b, old) { // { error } yoki tayyor mahsulot maydonlari
     if (!isYmd(ds) || !isYmd(de)) return { error: 'Chegirma uchun boshlanish va tugash sanasini kiriting.' };
     if (de < ds) return { error: 'Chegirma tugash sanasi boshlanishidan oldin bo‘lishi mumkin emas.' };
   }
+  const sz = {}; // ixtiyoriy: shu model tayyorlanadigan o‘lcham chegaralari (mm); bo‘sh bo‘lsa, saytdagi umumiy chegara ishlatiladi
+  for (const [k, lo, hi, nm] of [['wMin', 300, 2000, 'Kenglik (dan)'], ['wMax', 300, 2000, 'Kenglik (gacha)'], ['hMin', 1000, 3000, 'Balandlik (dan)'], ['hMax', 1000, 3000, 'Balandlik (gacha)']]) {
+    const v = optInt(b[k], lo, hi); if (v.bad) return { error: `${nm}: ${lo}–${hi} mm oralig‘ida butun son bo‘lsin (yoki bo‘sh).` }; sz[k] = v.v;
+  }
+  if ((sz.wMin !== null && sz.wMax !== null && sz.wMin > sz.wMax) || (sz.hMin !== null && sz.hMax !== null && sz.hMin > sz.hMax)) return { error: 'O‘lcham: “dan” qiymati “gacha” dan katta bo‘lmasin.' };
   const colorChanged = !old || old.color !== color;
   return {
     name, price, old: oldPrice.v, color, style, styleName: STYLES[style], badge, image, gallery, sku, qty: qty.v, minQty: minQty.v ?? 0, cost: cost.v, supplier: clean(b.supplier, 80),
@@ -415,7 +421,7 @@ function parseProduct(b, old) { // { error } yoki tayyor mahsulot maydonlari
     colorName: clean(b.colorName, 40) || (color[0].toUpperCase() + color.slice(1)),
     material: clean(b.material, 80) || 'MDF', desc: clean(b.desc, 200), long: clean(b.long, 1000), tags: clean(b.tags, 200).toLowerCase(),
     hex: colorChanged ? COLORS[color][0] : old.hex, edge: colorChanged ? COLORS[color][1] : old.edge,
-    stock: qty.v === null ? !!b.stock : qty.v > 0, hidden: !!b.hidden
+    stock: qty.v === null ? !!b.stock : qty.v > 0, hidden: !!b.hidden, wMin: sz.wMin, wMax: sz.wMax, hMin: sz.hMin, hMax: sz.hMax
   };
 }
 admin.get('/products', (req, res) => res.json({ ok: true, products: products.map(adminProduct) }));

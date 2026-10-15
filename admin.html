@@ -186,7 +186,13 @@
         <div class="fld"><label for="pColor">Rang guruhi</label><select class="in" id="pColor"><option value="oq">Oq</option><option value="qora">Qora</option><option value="jigarrang">Jigarrang</option><option value="yogoch">Yog‘och</option></select></div>
         <div class="fld"><label for="pColorName">Rang nomi (saytda ko‘rinadi)</label><input class="in" id="pColorName" maxlength="30" placeholder="Masalan: Eman"></div>
         <div class="fld"><label for="pStyle">Uslub</label><select class="in" id="pStyle"><option value="modern">Modern</option><option value="classic">Classic</option></select></div>
-        <div class="fld"><label for="pBadge">Belgi</label><select class="in" id="pBadge"><option value="">Yo‘q</option><option value="new">Yangi</option><option value="best">Bestseller</option><option value="premium">Premium</option><option value="sale">Sale</option><option value="limited">Limited</option></select></div>
+        <div class="fld"><label for="pBadge">Belgi</label><select class="in" id="pBadge"><option value="">Yo‘q</option><option value="new">Yangi</option><option value="best">Mashhur</option><option value="premium">Premium</option><option value="sale">Chegirma</option><option value="limited">Limited</option></select></div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label for="pWmin">Kenglik dan (mm, ixtiyoriy)</label><input class="in" id="pWmin" type="number" min="300" max="2000" inputmode="numeric"></div>
+        <div class="fld"><label for="pWmax">Kenglik gacha (mm)</label><input class="in" id="pWmax" type="number" min="300" max="2000" inputmode="numeric"></div>
+        <div class="fld"><label for="pHmin">Balandlik dan (mm, ixtiyoriy)</label><input class="in" id="pHmin" type="number" min="1000" max="3000" inputmode="numeric"></div>
+        <div class="fld"><label for="pHmax">Balandlik gacha (mm)</label><input class="in" id="pHmax" type="number" min="1000" max="3000" inputmode="numeric"></div>
       </div>
       <div class="fld"><label for="pMat">Material</label><input class="in" id="pMat" maxlength="80" placeholder="MDF + mat PVX qoplama"></div>
       <div class="fld"><label for="pDesc">Qisqa tavsif (kartada)</label><input class="in" id="pDesc" maxlength="120"></div>
@@ -350,6 +356,7 @@
     const d = p || { name: '', price: '', old: '', color: 'oq', colorName: '', style: 'modern', badge: '', material: 'MDF', desc: '', long: '', tags: '', image: '', stock: true, hidden: false };
     F('pName').value = d.name; F('pPrice').value = d.price; F('pOld').value = d.old || ''; F('pColor').value = d.color; F('pColorName').value = d.colorName; F('pStyle').value = d.style;
     F('pBadge').value = d.badge || ''; F('pMat').value = d.material; F('pDesc').value = d.desc; F('pLong').value = d.long; F('pTags').value = d.tags; F('pImg').value = d.image || '';
+    F('pWmin').value = d.wMin ?? ''; F('pWmax').value = d.wMax ?? ''; F('pHmin').value = d.hMin ?? ''; F('pHmax').value = d.hMax ?? '';
     F('pStock').checked = !!d.stock; F('pHidden').checked = !!d.hidden; $('#pdlg').showModal(); F('pName').focus();
   }
   $('#addP').addEventListener('click', () => openProduct(null));
@@ -366,6 +373,7 @@
     e.preventDefault(); const id = e.target.dataset.id, b = $('#pSave'); $('#pErr').textContent = '';
     const body = { name: F('pName').value, price: Number(F('pPrice').value), old: F('pOld').value === '' ? null : Number(F('pOld').value), color: F('pColor').value, colorName: F('pColorName').value,
       style: F('pStyle').value, badge: F('pBadge').value, material: F('pMat').value, desc: F('pDesc').value, long: F('pLong').value, tags: F('pTags').value, image: F('pImg').value,
+      wMin: F('pWmin').value, wMax: F('pWmax').value, hMin: F('pHmin').value, hMax: F('pHmax').value,
       stock: F('pStock').checked, hidden: F('pHidden').checked };
     b.disabled = true;
     try { await api(id ? 'PUT' : 'POST', '/api/admin/products' + (id ? '/' + id : ''), body); $('#pdlg').close(); toast('Saqlandi'); await loadProducts(); }

@@ -498,3 +498,12 @@ h2{line-height:1.08}.eyebrow{margin-bottom:18px}
 @media(max-width:900px){.frow{grid-template-columns:repeat(2,minmax(0,1fr))}.frow .btn{grid-column:1/-1;width:100%}}
 @media(max-width:600px){.tools{grid-template-columns:1fr}}
 .resline .pricehint{color:var(--acc);font-weight:600}.empty .btn{margin-top:6px}
+/* zakaz oynasi: tarkib va jami */
+.ord-items{list-style:none;padding:0;margin:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.ord-items li{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px}.ord-items b{white-space:nowrap}
+.ord-total{display:flex;justify-content:space-between;font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--tx);margin:2px 0 4px}.ord-total b{font-weight:600}
+/* filtrlar: 6 ta maydon + tugma (keng ekran), o'rtacha ekranda 3 ustun */
+.frow{grid-template-columns:repeat(6,minmax(0,1fr)) auto}
+@media(max-width:1100px){.frow{grid-template-columns:repeat(3,minmax(0,1fr))}.frow .btn{grid-column:1/-1;width:100%}}
+@media(max-width:900px){.frow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.frow .select{padding:0 36px 0 14px;font-size:15px;background-position:right 10px center;text-overflow:ellipsis}.frow .field{padding-inline:14px}

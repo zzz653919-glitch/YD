@@ -31,6 +31,7 @@
   // Katalog, yetkazib berish va sayt matnlari serverdan (admin paneldan) olinadi; server ishlamasa, yuqoridagi standart ma'lumot qoladi.
   const CONTENT = { hero: {}, promo: { enabled: false }, contacts: {}, faq: [] };
   const HANDLES = { steel: ['Po‘lat', '#f6f6f6', '#9c9c9c', '#e4e4e4'], black: ['Mat qora', '#4a4a4a', '#121212', '#3a3a3a'], gold: ['Oltin', '#f3e2b0', '#b08a3c', '#e6cf93'] }; // dastak variantlari (konstruktor)
+  const sizeOf = p => ({ ...SIZE, ...((p && p.sizes) || {}) }); // modelning o‘lcham chegarasi (admin kiritmasa — umumiy)
   const SIZE = { wMin: 600, wMax: 1200, hMin: 1800, hMax: 2400 }; // konstruktor uchun o‘lcham chegaralari (mm)
   async function getJSON(url) {
     try { const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 3000); const r = await fetch(url, { cache: 'no-store', signal: ctl.signal }); clearTimeout(t); return await r.json(); } catch { return null; }
@@ -100,6 +101,7 @@
     'Buyurtmani qanday beraman?': 'Как оформить заказ?'
   };
   Object.assign(RU, {
+    'Sizga yoqishi mumkin': 'Вам может понравиться', 'Zakazni tasdiqlash': 'Подтвердить заказ', 'Yetkazib berish': 'Доставка', 'Zakaz holatini tekshirish': 'Проверить статус заказа', 'Kenglik (mm)': 'Ширина (мм)', 'Balandlik (mm)': 'Высота (мм)', 'Eshiklar shu o‘lchamlarda tayyorlanadi': 'Двери изготавливаются в размерах',
     'Nom, rang yoki uslub bo‘yicha qidiring…': 'Поиск по названию, цвету или стилю…',
     'Filtrlarni tozalash': 'Сбросить фильтры', 'Katalogdagi narxlar': 'Цены в каталоге', '(narxlar almashtirildi)': '(значения поменяны местами)', 'Narx dan (so‘m)': 'Цена от (сум)', 'Narx gacha (so‘m)': 'Цена до (сум)',
     'Eshik tanlashda': 'С выбором двери', 'yordam beramiz': 'поможем', 'Savol bering, o‘lcham yoki rang bo‘yicha maslahat oling — tez orada javob beramiz.': 'Задайте вопрос, получите совет по размеру или цвету — скоро ответим.',
@@ -349,7 +351,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   /* --- aqlli qidiruv: rang, uslub, nom, material, narx; o‘zbekcha/ruscha/inglizcha so‘zlar, apostrof va 1 harfli xatolarga chidamli --- */
   const norm = v => String(v ?? '').toLowerCase().replace(/ё/g, 'е').replace(/[ʻʼ'`‘’´‛]/g, '').replace(/[^a-z0-9а-я\s]/g, ' ').replace(/\s+/g, ' ').trim();
   const SYN = {}; // sinonimlar: biridan boshqasi topiladi (masalan: qora = black = чёрный)
-  [['qora', 'black', 'черный'], ['oq', 'white', 'белый', 'ok'], ['jigarrang', 'brown', 'коричневый', 'yongoq', 'walnut', 'орех'], ['yogoch', 'wood', 'дерево', 'oak', 'eman', 'дуб', 'daraxt'],
+  [['qora', 'black', 'черный'], ['oq', 'white', 'белый', 'ok'], ['jigarrang', 'brown', 'коричневый'], ['yongoq', 'walnut', 'орех'], ['yogoch', 'wood', 'дерево', 'oak', 'eman', 'дуб', 'daraxt'],
    ['kulrang', 'gray', 'grey', 'серый'], ['klassik', 'classic', 'классика', 'классический'], ['zamonaviy', 'modern', 'современный'], ['minimal', 'minimalist', 'минимализм']]
     .forEach(g => { const n = g.map(norm); n.forEach(w => { SYN[w] = n; }); });
   const wordCache = new Map();
@@ -371,26 +373,35 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     const l = store.get('viewed', []).map(find).filter(p => p && p.id !== skip).slice(0, 4);
     sec.hidden = !l.length; fit(box, l.length); box.innerHTML = l.map(card).join(''); translateDom(sec);
   }
+  function renderRec() { // savat sahifasida: savatdagi eshiklarga o‘xshash va mashhur modellar
+    const sec = $('#recSec'), box = $('#recGrid'); if (!sec || !box) return;
+    const inCart = Object.keys(cart).map(find).filter(Boolean), pop = p => (p.badge === 'best' ? 2 : p.badge === 'premium' ? 1 : 0);
+    const score = p => pop(p) + inCart.reduce((a, c) => a + (c.style === p.style ? 1 : 0) + (c.color === p.color ? 1 : 0), 0) / Math.max(inCart.length, 1);
+    const l = PRODUCTS.filter(p => !cart[p.id]).sort((a, b) => score(b) - score(a)).slice(0, 3);
+    sec.hidden = !l.length; fit(box, l.length); box.innerHTML = l.map(card).join(''); translateDom(sec);
+  }
   const fit = (el, n) => el.style.setProperty('--n', Math.min(Math.max(n, 3), 4)); // 3–4 teng ustun: kam kartada bo‘sh joy qolmasin
   const emptyBox = (ic, title, text) => `<div class="empty">${ICON[ic]}<h3>${title}</h3><p>${text}</p><a class="btn btn--p" href="doors.html">Katalogga o‘tish</a></div>`;
-  const view = { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '' };
+  const view = { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '', w: null, h: null };
   const sorts = { asc: (a, b) => a.price - b.price, desc: (a, b) => b.price - a.price, az: (a, b) => a.name.localeCompare(b.name), za: (a, b) => b.name.localeCompare(a.name) };
   /* narx oralig‘i: mijoz "dan" va "gacha" summani o‘zi kiritadi; dan > gacha bo‘lsa, qiymatlar almashtiriladi */
   const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   const range = () => (view.min !== null && view.max !== null && view.min > view.max) ? [view.max, view.min, true] : [view.min, view.max, false];
+  const fitsSize = p => { const z = sizeOf(p); return (view.w === null || (view.w >= z.wMin && view.w <= z.wMax)) && (view.h === null || (view.h >= z.hMin && view.h <= z.hMax)); };
   const inRange = p => { const [lo, hi] = range(); return (lo === null || p.price >= lo) && (hi === null || p.price <= hi); };
   function priceHint(n) {
     const [lo, hi, swapped] = range(), el = $('#priceHint'); if (!el) return;
-    const txt = lo === null && hi === null ? '' : lo !== null && hi !== null ? `${fmt(lo)} – ${fmt(hi)} so‘m oralig‘ida: ${n} ta eshik` : lo !== null ? `${fmt(lo)} so‘mdan yuqori: ${n} ta eshik` : `${fmt(hi)} so‘mgacha: ${n} ta eshik`;
-    el.textContent = t(txt) + (swapped && txt ? ' ' + t('(narxlar almashtirildi)') : '');
+    const sz = view.w !== null || view.h !== null ? `${view.w !== null ? view.w : '…'} × ${view.h !== null ? view.h : '…'} mm` : '';
+    const txt = sz && lo === null && hi === null ? `${sz} o‘lchamga mos: ${n} ta eshik` : lo === null && hi === null ? '' : lo !== null && hi !== null ? `${fmt(lo)} – ${fmt(hi)} so‘m oralig‘ida: ${n} ta eshik` : lo !== null ? `${fmt(lo)} so‘mdan yuqori: ${n} ta eshik` : `${fmt(hi)} so‘mgacha: ${n} ta eshik`;
+    el.textContent = t(txt) + (swapped && txt ? ' ' + t('(narxlar almashtirildi)') : '') + (sz && (lo !== null || hi !== null) ? ` · ${sz}` : '');
   }
   function renderDoors() {
     const q = view.q.trim();
-    let list = PRODUCTS.filter(p => matches(p, view.f) && (!view.color || p.color === view.color) && (!view.style || p.style === view.style) && inRange(p) &&
+    let list = PRODUCTS.filter(p => matches(p, view.f) && (!view.color || p.color === view.color) && (!view.style || p.style === view.style) && inRange(p) && fitsSize(p) &&
       (!q || searchHit(p, q)));
     if (sorts[view.sort]) list = [...list].sort(sorts[view.sort]);
     const prices = PRODUCTS.map(p => p.price), pr = prices.length ? `${fmt(Math.min(...prices))} – ${fmt(Math.max(...prices))} so‘m` : '';
-    $('#doorsGrid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3><p>${range().some(v => v !== null) && pr ? `${t('Katalogdagi narxlar')}: ${pr}` : 'Boshqa so‘z yoki filtrni sinab ko‘ring.'}</p><button class="btn btn--o" type="button" data-act="freset">Filtrlarni tozalash</button></div>`;
+    $('#doorsGrid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3><p>${(view.w !== null || view.h !== null) ? `${t('Eshiklar shu o‘lchamlarda tayyorlanadi')}: ${SIZE.wMin}–${SIZE.wMax} × ${SIZE.hMin}–${SIZE.hMax} mm` : range().some(v => v !== null) && pr ? `${t('Katalogdagi narxlar')}: ${pr}` : 'Boshqa so‘z yoki filtrni sinab ko‘ring.'}</p><button class="btn btn--o" type="button" data-act="freset">Filtrlarni tozalash</button></div>`;
     priceHint(list.length);
     $('#resCount').textContent = `${list.length} / ${PRODUCTS.length}`;
   }
@@ -440,7 +451,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     const styles = [...new Map(PRODUCTS.map(p => [p.style, p.styleName])).entries()], colors = [...new Map(PRODUCTS.map(p => [p.color, p])).values()];
     const coats = [...new Set(PRODUCTS.map(p => p.material).filter(Boolean))];
     const pool = cfgPool(); if (!pool.some(p => p.id === cfg.id)) cfg.id = pool[0] ? pool[0].id : 0;
-    const sel = find(cfg.id), wOk = +cfg.w >= SIZE.wMin && +cfg.w <= SIZE.wMax, hOk = +cfg.h >= SIZE.hMin && +cfg.h <= SIZE.hMax, sizeOk = wOk && hOk;
+    const sel = find(cfg.id), SZ = sizeOf(sel), wOk = +cfg.w >= SZ.wMin && +cfg.w <= SZ.wMax, hOk = +cfg.h >= SZ.hMin && +cfg.h <= SZ.hMax, sizeOk = wOk && hOk;
     const opt = (act, key, val, label, extra = '') => `<button class="opt" type="button" data-act="${act}" data-k="${esc(val)}" aria-pressed="${cfg[key] === val}">${extra}${esc(label)}</button>`;
     const area = +cfg.w * +cfg.h, est = sel && sizeOk ? Math.round(sel.price * Math.min(1.8, Math.max(.6, area / (800 * 2000))) / 10000) * 10000 : 0;
     box.innerHTML = `<div class="cfg__vis">${sel ? `<img src="${doorImg(sel, '', cfg.handle)}" alt="${esc(sel.name)} — ${esc(HANDLES[cfg.handle][0])} dastak bilan" width="400" height="500">` : ''}</div><div class="cfg__f">
@@ -449,9 +460,9 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       <div><h3>Qoplama</h3><div class="opts">${opt('cfk', 'coat', '', 'Barchasi')}${coats.map(m => opt('cfk', 'coat', m, m)).join('')}</div></div>
       <div><h3>Dastak</h3><div class="opts">${Object.entries(HANDLES).map(([k, h]) => `<button class="opt" type="button" data-act="cfh" data-k="${k}" aria-pressed="${cfg.handle === k}"><i style="background:linear-gradient(135deg,${h[1]},${h[2]})"></i>${h[0]}</button>`).join('')}</div></div>
       <div><h3>Model</h3><div class="opts">${pool.length ? pool.map(p => `<button class="opt" type="button" data-act="cfm" data-id="${p.id}" aria-pressed="${p.id === cfg.id}">${esc(p.name)}</button>`).join('') : '<p>Bu bo‘limda mos modellar yo‘q.</p>'}</div></div>
-      <div><h3>O‘lcham (mm)</h3><div class="dims"><label>Kenglik (mm)<input class="field" id="cfW" type="number" inputmode="numeric" min="${SIZE.wMin}" max="${SIZE.wMax}" value="${esc(cfg.w)}" placeholder="${SIZE.wMin}–${SIZE.wMax}"></label>
-        <label>Balandlik (mm)<input class="field" id="cfH" type="number" inputmode="numeric" min="${SIZE.hMin}" max="${SIZE.hMax}" value="${esc(cfg.h)}" placeholder="${SIZE.hMin}–${SIZE.hMax}"></label></div>
-        <div class="err" id="cfErr">${(cfg.w || cfg.h) && !sizeOk ? 'Kenglik 600–1200 mm, balandlik 1800–2400 mm oralig‘ida bo‘lsin.' : ''}</div></div>
+      <div><h3>O‘lcham (mm)</h3><div class="dims"><label>Kenglik (mm)<input class="field" id="cfW" type="number" inputmode="numeric" min="${SZ.wMin}" max="${SZ.wMax}" value="${esc(cfg.w)}" placeholder="${SZ.wMin}–${SZ.wMax}"></label>
+        <label>Balandlik (mm)<input class="field" id="cfH" type="number" inputmode="numeric" min="${SZ.hMin}" max="${SZ.hMax}" value="${esc(cfg.h)}" placeholder="${SZ.hMin}–${SZ.hMax}"></label></div>
+        <div class="err" id="cfErr">${(cfg.w || cfg.h) && !sizeOk ? t(`Kenglik ${SZ.wMin}–${SZ.wMax} mm, balandlik ${SZ.hMin}–${SZ.hMax} mm oralig‘ida bo‘lsin.`) : ''}</div></div>
       ${sel ? `<div class="cfg__sum"><h3>Tanlovingiz</h3><dl><dt>Model</dt><dd>${esc(sel.name)}</dd></dl><dl><dt>Uslub</dt><dd>${esc(sel.styleName)}</dd></dl><dl><dt>Rang</dt><dd>${esc(sel.colorName)}</dd></dl><dl><dt>Qoplama</dt><dd>${esc(sel.material)}</dd></dl><dl><dt>Dastak</dt><dd>${HANDLES[cfg.handle][0]}</dd></dl>
         <dl><dt>O‘lcham (mm)</dt><dd>${sizeOk ? `${+cfg.w} × ${+cfg.h}` : '—'}</dd></dl><dl><dt>Model narxi</dt><dd>${money(sel.price)}</dd></dl>${est ? `<dl class="est"><dt>Taxminiy narx</dt><dd>≈ ${money(est)}</dd></dl>` : ''}
         <p class="note">Taxminiy narx standart 800 × 2000 mm o‘lchamga nisbatan hisoblanadi. Yakuniy narxni operator tasdiqlaydi.</p>
@@ -477,7 +488,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       <div class="pdp"><div class="gal"><button class="gal__main" data-act="lb" aria-label="Rasmni kattalashtirish"><img src="${esc(ims[pdpImg])}" alt="${esc(p.name)} — ${esc(p.colorName.toLowerCase())} ${esc(p.styleName)} MDF eshik" width="400" height="500"><span class="gal__zoom">${ICON.zoom}</span></button>
         ${ims.length > 1 ? `<div class="thumbs">${ims.map((u, i) => `<button type="button" data-act="thumb" data-id="${i}" aria-pressed="${i === pdpImg}" aria-label="Rasm ${i + 1}"><img src="${esc(u)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}</div>
         <div class="pinfo"><p class="eyebrow">${esc(p.styleName)} · ${esc(p.colorName)}</p><h1>${esc(p.name)}</h1><div class="price">${priceHtml(p)}</div><p>${esc(p.long)}</p>
-          <ul class="spec"><li><span>Material</span>${esc(p.material)}</li><li><span>Rang</span>${esc(p.colorName)}</li><li><span>Uslub</span>${esc(p.styleName)}</li><li><span>O‘lcham (mm)</span>${SIZE.wMin}–${SIZE.wMax} × ${SIZE.hMin}–${SIZE.hMax}</li><li><span>Mavjudligi</span>${p.stock ? 'Mavjud' : 'Buyurtma asosida'}</li></ul>
+          <ul class="spec"><li><span>Material</span>${esc(p.material)}</li><li><span>Rang</span>${esc(p.colorName)}</li><li><span>Uslub</span>${esc(p.styleName)}</li><li><span>O‘lcham (mm)</span>${sizeOf(p).wMin}–${sizeOf(p).wMax} × ${sizeOf(p).hMin}–${sizeOf(p).hMax}</li><li><span>Mavjudligi</span>${p.stock ? 'Mavjud' : 'Buyurtma asosida'}</li></ul>
           <div class="pbuy"><button class="btn btn--p" data-act="cart" data-id="${p.id}">${ICON.bag}Savatga qo‘shish</button><button class="btn btn--o" data-act="fav" data-id="${p.id}" aria-pressed="${fav}">${ICON.heart}${fav ? 'Sevimlilarda' : 'Sevimlilarga qo‘shish'}</button>
           <button class="btn btn--o" data-act="cmp" data-id="${p.id}" aria-pressed="${inCmp}">${ICON.compare}${inCmp ? 'Solishtirishda' : 'Solishtirish'}</button></div></div></div>
       ${sim.length ? `<div class="related"><div class="head"><h2>O‘xshash eshiklar</h2></div><div class="grid">${sim.map(card).join('')}</div></div>` : ''}`;
@@ -499,7 +510,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     if (page === 'doors') renderDoors();
     if (page === 'product') renderPdp();
     if (page === 'favorites') { const l = PRODUCTS.filter(p => favs.includes(p.id)); $('#favGrid').innerHTML = l.length ? l.map(card).join('') : emptyBox('heart', 'Sevimli mahsulotlar hozircha yo‘q', 'O‘zingizga yoqqan eshiklarni saqlab qo‘ying.'); }
-    if (page === 'cart') renderCart();
+    if (page === 'cart') { renderCart(); renderRec(); }
   }
 
   /* ---------- 9. Modal: tezkor ko‘rish ---------- */
@@ -564,6 +575,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
 
   function initStatus() { // buyurtma holatini zakaz raqami + telefon bilan tekshirish
     const f = $('#statusForm'); if (!f) return;
+    const last = store.get('lastOrder', null); if (last && last.id) { f.elements.id.value = last.id; f.elements.phone.value = last.phone || ''; }
     f.addEventListener('submit', async e => {
       e.preventDefault(); const btn = $('#stBtn'), out = $('#stRes'), err = $('#stErr'); out.innerHTML = ''; err.innerHTML = '';
       const id = f.elements.id.value.trim(), ph = f.elements.phone.value.trim();
@@ -585,11 +597,13 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     if (!cartCount()) return;
     lastFocus = document.activeElement; modalId = null; boxClass('order');
     $('#modalBox').innerHTML = `<button class="modal__x" data-act="close" aria-label="Yopish">${ICON.x}</button>
-      <form class="order-form" id="orderForm" novalidate><h2>Zakaz berish</h2><p>Umumiy summa: <b>${money(totals().total)}</b></p>
+      <form class="order-form" id="orderForm" novalidate><h2>Zakaz berish</h2>
+      <ul class="ord-items">${Object.keys(cart).map(id => { const p = find(id); return `<li><span>${esc(p.name)} × ${cart[id]}</span><b>${money(p.price * cart[id])}</b></li>`; }).join('')}<li><span>Yetkazib berish</span><b>${totals().fee ? money(totals().fee) : 'Bepul'}</b></li></ul>
+      <p class="ord-total">Jami: <b>${money(totals().total)}</b></p>
       ${fl('o-name', 'name', 'Ism', '', 'autocomplete="name" maxlength="100"')}${fl('o-phone', 'phone', 'Telefon raqam', '', 'type="tel" autocomplete="tel" maxlength="30"')}
       ${fl('o-address', 'address', 'Manzil', '', 'autocomplete="street-address" maxlength="300"')}
       <div class="fl"><textarea class="field" id="o-note" name="note" placeholder=" " rows="3" maxlength="500">${esc(store.get('cfgNote', ''))}</textarea><label for="o-note">Qo‘shimcha izoh</label></div>
-      <div class="notice" id="o-err" role="alert"></div><button class="btn btn--p" type="submit" id="orderBtn">Zakazni yuborish</button></form>`;
+      <div class="notice" id="o-err" role="alert"></div><button class="btn btn--p" type="submit" id="orderBtn">Zakazni tasdiqlash</button></form>`;
     openBox(); $('#o-name').focus();
     const f = $('#orderForm');
     const valid = bindValidation(f, { name: v => v.trim().length >= 2 || 'Ismingizni kiriting.', phone: phoneOk, address: v => v.trim().length >= 5 || 'Manzilni kiriting.' }, 'e-o-');
@@ -605,10 +619,11 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
         body: JSON.stringify({ name: el.name.value, phone: el.phone.value, address: el.address.value, note: el.note.value, items, delivery: tot.fee }) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok || !d.ok) throw new Error(d.error || (r.status === 404 || r.status === 405 ? 'noserver' : 'order failed'));
+      store.set('lastOrder', { id: d.id, phone: el.phone.value }); // zakaz holatini tekshirish formasi shu ma’lumot bilan to‘ldiriladi
       cart = {}; store.set('cfgNote', ''); commit();   // faqat muvaffaqiyatdan keyin savat tozalanadi
       $('#modalBox').innerHTML = `<button class="modal__x" data-act="close" aria-label="Yopish">${ICON.x}</button><div class="state">
         <svg class="bigcheck" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l8 8 14-16"/></svg>
-        <h2>Zakaz qabul qilindi</h2>${d.id ? `<p>Zakaz raqami: <b>${esc(d.id)}</b></p>` : ''}<p>Tez orada siz bilan bog‘lanamiz.</p><a class="btn btn--p" href="doors.html">Katalogga qaytish</a></div>`;
+        <h2>Zakaz qabul qilindi</h2>${d.id ? `<p>Zakaz raqami: <b>${esc(d.id)}</b></p>` : ''}<p>Tez orada siz bilan bog‘lanamiz.</p><a class="btn btn--p" href="doors.html">Katalogga qaytish</a><a class="btn btn--o" href="contact.html#statusSec">Zakaz holatini tekshirish</a></div>`;
     } catch (err) {
       const m = err && err.message, net = !m || m === 'noserver' || m === 'order failed' || /fetch|abort|network|load failed/i.test(m);
       if (net) console.warn('Zakaz serveri javob bermadi (/api/order). Sayt node server.js orqali ochilganini tekshiring.');
@@ -622,6 +637,13 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       btn.disabled = false; btn.textContent = 'Qayta urinish';
     } finally { clearTimeout(timer); }
   }
+
+  /* telefon raqam: maydondan chiqilganda +998 XX XXX XX XX ko‘rinishiga keltiriladi */
+  document.addEventListener('focusout', e => {
+    const i = e.target; if (!(i instanceof HTMLInputElement) || i.type !== 'tel') return;
+    let d = i.value.replace(/\D/g, ''); if (d.length === 9) d = '998' + d; if (!/^998\d{9}$/.test(d)) return;
+    i.value = `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10)}`; i.dispatchEvent(new Event('input', { bubbles: true }));
+  });
 
   /* ---------- 12. Hodisalar (event delegation) ---------- */
   document.addEventListener('click', e => {
@@ -646,7 +668,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   });
   document.addEventListener('input', e => { if (e.target.id === 'cfW') { cfg.w = e.target.value; cfgKeep(); } if (e.target.id === 'cfH') { cfg.h = e.target.value; cfgKeep(); } });
   function addConfigured() { // tanlangan model savatga qo‘shiladi, parametrlar zakaz izohiga tushishi uchun saqlanadi
-    const p = find(cfg.id); if (!p || !(+cfg.w >= SIZE.wMin && +cfg.w <= SIZE.wMax && +cfg.h >= SIZE.hMin && +cfg.h <= SIZE.hMax)) return;
+    const p = find(cfg.id); const SZ = sizeOf(p); if (!p || !(+cfg.w >= SZ.wMin && +cfg.w <= SZ.wMax && +cfg.h >= SZ.hMin && +cfg.h <= SZ.hMax)) return;
     store.set('cfgNote', `Konstruktor: ${p.name}, ${p.colorName}, ${p.styleName}, qoplama: ${p.material}, dastak: ${HANDLES[cfg.handle][0]}, ${+cfg.w}×${+cfg.h} mm`); addCart(p.id);
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeNav(); } });
@@ -685,14 +707,17 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     chips.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { setChip(c.dataset.f); renderDoors(); } });
     const num = v => { const d = String(v).replace(/\D/g, ''); return d ? +d : null; };
     const money2 = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 10); e.target.value = d ? fmt(d) : ''; };
+    const mm = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 4); e.target.value = d; return d ? +d : null; };
+    $('#fW').addEventListener('input', e => { view.w = mm(e); renderDoors(); });
+    $('#fH').addEventListener('input', e => { view.h = mm(e); renderDoors(); });
     const prices = PRODUCTS.map(p => p.price); if (prices.length) { $('#fMin').placeholder = fmt(Math.min(...prices)); $('#fMax').placeholder = fmt(Math.max(...prices)); }
     $('#fColor').addEventListener('change', e => { view.color = e.target.value; renderDoors(); });
     $('#fStyle').addEventListener('change', e => { view.style = e.target.value; renderDoors(); });
     $('#fMin').addEventListener('input', e => { money2(e); view.min = num(e.target.value); renderDoors(); });
     $('#fMax').addEventListener('input', e => { money2(e); view.max = num(e.target.value); renderDoors(); });
     $('#fReset').addEventListener('click', () => {
-      Object.assign(view, { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '' }); setChip('all');
-      ['#fColor', '#fStyle', '#fMin', '#fMax', '#search'].forEach(i => { $(i).value = ''; }); $('#sort').value = 'rec'; renderDoors();
+      Object.assign(view, { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '', w: null, h: null }); setChip('all');
+      ['#fColor', '#fStyle', '#fMin', '#fMax', '#fW', '#fH', '#search'].forEach(i => { $(i).value = ''; }); $('#sort').value = 'rec'; renderDoors();
     });
     const col = qp.get('f'); if (col && colors.some(([k]) => k === col)) { view.color = col; $('#fColor').value = col; }
     /* qidiruv: mos mahsulotlarni avtomatik tavsiya qilish */
