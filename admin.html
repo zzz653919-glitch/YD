@@ -151,6 +151,21 @@
           <div class="err" id="setErr" role="alert"></div>
           <button class="btn btn--p" type="submit">Saqlash</button>
         </form>
+        <form class="card dlg" id="cntForm" style="max-width:560px;margin-top:16px" novalidate>
+          <h2>Sayt matnlari</h2>
+          <div class="fld"><label for="cLead">Bosh sahifa qisqa tavsifi</label><input class="in" id="cLead" maxlength="160"></div>
+          <div class="fld"><label for="cPhone">Telefon</label><input class="in" id="cPhone" type="tel" maxlength="30"></div>
+          <div class="fld"><label for="cEmail">Email</label><input class="in" id="cEmail" type="email" maxlength="80"></div>
+          <div class="fld"><label for="cAddr">Manzil</label><input class="in" id="cAddr" maxlength="200"></div>
+          <div class="fld"><label for="cHours">Ish vaqti</label><input class="in" id="cHours" maxlength="80"></div>
+          <div class="fld"><label for="cTg">Telegram (@nom yoki havola)</label><input class="in" id="cTg" maxlength="120"></div>
+          <div class="fld"><label for="cIg">Instagram (@nom yoki havola)</label><input class="in" id="cIg" maxlength="120"></div>
+          <div class="fld"><label for="cPromo">Yuqoridagi banner matni (bo‘sh qolsa ko‘rinmaydi)</label><input class="in" id="cPromo" maxlength="160"></div>
+          <h2 style="margin-top:22px">Mijozlar fikrlari</h2><p style="margin-bottom:12px;font-size:14px">Faqat haqiqiy fikrlarni kiriting. Bo‘sh qolsa, saytda bu bo‘lim ko‘rinmaydi.</p>
+          <div id="cRev"></div>
+          <div class="err" id="cntErr" role="alert"></div>
+          <button class="btn btn--p" type="submit">Saqlash</button>
+        </form>
         <div class="card dlg" style="max-width:560px;margin-top:16px">
           <h2>Zaxira nusxa</h2><p style="margin-bottom:14px">Katalog va barcha zakazlarni JSON fayl sifatida yuklab oling.</p>
           <a class="btn" href="/api/admin/export" download>Zaxira nusxani yuklab olish</a>
@@ -232,7 +247,7 @@
   }
   async function enter() {
     $('#login').hidden = true; $('#app').hidden = false;
-    await Promise.all([loadOrders(), loadProducts(), loadSettings()]);
+    await Promise.all([loadOrders(), loadProducts(), loadSettings(), loadContent()]);
     route();
   }
   $('#loginForm').addEventListener('submit', async e => {
@@ -364,6 +379,29 @@
     e.preventDefault(); $('#setErr').textContent = '';
     try { await api('PUT', '/api/admin/settings', { deliveryFee: Number(F('sFee').value), freeFrom: Number(F('sFree').value) }); toast('Sozlamalar saqlandi'); }
     catch (err) { $('#setErr').textContent = err.message; }
+  });
+
+  /* ---------- Sayt matnlari va mijozlar fikrlari ---------- */
+  async function loadContent() {
+    try {
+      const c = S.content = (await api('GET', '/api/admin/content')).content, h = c.hero || {}, k = c.contacts || {};
+      F('cLead').value = h.lead || ''; F('cPhone').value = k.phone || ''; F('cEmail').value = k.email || '';
+      F('cAddr').value = k.address || ''; F('cHours').value = k.hours || ''; F('cTg').value = k.telegram || ''; F('cIg').value = k.instagram || '';
+      F('cPromo').value = c.promo && c.promo.enabled ? c.promo.text : '';
+      const rv = c.reviews || [];
+      F('cRev').innerHTML = Array.from({ length: 3 }, (_, i) => `<div class="fld"><label for="rN${i}">Fikr ${i + 1}: mijoz ismi</label><input class="in" id="rN${i}" maxlength="60" value="${esc(rv[i] ? rv[i].name : '')}"><label for="rT${i}" style="margin-top:8px">Fikr matni</label><textarea class="in" id="rT${i}" rows="2" maxlength="400">${esc(rv[i] ? rv[i].text : '')}</textarea></div>`).join('');
+    } catch (e) { toast(e.message); }
+  }
+  $('#cntForm').addEventListener('submit', async e => {
+    e.preventDefault(); $('#cntErr').textContent = '';
+    const c = S.content; if (!c) return;
+    const reviews = [0, 1, 2].map(i => ({ name: F('rN' + i).value, text: F('rT' + i).value })).filter(x => x.name.trim() || x.text.trim());
+    const text = F('cPromo').value.trim();
+    const body = { ...c, hero: { ...c.hero, lead: F('cLead').value },
+      contacts: { phone: F('cPhone').value, email: F('cEmail').value, address: F('cAddr').value, hours: F('cHours').value, telegram: F('cTg').value, instagram: F('cIg').value },
+      promo: { ...c.promo, enabled: !!text, text }, reviews };
+    try { await api('PUT', '/api/admin/content', body); toast('Sayt matnlari saqlandi'); await loadContent(); }
+    catch (err) { $('#cntErr').textContent = err.message; }
   });
 
   /* Yangi zakazlarni tekshirib turish (har 45 soniyada) */

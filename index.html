@@ -3,46 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bosh sahifa — YasinDoors</title>
-  <meta name="description" content="Yuqori sifat, zamonaviy dizayn va mustahkamlikni birlashtirgan MDF eshiklar.">
+  <title>YasinDoors — premium MDF eshiklar</title>
+  <meta name="description" content="YasinDoors — faqat MDF eshiklar: zamonaviy dizayn, aniq o‘lcham va premium sifat. Katalog, konstruktor va onlayn buyurtma.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script>
+  <meta property="og:title" content="YasinDoors — premium MDF eshiklar"><meta property="og:type" content="website">
+  <meta name="theme-color" content="#0b0b0a">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"YasinDoors","description":"Faqat MDF eshiklar internet-do‘koni"}</script>
 </head>
 <body data-page="home">
   <a class="skip" href="#main">Asosiy kontentga o‘tish</a>
   <header class="header" id="site-header"></header>
   <main id="main">
-    <section class="hero"><div class="container hero__in">
-      <div class="reveal">
-        <span class="badge-top">YASINDOORS · PREMIUM MDF</span>
-        <h1>Eshik — uyingizning <em>birinchi</em> taassuroti</h1>
-        <p class="lead">Sifatli material, aniq detallar va uyingiz uslubiga mos dizayn. Faqat MDF eshiklar.</p>
-        <div class="hero__btns"><a href="doors.html" class="btn btn--p">Eshiklarni ko‘rish <span data-icon="arrow"></span></a><a href="about.html" class="btn btn--o">Biz haqimizda</a></div>
-        <ul class="hero__meta"><li><i data-icon="layers"></i>100% MDF</li><li><i data-icon="award"></i>Premium Quality</li><li><i data-icon="pen"></i>Individual dizayn</li></ul>
+    <section class="hero" id="top">
+      <div class="container hero__in">
+        <div class="hero__txt">
+          <span class="badge-top">YasinDoors · Premium MDF</span>
+          <h1>Uyingizga <em>yangi uslub</em> bering</h1>
+          <p class="lead" data-content="hero.lead">Sifatli material, aniq detallar va uyingiz uslubiga mos dizayn. Faqat MDF eshiklar.</p>
+          <div class="hero__btns"><a href="doors.html" class="btn btn--p">Katalogni ko‘rish <span data-icon="arrow"></span></a><a href="#config" class="btn btn--o">Eshik tanlash</a></div>
+          <ul class="hero__meta"><li><i data-icon="layers"></i>100% MDF</li><li><i data-icon="award"></i>Premium Quality</li><li><i data-icon="pen"></i>Individual dizayn</li></ul>
+        </div>
+        <div class="hero__vis">
+          <div class="hero__frame"><img data-door="3" alt="Interyerdagi qora MDF eshik" width="400" height="500" fetchpriority="high"></div>
+        </div>
       </div>
-      <div class="hero__vis reveal scale">
-        <div class="hero__frame"><img data-door="3" alt="Interyerdagi eman rangli klassik MDF eshik" width="400" height="500"></div>
-      </div>
-    </div>
-    <a class="scroll" href="#intro" aria-label="Pastga aylantirish"><span>Pastga</span><span data-icon="down"></span></a></section>
+      <a class="scroll" href="#intro" aria-label="Pastga aylantirish"><span>Pastga</span><span data-icon="down"></span></a>
+    </section>
+
     <section class="section intro" id="intro"><div class="container reveal"><p class="eyebrow">YasinDoors</p>
-      <h2>Eshik — bu shunchaki kirish emas.<br>Bu uyingizning birinchi taassuroti.</h2>
+      <h2>Eshik — bu shunchaki kirish emas.<br><em>Bu uyingizning birinchi taassuroti.</em></h2>
       <p>Biz faqat MDF eshiklar bilan shug‘ullanamiz: sifatli material, aniq detallar va uyingiz uslubiga mos dizayn.</p></div></section>
-    <section class="section section--alt"><div class="container">
-      <div class="head reveal"><p class="eyebrow">Kolleksiya</p><h2>MDF Eshiklar kolleksiyasi</h2><p>YasinDoors kolleksiyasidan eng mashhur modellar.</p></div>
+
+    <section class="section section--alt" id="collection"><div class="container">
+      <div class="tabsrow reveal"><div class="head"><p class="eyebrow">Vitrina</p><h2>Premium kolleksiya</h2></div><div class="chips" id="homeTabs" role="group" aria-label="Kolleksiya bo‘limlari"></div></div>
       <div class="grid" id="featured"></div>
       <p class="more"><a href="doors.html" class="btn btn--o">Barcha eshiklarni ko‘rish <span data-icon="arrow"></span></a></p>
     </div></section>
+
+    <section class="section" id="colorsSec" hidden><div class="container">
+      <div class="head reveal"><p class="eyebrow">Galereya</p><h2>Ranglar va dizaynlar</h2><p>Interyeringizga mos tusni tanlang — har bir rang alohida kolleksiyada.</p></div>
+      <div class="swatches" id="swatches"></div>
+    </div></section>
+
+    <section class="section section--alt" id="config" hidden><div class="container">
+      <div class="head reveal"><p class="eyebrow">Konstruktor</p><h2>O‘z eshigingizni yarating</h2><p>Model, rang, qoplama va dastakni tanlang — natijani darhol ko‘ring.</p></div>
+      <div class="cfg" id="cfgRoot"></div>
+    </div></section>
+
     <section class="section"><div class="container">
       <div class="head reveal"><p class="eyebrow">Afzalliklar</p><h2>Nega YasinDoors?</h2></div>
       <div class="cards4"><article class="box reveal"><span class="ico" data-icon="layers"></span><h3>Faqat MDF</h3><p>Butun e’tiborimiz bitta mahsulotda — MDF eshiklarda.</p></article><article class="box reveal"><span class="ico" data-icon="award"></span><h3>Premium sifat</h3><p>Sifatli material va nafis, aniq detallar.</p></article><article class="box reveal"><span class="ico" data-icon="pen"></span><h3>Individual dizayn</h3><p>Turli rang, uslub va modellardan tanlash.</p></article><article class="box reveal"><span class="ico" data-icon="shield"></span><h3>Ishonch</h3><p>Ochiq munosabat va qulay buyurtma jarayoni.</p></article></div>
     </div></section>
+
     <section class="section section--alt"><div class="container">
-      <div class="head reveal"><p class="eyebrow">Jarayon</p><h2>O‘lchovdan o‘rnatishgacha</h2></div>
-      <ol class="timeline"><li class="reveal scale"><span class="ico" data-icon="ruler"></span><span class="num">01</span>O‘lchov<p>Eshik o‘lchamlari aniqlanadi.</p></li><li class="reveal scale"><span class="ico" data-icon="pen"></span><span class="num">02</span>Dizayn<p>Model va rang tanlanadi.</p></li><li class="reveal scale"><span class="ico" data-icon="factory"></span><span class="num">03</span>Ishlab chiqarish<p>MDF eshik tayyorlanadi.</p></li><li class="reveal scale"><span class="ico" data-icon="shield"></span><span class="num">04</span>Sifat nazorati<p>Har bir eshik tekshiriladi.</p></li><li class="reveal scale"><span class="ico" data-icon="door"></span><span class="num">05</span>O‘rnatish<p>Eshik joyiga o‘rnatiladi.</p></li></ol></div></section>
+      <div class="head reveal"><p class="eyebrow">Jarayon</p><h2>O‘lchovdan o‘rnatishgacha</h2><p>Har bir eshik besh bosqichdan o‘tadi.</p></div>
+      <ol class="timeline"><li class="reveal"><span class="ico" data-icon="ruler"></span><span class="num">01</span>O‘lchov<p>Eshik o‘lchamlari aniqlanadi.</p></li><li class="reveal"><span class="ico" data-icon="pen"></span><span class="num">02</span>Dizayn<p>Model va rang tanlanadi.</p></li><li class="reveal"><span class="ico" data-icon="factory"></span><span class="num">03</span>Ishlab chiqarish<p>MDF eshik tayyorlanadi.</p></li><li class="reveal"><span class="ico" data-icon="shield"></span><span class="num">04</span>Sifat nazorati<p>Har bir eshik tekshiriladi.</p></li><li class="reveal"><span class="ico" data-icon="door"></span><span class="num">05</span>O‘rnatish<p>Eshik joyiga o‘rnatiladi.</p></li></ol></div></section>
+
+    <section class="section" id="reviewsSec" hidden><div class="container">
+      <div class="head reveal"><p class="eyebrow">Fikrlar</p><h2>Mijozlarimiz nima deydi</h2></div>
+      <div class="reviews" id="reviewsList"></div>
+    </div></section>
+
+    <section class="section section--alt" id="viewedSec" hidden><div class="container">
+      <div class="head reveal"><p class="eyebrow">Tarix</p><h2>Siz ko‘rgan eshiklar</h2></div>
+      <div class="grid" id="viewedGrid"></div>
+    </div></section>
+
+    <section class="section" id="faqSec" hidden><div class="container">
+      <div class="head reveal"><p class="eyebrow">Savol-javob</p><h2>Ko‘p so‘raladigan savollar</h2></div>
+      <div class="faq" id="faqList"></div>
+    </div></section>
+
     <section class="cta" id="site-cta"></section>
   </main>
   <footer class="footer" id="site-footer"></footer>

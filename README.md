@@ -19,7 +19,7 @@ Fayllarni to'g'ridan-to'g'ri ochmang: zakaz va admin panel faqat server orqali i
 - **Boshqaruv** — yangi/jarayondagi zakazlar soni, summalar, so'nggi zakazlar.
 - **Zakazlar** — qidiruv, holat bo'yicha filtr, holatni o'zgartirish (Yangi / Jarayonda / Yakunlandi / Bekor qilingan), o'chirish, CSV yuklab olish.
 - **Mahsulotlar** — qo'shish, tahrirlash, o'chirish: nom, narx, eski narx (chegirma), belgi, rang, uslub, tavsif, rasm havolasi, omborda bor/yo'q, saytda yashirish.
-- **Sozlamalar** — yetkazib berish narxi va bepul yetkazib berish chegarasi, zaxira nusxa (JSON).
+- **Sozlamalar** — yetkazib berish narxi va bepul yetkazib berish chegarasi, sayt matnlari (tavsif, kontaktlar, banner), mijozlar fikrlari (faqat haqiqiylarini kiriting — bo'sh bo'lsa bo'lim ko'rinmaydi), zaxira nusxa (JSON).
 
 Katalog va zakazlar `data/` papkasidagi JSON fayllarda saqlanadi (`.gitignore` da, GitHub'ga yuborilmaydi). Shu papkani vaqti-vaqti bilan zaxiralab turing.
 Birinchi ishga tushirishda katalog 8 ta standart modeldan yaratiladi; keyin hammasi admin paneldan boshqariladi.
@@ -29,3 +29,6 @@ Birinchi ishga tushirishda katalog 8 ta standart modeldan yaratiladi; keyin hamm
 - Admin kirishi: parol serverda tekshiriladi, sessiya `HttpOnly` cookie'da (8 soat), noto'g'ri urinishlar cheklanadi.
 - Narxlar zakazda server katalogidan olinadi — mijoz yuborgan narxga ishonilmaydi.
 - Saytni internetga chiqarsangiz, HTTPS ishlating (aks holda parol ochiq uzatiladi).
+
+## Mijoz imkoniyatlari
+Katalog filtrlari va aqlli qidiruv, solishtirish, sevimlilar, ko'rilganlar tarixi, eshik konstruktori (model, rang, qoplama, dastak, o'lcham, taxminiy narx), UZ/RU tili, dark/light rejim, buyurtma holatini tekshirish (Aloqa sahifasida: zakaz raqami + telefon).

@@ -157,7 +157,8 @@ activity = load('activity.json', []);
 customerNotes = load('customers.json', {});
 const savedContent = load('content.json', {});
 content = { hero: { ...CONTENT_DEFAULT.hero, ...savedContent.hero }, promo: { ...CONTENT_DEFAULT.promo, ...savedContent.promo },
-  contacts: { ...CONTENT_DEFAULT.contacts, ...savedContent.contacts }, faq: Array.isArray(savedContent.faq) ? savedContent.faq : CONTENT_DEFAULT.faq };
+  contacts: { ...CONTENT_DEFAULT.contacts, ...savedContent.contacts }, faq: Array.isArray(savedContent.faq) ? savedContent.faq : CONTENT_DEFAULT.faq,
+  reviews: Array.isArray(savedContent.reviews) ? savedContent.reviews : [] }; // mijoz fikrlari faqat admin kiritganda ko‘rinadi
   migrate();
 }
 init();
@@ -601,7 +602,11 @@ function parseContent(b) {
   if (faqIn.length > 12) return { error: 'Savollar 12 tadan oshmasin.' };
   const faq = faqIn.map(x => ({ q: clean(x && x.q, 150), a: clean(x && x.a, 600) })).filter(x => x.q || x.a);
   if (faq.some(x => !x.q || !x.a)) return { error: 'Har bir savol va javob to‘ldirilishi kerak.' };
-  return { content: { hero, promo, contacts, faq } };
+  const revIn = Array.isArray(b.reviews) ? b.reviews : [];
+  if (revIn.length > 6) return { error: 'Fikrlar 6 tadan oshmasin.' };
+  const reviews = revIn.map(x => ({ name: clean(x && x.name, 60), text: clean(x && x.text, 400) })).filter(x => x.name || x.text);
+  if (reviews.some(x => !x.name || !x.text)) return { error: 'Har bir fikrda ism va matn bo‘lishi kerak.' };
+  return { content: { hero, promo, contacts, faq, reviews } };
 }
 admin.get('/content', (req, res) => res.json({ ok: true, content }));
 admin.put('/content', (req, res) => {
