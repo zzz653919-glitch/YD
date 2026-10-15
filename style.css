@@ -473,3 +473,6 @@ html:not(.theming)::view-transition-new(root){animation:.5s cubic-bezier(.2,.7,.
 .footer ul a,.footer .social a{color:#b8b1a3}.footer ul a:hover{color:#fff}.footer .social a:hover{color:#111}
 .footer__word{font-size:clamp(40px,14vw,260px);letter-spacing:.04em;white-space:nowrap}
 @media(max-width:768px){.fab{width:44px;height:44px}.fabs{right:10px;gap:8px}}
+.cta__acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.cta .btn--o{border-color:rgba(244,239,228,.5);color:#f4efe4}.cta .btn--o:hover{background:#f4efe4;color:#0a0a09}
+@media(max-width:600px){.cta__acts{flex-direction:column}.cta__acts .btn{width:100%}}
+.form .fl textarea.field{min-height:130px}

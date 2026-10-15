@@ -18,17 +18,17 @@
   <a class="skip" href="#main">Asosiy kontentga o‘tish</a>
   <header class="header" id="site-header"></header>
   <main id="main">
-    <section class="phero"><div class="container reveal"><p class="eyebrow">YasinDoors</p><h1>Siz bilan bog‘lanishni istaymiz</h1><p>Savollaringiz bo‘lsa yoki eshik tanlashda yordam kerak bo‘lsa, bizga yozing.</p></div></section>
+    <section class="phero"><div class="container reveal"><p class="eyebrow">YasinDoors</p><h1>Eshik tanlashda <em>yordam beramiz</em></h1><p>Savol bering, o‘lcham yoki rang bo‘yicha maslahat oling — tez orada javob beramiz.</p></div></section>
     <section class="section"><div class="container contact">
       <div class="reveal"><h2>Bog‘laning</h2>
         <ul class="info" id="contactInfo"></ul>
         <p class="note" id="contactNote"></p></div>
       <form class="form reveal" id="contactForm" novalidate>
         <h2>Xabar yuborish</h2>
-        <div><label for="name">Ism</label><input class="field" id="name" name="name" autocomplete="name" maxlength="100" placeholder="Ismingiz"><div class="err" id="e-name"></div></div>
-        <div><label for="phone">Telefon</label><input class="field" id="phone" name="phone" type="tel" autocomplete="tel" maxlength="30" placeholder="+998 ..."><div class="err" id="e-phone"></div></div>
-        <div><label for="email">Email</label><input class="field" id="email" name="email" type="email" autocomplete="email" maxlength="100" placeholder="email@example.com"><div class="err" id="e-email"></div></div>
-        <div><label for="message">Xabar</label><textarea class="field" id="message" name="message" rows="5" maxlength="2000" placeholder="Xabaringiz"></textarea><div class="err" id="e-message"></div></div>
+        <div class="fl"><input class="field" id="name" name="name" placeholder=" " autocomplete="name" maxlength="100"><label for="name">Ism</label><div class="err" id="e-name"></div></div>
+        <div class="fl"><input class="field" id="phone" name="phone" type="tel" placeholder=" " autocomplete="tel" maxlength="30"><label for="phone">Telefon raqam</label><div class="err" id="e-phone"></div></div>
+        <div class="fl"><input class="field" id="email" name="email" type="email" placeholder=" " autocomplete="email" maxlength="80"><label for="email">Email (ixtiyoriy)</label><div class="err" id="e-email"></div></div>
+        <div class="fl"><textarea class="field" id="message" name="message" placeholder=" " rows="5" maxlength="2000"></textarea><label for="message">Xabaringiz</label><div class="err" id="e-message"></div></div>
         <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp">
         <div class="notice" id="cErr" role="alert"></div>
         <button type="submit" class="btn btn--p" id="cBtn">Xabar yuborish</button>

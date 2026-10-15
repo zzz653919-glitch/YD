@@ -217,15 +217,17 @@ app.post('/api/contact', (req, res) => { // aloqa formasi: xabar saqlanadi, admi
   if (clean(b.website, 100)) return res.json({ ok: true }); // spam tuzoq: oddiy foydalanuvchi bu maydonni ko‘rmaydi
   if (contactLimited(req.ip)) return fail(res, 429, 'Juda ko‘p so‘rov. Birozdan so‘ng urinib ko‘ring.');
   const name = clean(b.name, 100), message = clean(b.message, 2000), digits = clean(b.phone, 30).replace(/\D/g, '');
+  const email = clean(b.email, 80);
+  if (email && !/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(email)) return fail(res, 400, 'Email noto‘g‘ri.');
   if (name.length < 2) return fail(res, 400, 'Ismni kiriting.');
   if (!/^(998)?\d{9}$/.test(digits)) return fail(res, 400, 'Telefon raqami noto‘g‘ri.');
   if (message.length < 10) return fail(res, 400, 'Xabar kamida 10 ta belgidan iborat bo‘lsin.');
   seq.m += 1; save('seq.json', seq);
   const d = digits.length === 9 ? '998' + digits : digits;
-  const m = { id: 'M-' + String(seq.m).padStart(4, '0'), createdAt: new Date().toISOString(), name, phone: `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10, 12)}`, message, read: false };
+  const m = { id: 'M-' + String(seq.m).padStart(4, '0'), createdAt: new Date().toISOString(), name, phone: `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10, 12)}`, email, message, read: false };
   messages.unshift(m); persist.messages();
   notify('message', 'Yangi xabar', `${name}: ${message.slice(0, 80)}`, '#messages');
-  sendTelegram(`✉️ <b>Yangi xabar ${tgEsc(m.id)}</b>\n👤 ${tgEsc(name)}\n📞 ${tgEsc(m.phone)}\n\n${tgEsc(message)}`);
+  sendTelegram(`✉️ <b>Yangi xabar ${tgEsc(m.id)}</b>\n👤 ${tgEsc(name)}\n📞 ${tgEsc(m.phone)}${email ? `\n✉️ ${tgEsc(email)}` : ''}\n\n${tgEsc(message)}`);
   res.json({ ok: true });
 });
 

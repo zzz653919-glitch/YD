@@ -100,6 +100,8 @@
     'Buyurtmani qanday beraman?': 'Как оформить заказ?'
   };
   Object.assign(RU, {
+    'Eshik tanlashda': 'С выбором двери', 'yordam beramiz': 'поможем', 'Savol bering, o‘lcham yoki rang bo‘yicha maslahat oling — tez orada javob beramiz.': 'Задайте вопрос, получите совет по размеру или цвету — скоро ответим.',
+    'Qo‘ng‘iroq qilish': 'Позвонить', 'Telegramda yozish': 'Написать в Telegram', 'Xabar qoldirish': 'Оставить сообщение', 'Email (ixtiyoriy)': 'Email (необязательно)', 'Xabaringiz': 'Ваше сообщение', 'Telefon raqam': 'Номер телефона',
     'Uyingizga': 'Придайте дому', 'yangi uslub': 'новый стиль', 'bering': '\u200b', 'Eshik tanlash': 'Выбрать дверь', 'Pastga': 'Вниз', 'Vitrina': 'Витрина', 'Premium kolleksiya': 'Премиум коллекция',
     'Galereya': 'Галерея', 'Ranglar va dizaynlar': 'Цвета и дизайн', 'Konstruktor': 'Конструктор', 'O‘z eshigingizni yarating': 'Создайте свою дверь', 'Qoplama': 'Покрытие', 'Dastak': 'Ручка',
     'Po‘lat': 'Сталь', 'Mat qora': 'Матовый чёрный', 'Oltin': 'Золото', 'Taxminiy narx': 'Примерная цена', 'Fikrlar': 'Отзывы', 'Mijozlarimiz nima deydi': 'Что говорят клиенты', 'Tarix': 'История',
@@ -236,7 +238,11 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       <div class="footer__c"><h4>Aloqa</h4><ul>${crow}<li><a href="contact.html#statusSec">Buyurtma holatini tekshirish</a></li></ul></div></div>
       <div class="footer__word" aria-hidden="true">YASINDOORS</div><small>© 2026 YasinDoors</small></div>`;
     const cta = $('#site-cta');
-    if (cta) cta.innerHTML = `<div class="container reveal"><h2>Uyingiz uchun ideal MDF eshikni tanlang</h2><p>YasinDoors bilan makoningizga zamonaviy ko‘rinish bering.</p><a href="contact.html" class="btn btn--p">Biz bilan bog‘lanish ${ICON.arrow}</a></div>`;
+    if (cta) { // aloqa tugmalari: telefon va Telegram faqat admin kiritgan bo‘lsa chiqadi; xabar qoldirish doim bor
+      const cc = CONTENT.contacts || {};
+      cta.innerHTML = `<div class="container reveal"><h2>Uyingiz uchun ideal MDF eshikni tanlang</h2><p>YasinDoors bilan makoningizga zamonaviy ko‘rinish bering.</p>
+        <div class="cta__acts">${cc.phone ? `<a href="${esc(telHref(cc.phone))}" class="btn btn--p">${ICON.phone}Qo‘ng‘iroq qilish</a>` : ''}${cc.telegram ? `<a href="${esc(cc.telegram)}" class="btn btn--o" target="_blank" rel="noopener">${ICON.tg}Telegramda yozish</a>` : ''}<a href="contact.html#contactForm" class="btn ${cc.phone || cc.telegram ? 'btn--o' : 'btn--p'}">Xabar qoldirish ${ICON.arrow}</a></div></div>`;
+    }
     const tab = (h, ic, t, k, c) => `<a href="${h}"${page === k ? ' class="active" aria-current="page"' : ''}>${ICON[ic]}<span>${t}</span>${c ? counter(c) : ''}</a>`;
     document.body.insertAdjacentHTML('beforeend', `<nav class="tabbar" aria-label="Tezkor menyu">${tab('index.html', 'home', 'Asosiy', 'home')}${tab('doors.html', 'grid', 'Katalog', 'doors')}${tab('favorites.html', 'heart', 'Sevimli', 'favorites', 'fav')}${tab('cart.html', 'bag', 'Savat', 'cart', 'cart')}</nav>
       <div class="cmpbar" id="cmpBar" hidden></div>
@@ -507,16 +513,17 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     const f = $('#contactForm');
     const valid = bindValidation(f, {
       name: v => v.trim().length >= 2 || 'Ismingizni kiriting.', phone: phoneOk,
-      message: v => v.trim().length >= 10 || 'Xabar kamida 10 ta belgidan iborat bo‘lsin.'
+      message: v => v.trim().length >= 10 || 'Xabar kamida 10 ta belgidan iborat bo‘lsin.',
+      email: v => !v.trim() || /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(v.trim()) || 'Email noto‘g‘ri. Masalan: ism@example.com'
     }, 'e-');
     f.addEventListener('submit', async e => {
       e.preventDefault(); if (!valid()) return;
       const btn = $('#cBtn'), el = f.elements; btn.disabled = true; $('#cErr').innerHTML = '';
       try {
-        const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: el.name.value, phone: el.phone.value, message: el.message.value, website: el.website.value }) });
+        const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: el.name.value, phone: el.phone.value, email: el.email.value, message: el.message.value, website: el.website.value }) });
         const d = await r.json().catch(() => ({})); if (!r.ok || !d.ok) throw new Error(d.error || 'fail');
         f.reset(); $$('.field', f).forEach(i => delete i.dataset.t); toast('Xabaringiz qabul qilindi!');
-      } catch { $('#cErr').innerHTML = ICON.x + `<span>${t('Xabar yuborilmadi. Qaytadan urinib ko‘ring.')}</span>`; }
+      } catch (err) { const m = err && err.message; $('#cErr').innerHTML = ICON.x + `<span>${m && m !== 'fail' && !/fetch|network|load failed|abort/i.test(m) ? esc(m) : t('Xabar yuborilmadi. Qaytadan urinib ko‘ring.')}</span>`; }
       finally { btn.disabled = false; }
     });
   }
