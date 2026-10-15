@@ -863,6 +863,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     $('#procDots').innerHTML = STAGES.map(() => '<i></i>').join('');
     const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
     const tick = () => {
+      if (sec.classList.contains('proc--3d')) return; // 3D sahna ishga tushgan bo‘lsa, 2D chizma o‘chadi
       const r = sec.getBoundingClientRect(), total = sec.offsetHeight - innerHeight;
       const p = calm ? 1 : clamp(-r.top / Math.max(total, 1)), x = p * 7, i = Math.min(6, Math.floor(x));
       for (let k = 1; k <= 7; k++) svg.style.setProperty('--a' + k, calm ? 1 : clamp(x - (k - 1)).toFixed(3));
@@ -871,6 +872,72 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       if (i !== cur) { cur = i; setText(i); }
     };
     addEventListener('scroll', tick, { passive: true }); addEventListener('resize', tick); tick();
+    init3D(sec);
+  }
+  /* ---------- 13b. 3D ishlab chiqarish sahnasi (Three.js) — faqat kerak bo‘lganda yuklanadi; yo‘q bo‘lsa 2D chizma qoladi ---------- */
+  const RU_BEATS = [
+    ['Инженер приходит в дом', 'Инженер вместе с клиентом входит в дом и осматривает место для двери.', ['Осмотр места', 'Согласование с клиентом']],
+    ['Замер лазером', 'Лазерный дальномер точно измеряет ширину и высоту проёма.', ['Ширина', 'Высота', 'Лазерный дальномер']],
+    ['Данные вводятся в планшет', 'Размеры записываются в планшет и вместе с заказом отправляются на завод.', ['Цифровой заказ', 'Передача на завод']],
+    ['Привозят материалы', 'Плиты MDF доставляют в производственную зону погрузчиком.', ['Плита MDF', 'Погрузчик']],
+    ['Раскрой по размеру', 'Плита точно раскраивается по размеру заказа на специальном станке.', ['Станок раскроя', 'Точный размер']],
+    ['Формируются детали', 'Детали собираются в единое дверное полотно.', ['Каркас', 'Панели']],
+    ['Шлифовка поверхности', 'Шлифовальный станок выравнивает поверхность и готовит её к покраске.', ['Шлифовка', 'Ровная поверхность']],
+    ['Фрезеровка и узор', 'ЧПУ-фреза вырезает панели и узор выбранной модели.', ['ЧПУ-фреза', 'Узор']],
+    ['Краска или покрытие', 'В покрасочной камере на поверхность наносят выбранный цвет и покрытие.', ['Покрасочная камера', 'Цвет']],
+    ['Сушка и контроль', 'Дверь сушат, затем контролёр качества проверяет каждую деталь.', ['Сушка', 'Контроль качества']],
+    ['Упаковка', 'Готовая дверь упаковывается в защитную плёнку и коробку.', ['Плёнка', 'Коробка']],
+    ['Погрузка в машину', 'Упакованную дверь бережно грузят в грузовик.', ['Бережная погрузка']],
+    ['Дорога к дому клиента', 'Машина выезжает с завода и направляется к дому клиента.', ['Доставка']],
+    ['Проверка коробки', 'Монтажники приезжают, проверяют дверную коробку по уровню и размеру.', ['Уровень', 'Размер']],
+    ['Установка на место', 'Дверь достают из упаковки и аккуратно устанавливают в коробку.', ['Установка']],
+    ['Выравнивание и крепление', 'Дверь выравнивают по уровню и закрепляют на петлях.', ['Выравнивание', 'Петли']],
+    ['Установка ручки', 'Устанавливаются ручка и замок.', ['Ручка', 'Замок']],
+    ['Открывание и закрывание', 'Проверяется ход двери — результат готов.', ['Плавный ход', 'Готовый результат']]
+  ];
+  const RU_ACTS = ['Замер', 'Производство', 'Доставка', 'Установка'];
+  function init3D(sec) {
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches || (navigator.connection && navigator.connection.saveData)) return; // zaxira: 2D chizma + ro‘yxat
+    const wrap = $('#procScene'); if (!wrap) return;
+    try { const cv = document.createElement('canvas'); if (!(cv.getContext('webgl2') || cv.getContext('webgl'))) return; } catch { return; }
+    const load = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = rej; document.head.appendChild(el); });
+    let started = false;
+    const boot = async () => {
+      try { await load('vendor/three.min.js'); await load('scene3d.js'); await load('scene3d-world.js'); } catch { return; }
+      if (!window.YDScene) return;
+      const mobile = matchMedia('(max-width:900px)').matches || matchMedia('(pointer:coarse)').matches;
+      const canvas = document.createElement('canvas'); canvas.className = 'proc__canvas'; canvas.setAttribute('aria-hidden', 'true'); wrap.appendChild(canvas);
+      const hud = $('#procHud'); const sceneApi = YDScene.init({ canvas, mobile, onHud: (txt) => { if (!hud) return; hud.hidden = !txt; if (txt) hud.textContent = txt; } });
+      if (!sceneApi) { canvas.remove(); return; }
+      const B = YDScene.BEATS, ACTS = YDScene.ACTS, txt = $('#procTxt'), count = $('#procCount'), acts = $('#procDots'), fin = $('#procFinal');
+      const pad = n => String(n).padStart(2, '0'), clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+      acts.className = 'proc__acts'; acts.innerHTML = ACTS.map((n, ai) => { const bs = B.filter(b => b.act === ai); return `<div class="act" data-a="${ai}" style="flex:${(bs[bs.length - 1].b - bs[0].a).toFixed(4)}"><span>${esc(LANG === 'ru' ? RU_ACTS[ai] : n)}</span><i><b></b></i></div>`; }).join('');
+      const fills = $$('.act b', acts), actEls = $$('.act', acts);
+      if (fin) fin.innerHTML = `<p class="eyebrow">YasinDoors</p><h2>${LANG === 'ru' ? 'От замера до идеального результата — <em>YasinDoors</em>' : 'O‘lchovdan mukammal natijagacha — <em>YasinDoors</em>'}</h2><a class="btn btn--p" href="doors.html">${t('Eshik tanlash')}</a>`;
+      let cur = -1;
+      const setBeat = i => {
+        const b = B[i], r = LANG === 'ru' ? RU_BEATS[i] : null;
+        txt.innerHTML = `<p class="proc__no">${pad(i + 1)} / ${pad(B.length)}</p><p class="proc__lb">${esc(LANG === 'ru' ? RU_ACTS[b.act] : ACTS[b.act])}</p><h2>${esc(r ? r[0] : b.t)}</h2><p class="proc__p">${esc(r ? r[1] : b.d)}</p><ul class="proc__chips">${(r ? r[2] : b.c).map(c => `<li>${esc(c)}</li>`).join('')}</ul>`;
+        txt.classList.remove('in'); void txt.offsetWidth; txt.classList.add('in'); count.textContent = `${pad(i + 1)} / ${pad(B.length)}`;
+        actEls.forEach((a, k) => a.classList.toggle('on', k === b.act));
+      };
+      let visible = false;
+      const tick = () => {
+        const r = sec.getBoundingClientRect(), total = sec.offsetHeight - innerHeight, p = clamp(-r.top / Math.max(total, 1));
+        const inView = r.bottom > 0 && r.top < innerHeight;
+        if (inView && !visible && !document.hidden) { visible = true; sceneApi.start(); } else if ((!inView || document.hidden) && visible) { visible = false; sceneApi.stop(); }
+        sceneApi.setProgress(p);
+        let i = B.findIndex(b => p < b.b); if (i < 0) i = B.length - 1; if (i !== cur) { cur = i; setBeat(i); }
+        B.forEach((b, k) => { if (k === 0 || b.act !== B[k - 1].act) { const ai = b.act, bs = B.filter(x => x.act === ai), a0 = bs[0].a, a1 = bs[bs.length - 1].b; fills[ai].style.width = (clamp((p - a0) / (a1 - a0)) * 100).toFixed(1) + '%'; } });
+        sec.classList.toggle('proc--end', p > .94);
+      };
+      const first = () => { sec.classList.add('proc--3d'); sceneApi.resize(); tick(); requestAnimationFrame(() => canvas.classList.add('on')); };
+      first();
+      addEventListener('scroll', tick, { passive: true }); addEventListener('resize', () => { sceneApi.resize(); tick(); }); document.addEventListener('visibilitychange', tick);
+    };
+    // sahifa tez ochilishi uchun: birinchi scrolldan keyin (yoki 3.5 soniya jim turilsa) yuklanadi
+    const kick = () => { if (started) return; started = true; removeEventListener('scroll', kick); boot(); };
+    addEventListener('scroll', kick, { passive: true }); setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(kick, { timeout: 2000 }) : kick()), 3500);
   }
   function initStatement() { // so‘zlar scroll bilan birin-ketin yorishadi
     const sec = $('#statement'), box = $('#stmText'); if (!sec || !box) return;

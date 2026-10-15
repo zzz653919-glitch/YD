@@ -186,7 +186,7 @@ app.use((req, res, next) => { res.set('X-Content-Type-Options', 'nosniff'); next
 app.use(express.json({ limit: '50kb' }));
 
 /* ---------- Statik fayllar: faqat ruxsat etilgan ro‘yxat (.env, server.js, data/ ochilmaydi) ---------- */
-const PAGES = ['index.html', 'doors.html', 'product.html', 'about.html', 'contact.html', 'cart.html', 'favorites.html', '404.html', 'style.css', 'script.js', 'manifest.webmanifest', 'sw.js', 'icon.svg'];
+const PAGES = ['index.html', 'doors.html', 'product.html', 'about.html', 'contact.html', 'cart.html', 'favorites.html', '404.html', 'style.css', 'script.js', 'scene3d.js', 'scene3d-world.js', 'manifest.webmanifest', 'sw.js', 'icon.svg'];
 const send = f => (req, res) => res.sendFile(path.join(ROOT, f));
 app.get('/', send('index.html'));
 PAGES.forEach(f => app.get('/' + f, send(f)));
@@ -196,6 +196,7 @@ app.get('/sitemap.xml', (req, res) => {
   const o = origin(req), urls = ['', 'doors.html', 'about.html', 'contact.html', ...(products || []).filter(p => !p.hidden).map(p => 'product.html?id=' + p.id)];
   res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(u => `<url><loc>${o}/${u.replace(/&/g, '&amp;')}</loc></url>`).join('')}</urlset>`);
 });
+app.use('/vendor', express.static(path.join(ROOT, 'vendor'), { dotfiles: 'deny', maxAge: '30d' })); // Three.js (3D sahna) — faqat shu papka
 app.use('/img', express.static(path.join(ROOT, 'img'), { dotfiles: 'deny' })); // haqiqiy rasmlar uchun (ixtiyoriy)
 const adminPage = (req, res) => { res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' }); res.sendFile(path.join(ROOT, 'admin.html')); };
 app.get(['/admin', '/admin.html'], adminPage);

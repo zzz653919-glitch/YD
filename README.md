@@ -37,3 +37,7 @@ Katalog filtrlari (rang, uslub, narx oralig'ini o'zi kiritish, o'lcham) va aqlli
 - **Jarayon** — eshik tayyorlanishining 7 bosqichi scroll bilan jonlanadi (o'lchov → material → dizayn → qoplama → furnitura → sifat nazorati → o'rnatish), kunduzi/kechqurun yoritilishi almashadi.
 - **So'z-so'z matn** — scroll bilan so'zlar birin-ketin yorishadi.
 - Suzuvchi shisha navbar bo'limga qarab yoritiladi. `prefers-reduced-motion` yoqilgan bo'lsa, sahna oddiy ro'yxatga aylanadi.
+
+## 3D ishlab chiqarish sahnasi
+
+`#process` bo‘limida scroll bilan boshqariladigan Three.js sahnasi (`scene3d.js`, `scene3d-world.js`, `vendor/three.min.js`): o‘lchov → zavod → yetkazish → o‘rnatish (18 bosqich). Skriptlar birinchi scrolldan keyin yuklanadi; WebGL yo‘q, `prefers-reduced-motion` yoki `saveData` bo‘lsa, avvalgi 2D SVG sahna va ro‘yxat ko‘rsatiladi.
