@@ -100,6 +100,7 @@
     'Buyurtmani qanday beraman?': 'Как оформить заказ?'
   };
   Object.assign(RU, {
+    'Nom, rang yoki uslub bo‘yicha qidiring…': 'Поиск по названию, цвету или стилю…',
     'Filtrlarni tozalash': 'Сбросить фильтры', 'Katalogdagi narxlar': 'Цены в каталоге', '(narxlar almashtirildi)': '(значения поменяны местами)', 'Narx dan (so‘m)': 'Цена от (сум)', 'Narx gacha (so‘m)': 'Цена до (сум)',
     'Eshik tanlashda': 'С выбором двери', 'yordam beramiz': 'поможем', 'Savol bering, o‘lcham yoki rang bo‘yicha maslahat oling — tez orada javob beramiz.': 'Задайте вопрос, получите совет по размеру или цвету — скоро ответим.',
     'Qo‘ng‘iroq qilish': 'Позвонить', 'Telegramda yozish': 'Написать в Telegram', 'Xabar qoldirish': 'Оставить сообщение', 'Email (ixtiyoriy)': 'Email (необязательно)', 'Xabaringiz': 'Ваше сообщение', 'Telefon raqam': 'Номер телефона',
@@ -345,6 +346,24 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
         <div class="card__act"><button class="btn btn--p btn--sm" data-act="cart" data-id="${p.id}" aria-label="Savatga qo‘shish: ${p.name}">${ICON.bag}Savatga</button>
         <button class="btn btn--o btn--sm touch" data-act="details" data-id="${p.id}" aria-label="Batafsil: ${p.name}">Batafsil</button></div></div></article>`;
   };
+  /* --- aqlli qidiruv: rang, uslub, nom, material, narx; o‘zbekcha/ruscha/inglizcha so‘zlar, apostrof va 1 harfli xatolarga chidamli --- */
+  const norm = v => String(v ?? '').toLowerCase().replace(/ё/g, 'е').replace(/[ʻʼ'`‘’´‛]/g, '').replace(/[^a-z0-9а-я\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  const SYN = {}; // sinonimlar: biridan boshqasi topiladi (masalan: qora = black = чёрный)
+  [['qora', 'black', 'черный'], ['oq', 'white', 'белый', 'ok'], ['jigarrang', 'brown', 'коричневый', 'yongoq', 'walnut', 'орех'], ['yogoch', 'wood', 'дерево', 'oak', 'eman', 'дуб', 'daraxt'],
+   ['kulrang', 'gray', 'grey', 'серый'], ['klassik', 'classic', 'классика', 'классический'], ['zamonaviy', 'modern', 'современный'], ['minimal', 'minimalist', 'минимализм']]
+    .forEach(g => { const n = g.map(norm); n.forEach(w => { SYN[w] = n; }); });
+  const wordCache = new Map();
+  const wordsOf = p => { const k = p.id; if (!wordCache.has(k)) wordCache.set(k, norm(`${p.name} ${p.desc} ${p.long || ''} ${p.tags} ${p.colorName} ${p.styleName} ${p.material} ${p.price}`).split(' ')); return wordCache.get(k); };
+  const lev1 = (a, b) => { // tahrir masofasi ≤ 1 (almashtirish, tushib qolgan yoki ortiqcha harf)
+    if (a === b) return true; const d = a.length - b.length; if (d > 1 || d < -1) return false;
+    let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    if (d === 0) return a.slice(i + 1) === b.slice(i + 1); return d > 0 ? a.slice(i + 1) === b.slice(i) : a.slice(i) === b.slice(i + 1);
+  };
+  const near = (a, w) => a.length >= 5 && w.length >= 4 && [a.length - 1, a.length, a.length + 1].some(n => lev1(a, w.slice(0, n))); // 5+ harfli so‘zlarda 1 ta xatoga chidamli
+  const searchHit = (p, q) => { // barcha so‘zlar (VA) mos kelishi kerak: "qora modern" → qora VA modern
+    const toks = norm(q).split(' ').filter(Boolean); if (!toks.length) return true; const ws = wordsOf(p);
+    return toks.every(tk => (SYN[tk] || [tk]).some(a => ws.some(w => w.startsWith(a) || near(a, w) || (/^\d{3,}$/.test(a) && w.includes(a)))));
+  };
   /* --- ko‘rilgan mahsulotlar tarixi (faqat shu qurilmada) --- */
   const pushViewed = id => { const l = [id, ...store.get('viewed', []).filter(x => x !== id)].slice(0, 8); store.set('viewed', l); };
   function renderViewed(skip) {
@@ -366,9 +385,9 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     el.textContent = t(txt) + (swapped && txt ? ' ' + t('(narxlar almashtirildi)') : '');
   }
   function renderDoors() {
-    const q = view.q.trim().toLowerCase();
+    const q = view.q.trim();
     let list = PRODUCTS.filter(p => matches(p, view.f) && (!view.color || p.color === view.color) && (!view.style || p.style === view.style) && inRange(p) &&
-      (!q || `${p.name} ${p.desc} ${p.tags} ${p.colorName} ${p.styleName} ${p.material}`.toLowerCase().includes(q)));
+      (!q || searchHit(p, q)));
     if (sorts[view.sort]) list = [...list].sort(sorts[view.sort]);
     const prices = PRODUCTS.map(p => p.price), pr = prices.length ? `${fmt(Math.min(...prices))} – ${fmt(Math.max(...prices))} so‘m` : '';
     $('#doorsGrid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3><p>${range().some(v => v !== null) && pr ? `${t('Katalogdagi narxlar')}: ${pr}` : 'Boshqa so‘z yoki filtrni sinab ko‘ring.'}</p><button class="btn btn--o" type="button" data-act="freset">Filtrlarni tozalash</button></div>`;
@@ -681,7 +700,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     const hide = () => { box.hidden = true; inp.setAttribute('aria-expanded', 'false'); on = -1; };
     const sug = () => {
       const q = inp.value.trim().toLowerCase(); if (q.length < 2) return hide();
-      const l = PRODUCTS.filter(p => `${p.name} ${p.tags} ${p.colorName} ${p.styleName}`.toLowerCase().includes(q)).slice(0, 5); if (!l.length) return hide();
+      const l = PRODUCTS.filter(p => searchHit(p, q)).slice(0, 5); if (!l.length) return hide();
       box.innerHTML = l.map(p => `<li role="option"><a href="product.html?id=${p.id}"><img src="${doorImg(p)}" alt="" width="34" height="42"><span>${esc(p.name)}<small>${esc(p.styleName)} · ${esc(p.colorName)} · ${money(p.price)}</small></span></a></li>`).join('');
       box.hidden = false; inp.setAttribute('aria-expanded', 'true');
     };
