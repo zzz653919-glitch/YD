@@ -93,7 +93,7 @@
     'Mahsulot savatga qo‘shildi': 'Товар добавлен в корзину', 'Mahsulot savatdan olib tashlandi': 'Товар удалён из корзины', 'Sevimlilarga qo‘shildi': 'Добавлено в избранное', 'Mahsulot sevimlilardan olib tashlandi': 'Удалено из избранного',
     'Eng ko‘pi bilan 3 ta mahsulotni solishtirish mumkin': 'Можно сравнить не более 3 товаров', 'Sevimlilarga qo‘shish': 'В избранное', 'Sevimlilarda': 'В избранном',
     'Sahifa topilmadi': 'Страница не найдена', 'Siz izlagan sahifa mavjud emas yoki ko‘chirilgan.': 'Такой страницы нет или она перемещена.', 'Bosh sahifaga qaytish': 'Вернуться на главную',
-    'Mahsulot topilmadi.': 'Товар не найден.', 'Aksiya': 'Акция', 'Maxsus takliflar va chegirmalar': 'Специальные предложения и скидки', 'O‘xshash eshiklar': 'Похожие двери', 'Rasmni kattalashtirish': 'Увеличить фото', 'Dark rejimga o‘tish': 'Тёмная тема', 'Light rejimga o‘tish': 'Светлая тема',
+    'Mahsulot topilmadi.': 'Товар не найден.', 'Maxsus takliflar va chegirmalar': 'Специальные предложения и скидки', 'O‘xshash eshiklar': 'Похожие двери', 'Rasmni kattalashtirish': 'Увеличить фото', 'Dark rejimga o‘tish': 'Тёмная тема', 'Light rejimga o‘tish': 'Светлая тема',
     'Yuqoriga qaytish': 'Наверх', 'Telegram orqali bog‘lanish': 'Связаться через Telegram', 'Sahifa yuklanmadi. Internetni tekshirib, qayta urinib ko‘ring.': 'Страница не загрузилась. Проверьте интернет.',
     'Biz haqimizda ': 'О нас', 'YasinDoors — faqat MDF eshiklarga ixtisoslashgan kompaniya.': 'YasinDoors — компания, специализирующаяся только на MDF дверях.', 'Faqat MDF eshiklar': 'Только MDF двери',
     'Katalogni ko‘rish': 'Смотреть каталог', 'MDF sifati va dizayn': 'Качество MDF и дизайн', 'Ishlab chiqarish jarayoni': 'Процесс производства', 'Material va dizayn': 'Материал и дизайн',
@@ -194,7 +194,8 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     return (scenes[key] = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg));
   }
   const altImg = p => (p.gallery && p.gallery[0]) || doorImg(p, 'detail'); // ikkinchi rasm: galereya yoki yaqin plan
-  const img = (p, lazy = true) => `<img src="${doorImg(p)}" alt="${p.name} — ${p.colorName.toLowerCase()} ${p.styleName} MDF eshik" width="400" height="500"${lazy ? ' loading="lazy"' : ''} decoding="async">`;
+  const lz = u => (/^data:/.test(u) ? '' : ' loading="lazy"'); // data: sahnalar ichki, lazy kerak emas
+  const img = (p, lazy = true) => `<img src="${doorImg(p)}" alt="${p.name} — ${p.colorName.toLowerCase()} ${p.styleName} MDF eshik" width="400" height="500"${lazy ? lz(doorImg(p)) : ''} decoding="async">`;
 
   /* ---------- 5. Umumiy qismlar: header, tabbar, footer, CTA, toast, modal ---------- */
   const counter = (k, cls = 'badge') => `<span class="${cls}" data-count="${k}">0</span>`;
@@ -334,7 +335,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   const priceHtml = p => `${money(p.price)}${p.old ? `<s>${money(p.old)}</s>` : ''}${p.discountPercent ? `<span class="disc">−${p.discountPercent}%</span>` : ''}`;
   const card = p => {
     const fav = favs.includes(p.id), inCmp = cmp.includes(p.id), bd = p.badge || (p.discountPercent ? 'sale' : '');
-    return `<article class="card reveal in"><div class="card__img">${img(p)}<img class="card__alt" src="${altImg(p)}" alt="" width="400" height="500" loading="lazy" decoding="async" aria-hidden="true">${bd ? `<span class="pbadge pbadge--${bd}">${BADGES[bd]}</span>` : ''}
+    return `<article class="card reveal in"><div class="card__img">${img(p)}<img class="card__alt" src="${altImg(p)}" alt="" width="400" height="500"${lz(altImg(p))} decoding="async" aria-hidden="true">${bd ? `<span class="pbadge pbadge--${bd}">${BADGES[bd]}</span>` : ''}
       <button class="fav" data-act="fav" data-id="${p.id}" aria-pressed="${fav}" aria-label="${fav ? 'Sevimlilardan olib tashlash' : 'Sevimlilarga qo‘shish'}: ${p.name}">${ICON.heart}</button>
       <button class="fav cmpb" data-act="cmp" data-id="${p.id}" aria-pressed="${inCmp}" aria-label="${inCmp ? 'Solishtirishdan olib tashlash' : 'Solishtirishga qo‘shish'}: ${p.name}">${ICON.compare}</button>
       <div class="card__ov"><button class="btn btn--glass btn--sm" data-act="details" data-id="${p.id}" aria-label="Tezkor ko‘rish: ${p.name}">${ICON.eye}Tezkor ko‘rish</button></div></div>
@@ -348,8 +349,9 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   function renderViewed(skip) {
     const sec = $('#viewedSec'), box = $('#viewedGrid'); if (!sec || !box) return;
     const l = store.get('viewed', []).map(find).filter(p => p && p.id !== skip).slice(0, 4);
-    sec.hidden = !l.length; box.innerHTML = l.map(card).join(''); translateDom(sec);
+    sec.hidden = !l.length; fit(box, l.length); box.innerHTML = l.map(card).join(''); translateDom(sec);
   }
+  const fit = (el, n) => el.style.setProperty('--n', Math.min(Math.max(n, 3), 4)); // 3–4 teng ustun: kam kartada bo‘sh joy qolmasin
   const emptyBox = (ic, title, text) => `<div class="empty">${ICON[ic]}<h3>${title}</h3><p>${text}</p><a class="btn btn--p" href="doors.html">Katalogga o‘tish</a></div>`;
   const view = { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '' };
   const sorts = { asc: (a, b) => a.price - b.price, desc: (a, b) => b.price - a.price, az: (a, b) => a.name.localeCompare(b.name), za: (a, b) => b.name.localeCompare(a.name) };
@@ -381,15 +383,16 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     if (!homeTab || !tabs.some(x => x[0] === homeTab)) homeTab = tabs[0][0];
     $('#homeTabs').innerHTML = tabs.map(([k, n]) => `<button class="chip" data-act="htab" data-k="${k}" aria-pressed="${k === homeTab}">${n}</button>`).join('');
     const f = HOME_TABS.find(x => x[0] === homeTab)[2], list = PRODUCTS.filter(f).slice(0, 5);
+    fit($('#featured'), list.length);
     $('#featured').classList.toggle('grid--show', list.length >= 5); // asimmetrik vitrina faqat 5 ta mahsulot bo‘lganda
     $('#featured').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3></div>`;
     const sale = PRODUCTS.filter(p => p.discountPercent || p.old).slice(0, 3); // maxsus takliflar: faqat haqiqiy chegirmalar
     let off = $('#offers');
     if (sale.length && !off) { $('#collection').insertAdjacentHTML('afterend', '<section class="section" id="offers"><div class="container"><div class="head reveal in"><p class="eyebrow">Aksiya</p><h2>Maxsus takliflar va chegirmalar</h2></div><div class="grid" id="offersGrid"></div></div></section>'); off = $('#offers'); }
-    if (off) { off.hidden = !sale.length; $('#offersGrid').innerHTML = sale.map(card).join(''); }
+    if (off) { off.hidden = !sale.length; fit($('#offersGrid'), sale.length); $('#offersGrid').innerHTML = sale.map(card).join(''); }
     const cols = [...new Map(PRODUCTS.map(p => [p.color, p])).values()];
     $('#colorsSec').hidden = !cols.length;
-    $('#swatches').innerHTML = cols.map(p => `<a class="sw" href="doors.html?f=${encodeURIComponent(p.color)}"><img src="${doorImg(p)}" alt="" width="400" height="500" loading="lazy" decoding="async"><span><i style="background:${esc(p.hex)}"></i>${esc(p.colorName)}</span></a>`).join('');
+    $('#swatches').innerHTML = cols.map(p => `<a class="sw" href="doors.html?f=${encodeURIComponent(p.color)}"><img src="${doorImg(p)}" alt="${esc(p.colorName)} rangdagi MDF eshik" width="400" height="500"${lz(doorImg(p))} decoding="async"><span><i style="background:${esc(p.hex)}"></i>${esc(p.colorName)}</span></a>`).join('');
     const rev = (CONTENT.reviews || []).filter(x => x.name && x.text); // faqat admin kiritgan haqiqiy fikrlar
     $('#reviewsSec').hidden = !rev.length;
     $('#reviewsList').innerHTML = rev.map(x => `<figure class="rev reveal in"><blockquote>${esc(x.text)}</blockquote><figcaption>${esc(x.name)}</figcaption></figure>`).join('');
@@ -546,7 +549,6 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   }
 
   /* ---------- 11. Zakaz: POST /api/order -> server.js -> Telegram ---------- */
-  const ORDER_ERR = 'Zakaz yuborilmadi. Iltimos, qaytadan urinib ko‘ring.';
   const fl = (id, name, label, ph, extra = '') => `<div class="fl"><input class="field" id="${id}" name="${name}" placeholder=" " ${extra}><label for="${id}">${label}</label><div class="err" id="e-o-${name}"></div></div>`;
   function openOrder() {
     if (!cartCount()) return;
