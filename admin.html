@@ -86,7 +86,7 @@
     /* Dialog */
     dialog{width:min(640px,calc(100% - 24px));max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--line);border-radius:24px;background:var(--card);color:var(--tx);box-shadow:0 30px 80px rgba(0,0,0,.35)}
     dialog::backdrop{background:rgba(10,10,10,.55);backdrop-filter:blur(6px)}
-    dialog form,.dlg{padding:26px}dialog h2{margin-bottom:18px}.dlg__f{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+    dialog form,.dlg{padding:26px}dialog h2,.dlg h2{margin-bottom:18px}.dlg__f{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
     /* Toast */
     .toasts{position:fixed;left:50%;bottom:20px;z-index:200;display:grid;gap:8px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px)}
     .toast{padding:12px 20px;border-radius:14px;background:var(--btn);color:var(--btnTx);font-weight:700;font-size:14.5px;box-shadow:var(--sh);animation:in .3s ease}@keyframes in{from{opacity:0;transform:translateY(10px)}}
@@ -151,6 +151,21 @@
           <div class="err" id="setErr" role="alert"></div>
           <button class="btn btn--p" type="submit">Saqlash</button>
         </form>
+        <form class="card dlg" id="cntForm" style="max-width:560px;margin-top:16px" novalidate>
+          <h2>Sayt matnlari</h2>
+          <div class="fld"><label for="cLead">Bosh sahifa qisqa tavsifi</label><input class="in" id="cLead" maxlength="160"></div>
+          <div class="fld"><label for="cPhone">Telefon</label><input class="in" id="cPhone" type="tel" maxlength="30"></div>
+          <div class="fld"><label for="cEmail">Email</label><input class="in" id="cEmail" type="email" maxlength="80"></div>
+          <div class="fld"><label for="cAddr">Manzil</label><input class="in" id="cAddr" maxlength="200"></div>
+          <div class="fld"><label for="cHours">Ish vaqti</label><input class="in" id="cHours" maxlength="80"></div>
+          <div class="fld"><label for="cTg">Telegram (@nom yoki havola)</label><input class="in" id="cTg" maxlength="120"></div>
+          <div class="fld"><label for="cIg">Instagram (@nom yoki havola)</label><input class="in" id="cIg" maxlength="120"></div>
+          <div class="fld"><label for="cPromo">Yuqoridagi banner matni (bo‘sh qolsa ko‘rinmaydi)</label><input class="in" id="cPromo" maxlength="160"></div>
+          <h2 style="margin-top:22px">Mijozlar fikrlari</h2><p style="margin-bottom:12px;font-size:14px">Faqat haqiqiy fikrlarni kiriting. Bo‘sh qolsa, saytda bu bo‘lim ko‘rinmaydi.</p>
+          <div id="cRev"></div>
+          <div class="err" id="cntErr" role="alert"></div>
+          <button class="btn btn--p" type="submit">Saqlash</button>
+        </form>
         <div class="card dlg" style="max-width:560px;margin-top:16px">
           <h2>Zaxira nusxa</h2><p style="margin-bottom:14px">Katalog va barcha zakazlarni JSON fayl sifatida yuklab oling.</p>
           <a class="btn" href="/api/admin/export" download>Zaxira nusxani yuklab olish</a>
@@ -171,7 +186,13 @@
         <div class="fld"><label for="pColor">Rang guruhi</label><select class="in" id="pColor"><option value="oq">Oq</option><option value="qora">Qora</option><option value="jigarrang">Jigarrang</option><option value="yogoch">Yog‘och</option></select></div>
         <div class="fld"><label for="pColorName">Rang nomi (saytda ko‘rinadi)</label><input class="in" id="pColorName" maxlength="30" placeholder="Masalan: Eman"></div>
         <div class="fld"><label for="pStyle">Uslub</label><select class="in" id="pStyle"><option value="modern">Modern</option><option value="classic">Classic</option></select></div>
-        <div class="fld"><label for="pBadge">Belgi</label><select class="in" id="pBadge"><option value="">Yo‘q</option><option value="new">Yangi</option><option value="best">Bestseller</option><option value="premium">Premium</option><option value="sale">Sale</option><option value="limited">Limited</option></select></div>
+        <div class="fld"><label for="pBadge">Belgi</label><select class="in" id="pBadge"><option value="">Yo‘q</option><option value="new">Yangi</option><option value="best">Mashhur</option><option value="premium">Premium</option><option value="sale">Chegirma</option><option value="limited">Limited</option></select></div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label for="pWmin">Kenglik dan (mm, ixtiyoriy)</label><input class="in" id="pWmin" type="number" min="300" max="2000" inputmode="numeric"></div>
+        <div class="fld"><label for="pWmax">Kenglik gacha (mm)</label><input class="in" id="pWmax" type="number" min="300" max="2000" inputmode="numeric"></div>
+        <div class="fld"><label for="pHmin">Balandlik dan (mm, ixtiyoriy)</label><input class="in" id="pHmin" type="number" min="1000" max="3000" inputmode="numeric"></div>
+        <div class="fld"><label for="pHmax">Balandlik gacha (mm)</label><input class="in" id="pHmax" type="number" min="1000" max="3000" inputmode="numeric"></div>
       </div>
       <div class="fld"><label for="pMat">Material</label><input class="in" id="pMat" maxlength="80" placeholder="MDF + mat PVX qoplama"></div>
       <div class="fld"><label for="pDesc">Qisqa tavsif (kartada)</label><input class="in" id="pDesc" maxlength="120"></div>
@@ -232,7 +253,7 @@
   }
   async function enter() {
     $('#login').hidden = true; $('#app').hidden = false;
-    await Promise.all([loadOrders(), loadProducts(), loadSettings()]);
+    await Promise.all([loadOrders(), loadProducts(), loadSettings(), loadContent()]);
     route();
   }
   $('#loginForm').addEventListener('submit', async e => {
@@ -335,6 +356,7 @@
     const d = p || { name: '', price: '', old: '', color: 'oq', colorName: '', style: 'modern', badge: '', material: 'MDF', desc: '', long: '', tags: '', image: '', stock: true, hidden: false };
     F('pName').value = d.name; F('pPrice').value = d.price; F('pOld').value = d.old || ''; F('pColor').value = d.color; F('pColorName').value = d.colorName; F('pStyle').value = d.style;
     F('pBadge').value = d.badge || ''; F('pMat').value = d.material; F('pDesc').value = d.desc; F('pLong').value = d.long; F('pTags').value = d.tags; F('pImg').value = d.image || '';
+    F('pWmin').value = d.wMin ?? ''; F('pWmax').value = d.wMax ?? ''; F('pHmin').value = d.hMin ?? ''; F('pHmax').value = d.hMax ?? '';
     F('pStock').checked = !!d.stock; F('pHidden').checked = !!d.hidden; $('#pdlg').showModal(); F('pName').focus();
   }
   $('#addP').addEventListener('click', () => openProduct(null));
@@ -351,6 +373,7 @@
     e.preventDefault(); const id = e.target.dataset.id, b = $('#pSave'); $('#pErr').textContent = '';
     const body = { name: F('pName').value, price: Number(F('pPrice').value), old: F('pOld').value === '' ? null : Number(F('pOld').value), color: F('pColor').value, colorName: F('pColorName').value,
       style: F('pStyle').value, badge: F('pBadge').value, material: F('pMat').value, desc: F('pDesc').value, long: F('pLong').value, tags: F('pTags').value, image: F('pImg').value,
+      wMin: F('pWmin').value, wMax: F('pWmax').value, hMin: F('pHmin').value, hMax: F('pHmax').value,
       stock: F('pStock').checked, hidden: F('pHidden').checked };
     b.disabled = true;
     try { await api(id ? 'PUT' : 'POST', '/api/admin/products' + (id ? '/' + id : ''), body); $('#pdlg').close(); toast('Saqlandi'); await loadProducts(); }
@@ -364,6 +387,29 @@
     e.preventDefault(); $('#setErr').textContent = '';
     try { await api('PUT', '/api/admin/settings', { deliveryFee: Number(F('sFee').value), freeFrom: Number(F('sFree').value) }); toast('Sozlamalar saqlandi'); }
     catch (err) { $('#setErr').textContent = err.message; }
+  });
+
+  /* ---------- Sayt matnlari va mijozlar fikrlari ---------- */
+  async function loadContent() {
+    try {
+      const c = S.content = (await api('GET', '/api/admin/content')).content, h = c.hero || {}, k = c.contacts || {};
+      F('cLead').value = h.lead || ''; F('cPhone').value = k.phone || ''; F('cEmail').value = k.email || '';
+      F('cAddr').value = k.address || ''; F('cHours').value = k.hours || ''; F('cTg').value = k.telegram || ''; F('cIg').value = k.instagram || '';
+      F('cPromo').value = c.promo && c.promo.enabled ? c.promo.text : '';
+      const rv = c.reviews || [];
+      F('cRev').innerHTML = Array.from({ length: 3 }, (_, i) => `<div class="fld"><label for="rN${i}">Fikr ${i + 1}: mijoz ismi</label><input class="in" id="rN${i}" maxlength="60" value="${esc(rv[i] ? rv[i].name : '')}"><label for="rT${i}" style="margin-top:8px">Fikr matni</label><textarea class="in" id="rT${i}" rows="2" maxlength="400">${esc(rv[i] ? rv[i].text : '')}</textarea></div>`).join('');
+    } catch (e) { toast(e.message); }
+  }
+  $('#cntForm').addEventListener('submit', async e => {
+    e.preventDefault(); $('#cntErr').textContent = '';
+    const c = S.content; if (!c) return;
+    const reviews = [0, 1, 2].map(i => ({ name: F('rN' + i).value, text: F('rT' + i).value })).filter(x => x.name.trim() || x.text.trim());
+    const text = F('cPromo').value.trim();
+    const body = { ...c, hero: { ...c.hero, lead: F('cLead').value },
+      contacts: { phone: F('cPhone').value, email: F('cEmail').value, address: F('cAddr').value, hours: F('cHours').value, telegram: F('cTg').value, instagram: F('cIg').value },
+      promo: { ...c.promo, enabled: !!text, text }, reviews };
+    try { await api('PUT', '/api/admin/content', body); toast('Sayt matnlari saqlandi'); await loadContent(); }
+    catch (err) { $('#cntErr').textContent = err.message; }
   });
 
   /* Yangi zakazlarni tekshirib turish (har 45 soniyada) */

@@ -5,7 +5,7 @@
   /* ---------- 1. Mahsulotlar (yagona manba) ---------- */
   // color: oq | qora | jigarrang | yogoch ; style: modern | classic ; badge: new | best | premium | sale | limited
   // Haqiqiy foto qo‘shish uchun mahsulotga `image: 'img/nom.jpg'` maydonini yozing — SVG o‘rniga shu ishlatiladi.
-  const BADGES = { new: 'Yangi', best: 'Bestseller', premium: 'Premium', sale: 'Sale', limited: 'Limited' };
+  const BADGES = { new: 'Yangi', best: 'Mashhur', premium: 'Premium', sale: 'Chegirma', limited: 'Limited' };
   const PRODUCTS = [
     { id: 1, name: 'Classic White', price: 2790000, color: 'oq', style: 'classic', hex: '#e8e4da', edge: '#cfc9bb', badge: 'best', tags: 'white oq classic pearl',
       desc: 'Nafis panelli och rangli klassik eshik.', long: 'Yumshoq oq tus va ko‘tarma panellar uyga tinch, yorug‘ muhit beradi.', material: 'MDF + emal qoplama', colorName: 'Oq', styleName: 'Classic', stock: true },
@@ -26,10 +26,12 @@
   ];
   const FILTERS = [['all', 'Barchasi'], ['new', 'Yangi'], ['sale', 'Chegirmali'], ['classic', 'Classic'], ['modern', 'Modern'], ['minimal', 'Minimal'], ['yogoch', 'Wood'], ['oq', 'White'], ['qora', 'Black']];
   const matches = (p, f) => f === 'all' || (f === 'new' ? p.badge === 'new' : f === 'sale' ? !!(p.discountPercent || p.old) : [p.color, p.style, ...p.tags.split(' ')].includes(f));
-  const NAV = [['index.html', 'Bosh sahifa', 'home'], ['doors.html', 'MDF Eshiklar', 'doors'], ['about.html', 'Biz haqimizda', 'about'], ['contact.html', 'Aloqa', 'contact']];
+  const NAV = [['index.html', 'Bosh sahifa', 'home'], ['index.html#process', 'Jarayon', 'process'], ['doors.html', 'MDF Eshiklar', 'doors'], ['index.html#config', 'Konstruktor', 'config'], ['about.html', 'Biz haqimizda', 'about'], ['contact.html', 'Aloqa', 'contact']];
   const DELIVERY = { fee: 100000, freeFrom: 5000000 }; // 5 mln dan yuqori buyurtmada yetkazib berish bepul
   // Katalog, yetkazib berish va sayt matnlari serverdan (admin paneldan) olinadi; server ishlamasa, yuqoridagi standart ma'lumot qoladi.
   const CONTENT = { hero: {}, promo: { enabled: false }, contacts: {}, faq: [] };
+  const HANDLES = { steel: ['Po‘lat', '#f6f6f6', '#9c9c9c', '#e4e4e4'], black: ['Mat qora', '#4a4a4a', '#121212', '#3a3a3a'], gold: ['Oltin', '#f3e2b0', '#b08a3c', '#e6cf93'] }; // dastak variantlari (konstruktor)
+  const sizeOf = p => ({ ...SIZE, ...((p && p.sizes) || {}) }); // modelning o‘lcham chegarasi (admin kiritmasa — umumiy)
   const SIZE = { wMin: 600, wMax: 1200, hMin: 1800, hMax: 2400 }; // konstruktor uchun o‘lcham chegaralari (mm)
   async function getJSON(url) {
     try { const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 3000); const r = await fetch(url, { cache: 'no-store', signal: ctl.signal }); clearTimeout(t); return await r.json(); } catch { return null; }
@@ -92,12 +94,40 @@
     'Mahsulot savatga qo‘shildi': 'Товар добавлен в корзину', 'Mahsulot savatdan olib tashlandi': 'Товар удалён из корзины', 'Sevimlilarga qo‘shildi': 'Добавлено в избранное', 'Mahsulot sevimlilardan olib tashlandi': 'Удалено из избранного',
     'Eng ko‘pi bilan 3 ta mahsulotni solishtirish mumkin': 'Можно сравнить не более 3 товаров', 'Sevimlilarga qo‘shish': 'В избранное', 'Sevimlilarda': 'В избранном',
     'Sahifa topilmadi': 'Страница не найдена', 'Siz izlagan sahifa mavjud emas yoki ko‘chirilgan.': 'Такой страницы нет или она перемещена.', 'Bosh sahifaga qaytish': 'Вернуться на главную',
-    'Mahsulot topilmadi.': 'Товар не найден.', 'Aksiya': 'Акция', 'Maxsus takliflar va chegirmalar': 'Специальные предложения и скидки', 'O‘xshash eshiklar': 'Похожие двери', 'Rasmni kattalashtirish': 'Увеличить фото', 'Dark rejimga o‘tish': 'Тёмная тема', 'Light rejimga o‘tish': 'Светлая тема',
+    'Mahsulot topilmadi.': 'Товар не найден.', 'Maxsus takliflar va chegirmalar': 'Специальные предложения и скидки', 'O‘xshash eshiklar': 'Похожие двери', 'Rasmni kattalashtirish': 'Увеличить фото', 'Dark rejimga o‘tish': 'Тёмная тема', 'Light rejimga o‘tish': 'Светлая тема',
     'Yuqoriga qaytish': 'Наверх', 'Telegram orqali bog‘lanish': 'Связаться через Telegram', 'Sahifa yuklanmadi. Internetni tekshirib, qayta urinib ko‘ring.': 'Страница не загрузилась. Проверьте интернет.',
     'Biz haqimizda ': 'О нас', 'YasinDoors — faqat MDF eshiklarga ixtisoslashgan kompaniya.': 'YasinDoors — компания, специализирующаяся только на MDF дверях.', 'Faqat MDF eshiklar': 'Только MDF двери',
     'Katalogni ko‘rish': 'Смотреть каталог', 'MDF sifati va dizayn': 'Качество MDF и дизайн', 'Ishlab chiqarish jarayoni': 'Процесс производства', 'Material va dizayn': 'Материал и дизайн',
     'Buyurtmani qanday beraman?': 'Как оформить заказ?'
   };
+  Object.assign(RU, {
+    'Kenglik': 'Ширина', 'Balandlik': 'Высота',
+    'O‘lchov': 'Замер', 'Material': 'Материал', 'Dizayn': 'Дизайн', 'Furnitura': 'Фурнитура', 'Sifat nazorati': 'Контроль качества', 'O‘rnatish': 'Установка',
+    'Hammasi aniq o‘lchovdan boshlanadi.': 'Всё начинается с точного замера.', 'Mutaxassis eshik oralig‘ini o‘lchaydi: kenglik, balandlik va devor qalinligi. Eshik joyiga aynan mos tayyorlanadi.': 'Специалист замеряет проём: ширину, высоту и толщину стены. Дверь изготавливается строго под ваш проём.',
+    'Kenglik × balandlik': 'Ширина × высота', 'Devor qalinligi': 'Толщина стены', 'Eshik oralig‘i': 'Дверной проём',
+    'Sifatli MDF plita tanlanadi.': 'Выбирается качественная MDF плита.', 'Zich va bir tekis MDF plita: namlik va harorat o‘zgarishiga barqaror, yuzasi silliq.': 'Плотная и ровная MDF плита: устойчива к влаге и перепадам температуры, поверхность гладкая.',
+    'MDF plita': 'MDF плита', 'Bir tekis zichlik': 'Ровная плотность', 'Silliq yuza': 'Гладкая поверхность',
+    'Model aniq kesib chiqiladi.': 'Модель точно вырезается.', 'Tanlangan modelga qarab panel va chiziqlar frezer stanokda aniq o‘yiladi.': 'Панели и линии выбранной модели точно фрезеруются на станке.',
+    'Rang va qoplama beriladi.': 'Наносятся цвет и покрытие.', 'Emal, mat PVX yoki yog‘och tekstura — interyeringizga mos rangni tanlaysiz.': 'Эмаль, матовый ПВХ или текстура дерева — вы выбираете цвет под интерьер.',
+    'Oq': 'Белый', 'Qora': 'Чёрный', 'Yog‘och': 'Дерево', 'Jigarrang': 'Коричневый',
+    'Dastak va petlalar o‘rnatiladi.': 'Устанавливаются ручка и петли.', 'Po‘lat, mat qora yoki oltin dastak; petlalar eshik og‘irligiga mos tanlanadi.': 'Ручка из стали, матовая чёрная или золотая; петли подбираются по весу двери.',
+    'Har bir eshik tekshiriladi.': 'Каждая дверь проверяется.', 'O‘lcham, yuza va furnitura yetkazib berishdan oldin nazoratdan o‘tadi.': 'Размер, поверхность и фурнитура проходят контроль перед доставкой.', 'O‘lcham': 'Размер', 'Yuza': 'Поверхность',
+    'Eshik joyiga o‘rnatiladi.': 'Дверь устанавливается на место.', 'Eshik oraliqqa qo‘yilib, tekislanadi va sozlanadi — yopiladi ham, ochiladi ham silliq.': 'Дверь ставится в проём, выравнивается и настраивается — закрывается и открывается плавно.',
+    'Tekislash': 'Выравнивание', 'Sozlash': 'Регулировка', 'Yakuniy tekshiruv': 'Финальная проверка',
+    'Ba’zi eshiklar shunchaki o‘rnatiladi va unutiladi. Bu eshik esa uyingizning birinchi taassuroti bo‘ladi — har kuni, har kirishda.': 'Некоторые двери просто устанавливают и забывают. А эта дверь становится первым впечатлением о вашем доме — каждый день, при каждом входе.',
+    'Rang va uslubni tanlang — har bir eshik alohida sahifa, tezkor ko‘rish va konstruktor bilan.': 'Выберите цвет и стиль — у каждой двери своя страница, быстрый просмотр и конструктор.',
+    'Eshik tanlash': 'Выбрать дверь', 'Kunduzi': 'День', 'Kechqurun': 'Вечер', 'Jarayon': 'Процесс', 'Konstruktor': 'Конструктор', 'MDF Eshiklar': 'MDF двери',
+    'Sizga yoqishi mumkin': 'Вам может понравиться', 'Zakazni tasdiqlash': 'Подтвердить заказ', 'Yetkazib berish': 'Доставка', 'Zakaz holatini tekshirish': 'Проверить статус заказа', 'Kenglik (mm)': 'Ширина (мм)', 'Balandlik (mm)': 'Высота (мм)', 'Eshiklar shu o‘lchamlarda tayyorlanadi': 'Двери изготавливаются в размерах',
+    'Nom, rang yoki uslub bo‘yicha qidiring…': 'Поиск по названию, цвету или стилю…',
+    'Filtrlarni tozalash': 'Сбросить фильтры', 'Katalogdagi narxlar': 'Цены в каталоге', '(narxlar almashtirildi)': '(значения поменяны местами)', 'Narx dan (so‘m)': 'Цена от (сум)', 'Narx gacha (so‘m)': 'Цена до (сум)',
+    'Eshik tanlashda': 'С выбором двери', 'yordam beramiz': 'поможем', 'Savol bering, o‘lcham yoki rang bo‘yicha maslahat oling — tez orada javob beramiz.': 'Задайте вопрос, получите совет по размеру или цвету — скоро ответим.',
+    'Qo‘ng‘iroq qilish': 'Позвонить', 'Telegramda yozish': 'Написать в Telegram', 'Xabar qoldirish': 'Оставить сообщение', 'Email (ixtiyoriy)': 'Email (необязательно)', 'Xabaringiz': 'Ваше сообщение', 'Telefon raqam': 'Номер телефона',
+    'Uyingizga': 'Придайте дому', 'yangi uslub': 'новый стиль', 'bering': '\u200b', 'Pastga': 'Вниз', 'Vitrina': 'Витрина', 'Premium kolleksiya': 'Премиум коллекция',
+    'Galereya': 'Галерея', 'Ranglar va dizaynlar': 'Цвета и дизайн', 'O‘z eshigingizni yarating': 'Создайте свою дверь', 'Qoplama': 'Покрытие', 'Dastak': 'Ручка',
+    'Po‘lat': 'Сталь', 'Mat qora': 'Матовый чёрный', 'Oltin': 'Золото', 'Taxminiy narx': 'Примерная цена', 'Fikrlar': 'Отзывы', 'Mijozlarimiz nima deydi': 'Что говорят клиенты', 'Tarix': 'История',
+    'Siz ko‘rgan eshiklar': 'Вы смотрели', 'Mashhur': 'Популярное', 'Chegirma': 'Скидка', 'Buyurtma holatini tekshirish': 'Проверить статус заказа', 'Zakaz raqami': 'Номер заказа', 'Tekshirish': 'Проверить',
+    'Sahifalar': 'Страницы', 'Zakaz': 'Заказ', 'Jami': 'Итого', 'Tezkor ko‘rish': 'Быстрый просмотр', 'Rang': 'Цвет', 'Uslub': 'Стиль', 'Natija:': 'Результат:', 'Tozalash': 'Сбросить'
+  });
   const t = k => (LANG === 'ru' && RU[k]) || k;
   function translateDom(rootEl) { // ruscha rejimda statik va dinamik matnlarni almashtiradi
     if (LANG !== 'ru') return;
@@ -154,19 +184,20 @@
 
   /* ---------- 4. Realistik eshik sahnasi (SVG: devor, pol, yorug‘lik, yog‘och teksturasi) ---------- */
   const scenes = {};
-  function doorImg(p) {
-    if (p.image) return p.image;
-    if (scenes[p.id]) return scenes[p.id];
+  function doorImg(p, v = '', hd = 'steel') { // v='detail' — yaqin plan (kartaning ikkinchi rasmi); hd — dastak turi
+    if (p.image && v !== 'detail') return p.image;
+    const key = `${p.id}|${v}|${hd}`; if (scenes[key]) return scenes[key];
+    const H = HANDLES[hd] || HANDLES.steel;
     const wood = p.color === 'yogoch' || p.color === 'jigarrang', hl = 'rgba(255,255,255,.3)', sh = 'rgba(0,0,0,.3)';
     const bevel = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${p.edge}" opacity=".3"/><path d="M${x} ${y + h}V${y}H${x + w}" fill="none" stroke="${hl}" stroke-width="2"/><path d="M${x + w} ${y}V${y + h}H${x}" fill="none" stroke="${sh}" stroke-width="2"/>`;
     const groove = x => `<path d="M${x} 70V366" stroke="${sh}" stroke-width="2"/><path d="M${x + 2} 70V366" stroke="${hl}" stroke-width="1.5"/>`;
     const detail = p.style === 'classic' ? bevel(134, 76, 60, 124) + bevel(206, 76, 60, 124) + bevel(134, 218, 60, 130) + bevel(206, 218, 60, 130)
       : (p.tags.includes('minimal') ? groove(200) : [150, 175, 200, 225, 250].map(groove).join(''));
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><defs>
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${v === 'detail' ? '150 140 140 175' : '0 0 400 500'}" preserveAspectRatio="xMidYMid slice"><defs>
 <linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ece6dc"/><stop offset="1" stop-color="#cfc6b6"/></linearGradient>
 <linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b5851"/><stop offset="1" stop-color="#2a2927"/></linearGradient>
 <linearGradient id="s" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient>
-<linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f6f6"/><stop offset=".5" stop-color="#9c9c9c"/><stop offset="1" stop-color="#e4e4e4"/></linearGradient>
+<linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${H[1]}"/><stop offset=".5" stop-color="${H[2]}"/><stop offset="1" stop-color="${H[3]}"/></linearGradient>
 <linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
 <filter id="g" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="${wood ? '.012 .3' : '.6'}" numOctaves="3" seed="${p.id}"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.1 -.42"/></filter>
 <filter id="b" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="6"/></filter></defs>
@@ -180,9 +211,11 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
 <path d="M116 56H196L150 380H116z" fill="url(#l)" opacity=".16"/>
 <rect x="236" y="213" width="40" height="7" rx="3.5" fill="url(#m)" stroke="#777" stroke-width=".6"/><circle cx="270" cy="216" r="11" fill="url(#m)" stroke="#777" stroke-width=".6"/>
 <ellipse cx="200" cy="384" rx="112" ry="6" fill="#000" opacity=".32" filter="url(#b)"/></svg>`;
-    return (scenes[p.id] = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg));
+    return (scenes[key] = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg));
   }
-  const img = (p, lazy = true) => `<img src="${doorImg(p)}" alt="${p.name} — ${p.colorName.toLowerCase()} ${p.styleName} MDF eshik" width="400" height="500"${lazy ? ' loading="lazy"' : ''} decoding="async">`;
+  const altImg = p => (p.gallery && p.gallery[0]) || doorImg(p, 'detail'); // ikkinchi rasm: galereya yoki yaqin plan
+  const lz = u => (/^data:/.test(u) ? '' : ' loading="lazy"'); // data: sahnalar ichki, lazy kerak emas
+  const img = (p, lazy = true) => `<img src="${doorImg(p)}" alt="${p.name} — ${p.colorName.toLowerCase()} ${p.styleName} MDF eshik" width="400" height="500"${lazy ? lz(doorImg(p)) : ''} decoding="async">`;
 
   /* ---------- 5. Umumiy qismlar: header, tabbar, footer, CTA, toast, modal ---------- */
   const counter = (k, cls = 'badge') => `<span class="${cls}" data-count="${k}">0</span>`;
@@ -203,13 +236,14 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     $$('[data-content]').forEach(el => { const [g, k] = el.dataset.content.split('.'), v = CONTENT[g] && CONTENT[g][k]; if (v) el.textContent = v; });
   }
   function renderLayout() {
-    const links = NAV.map(([h, t, k]) => `<li><a href="${h}"${page === k ? ' class="active" aria-current="page"' : ''}>${t}</a></li>`).join('');
+    const links = NAV.map(([h, t, k]) => `<li><a href="${h}" data-k="${k}"${page === k ? ' class="active" aria-current="page"' : ''}>${t}</a></li>`).join('');
     $('#site-header').innerHTML = `<div class="container header__in">
       <a href="index.html" class="logo" aria-label="YasinDoors — bosh sahifa">${ICON.door}<span class="logo__t"><b>YASIN</b><i>DOORS</i></span></a>
       <nav class="nav" id="nav" aria-label="Asosiy menyu"><ul>${links}
         <li class="only-m"><a href="favorites.html">${ICON.heart}Sevimlilar ${counter('fav', 'count')}</a></li>
         <li class="only-m"><a href="cart.html">${ICON.bag}Savat ${counter('cart', 'count')}</a></li></ul></nav>
       <div class="actions">
+        <a href="doors.html" class="btn btn--p btn--sm hdr-cta">Eshik tanlash</a>
         <a href="doors.html?focus=search" class="ibtn" data-act="search" aria-label="MDF eshik qidirish">${ICON.search}</a>
         <a href="favorites.html" class="ibtn hm" aria-label="Sevimlilar">${ICON.heart}${counter('fav')}</a>
         <a href="cart.html" class="ibtn hm" aria-label="Savat">${ICON.bag}${counter('cart')}</a>
@@ -218,12 +252,19 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
         <button class="ibtn burger" id="burger" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>
       </div></div>`;
     const foot = [['index.html', 'Bosh sahifa'], ...NAV.slice(1).map(([h, t]) => [h, t]), ['cart.html', 'Savat'], ['favorites.html', 'Sevimlilar']].map(([h, t]) => `<li><a href="${h}">${t}</a></li>`).join('');
+    const fc = CONTENT.contacts || {}, crow = [fc.phone && `<li><a href="${esc(telHref(fc.phone))}">${esc(fc.phone)}</a></li>`, fc.email && `<li><a href="mailto:${esc(fc.email)}">${esc(fc.email)}</a></li>`, fc.address && `<li><span>${esc(fc.address)}</span></li>`, fc.hours && `<li><span>${esc(fc.hours)}</span></li>`, fc.telegram && `<li><a href="${esc(fc.telegram)}" target="_blank" rel="noopener">Telegram</a></li>`].filter(Boolean).join('');
     $('#site-footer').innerHTML = `<div class="container"><div class="footer__in">
       <div><a href="index.html" class="logo" aria-label="YasinDoors — bosh sahifa">${ICON.door}<span class="logo__t"><b>YASIN</b><i>DOORS</i></span></a><p>Zamonaviy MDF eshiklar</p>
         ${socials()}</div>
-      <nav aria-label="Footer menyusi"><ul>${foot}</ul></nav></div><small>© 2026 YasinDoors</small></div>`;
+      <nav aria-label="Footer menyusi"><h4>Sahifalar</h4><ul>${foot}</ul></nav>
+      <div class="footer__c"><h4>Aloqa</h4><ul>${crow}<li><a href="contact.html#statusSec">Buyurtma holatini tekshirish</a></li></ul></div></div>
+      <div class="footer__word" aria-hidden="true">YASINDOORS</div><small>© 2026 YasinDoors</small></div>`;
     const cta = $('#site-cta');
-    if (cta) cta.innerHTML = `<div class="container reveal"><h2>Uyingiz uchun ideal MDF eshikni tanlang</h2><p>YasinDoors bilan makoningizga zamonaviy ko‘rinish bering.</p><a href="contact.html" class="btn btn--p">Biz bilan bog‘lanish ${ICON.arrow}</a></div>`;
+    if (cta) { // aloqa tugmalari: telefon va Telegram faqat admin kiritgan bo‘lsa chiqadi; xabar qoldirish doim bor
+      const cc = CONTENT.contacts || {};
+      cta.innerHTML = `<div class="container reveal"><h2>Uyingiz uchun ideal MDF eshikni tanlang</h2><p>YasinDoors bilan makoningizga zamonaviy ko‘rinish bering.</p>
+        <div class="cta__acts">${cc.phone ? `<a href="${esc(telHref(cc.phone))}" class="btn btn--p">${ICON.phone}Qo‘ng‘iroq qilish</a>` : ''}${cc.telegram ? `<a href="${esc(cc.telegram)}" class="btn btn--o" target="_blank" rel="noopener">${ICON.tg}Telegramda yozish</a>` : ''}<a href="contact.html#contactForm" class="btn ${cc.phone || cc.telegram ? 'btn--o' : 'btn--p'}">Xabar qoldirish ${ICON.arrow}</a></div></div>`;
+    }
     const tab = (h, ic, t, k, c) => `<a href="${h}"${page === k ? ' class="active" aria-current="page"' : ''}>${ICON[ic]}<span>${t}</span>${c ? counter(c) : ''}</a>`;
     document.body.insertAdjacentHTML('beforeend', `<nav class="tabbar" aria-label="Tezkor menyu">${tab('index.html', 'home', 'Asosiy', 'home')}${tab('doors.html', 'grid', 'Katalog', 'doors')}${tab('favorites.html', 'heart', 'Sevimli', 'favorites', 'fav')}${tab('cart.html', 'bag', 'Savat', 'cart', 'cart')}</nav>
       <div class="cmpbar" id="cmpBar" hidden></div>
@@ -246,7 +287,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   const toggleTheme = () => {
     const next = () => applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true), b = $('#themeBtn');
     if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches && b) { // doira bo‘lib ochiladigan o‘tish
-      const r = b.getBoundingClientRect(); root.style.setProperty('--thx', r.left + r.width / 2 + 'px'); root.style.setProperty('--thy', r.top + r.height / 2 + 'px'); document.startViewTransition(next);
+      const r = b.getBoundingClientRect(); root.style.setProperty('--thx', r.left + r.width / 2 + 'px'); root.style.setProperty('--thy', r.top + r.height / 2 + 'px'); root.classList.add('theming'); document.startViewTransition(next).finished.finally(() => root.classList.remove('theming'));
     } else next();
   };
   function toast(msg) {
@@ -289,7 +330,16 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       ${row('', p => `<button class="btn btn--p btn--sm" data-act="cart" data-id="${p.id}">${ICON.bag}Savatga</button>`)}</tbody></table></div></div>`;
     openBox();
   }
-  function addCart(id, n = 1) { cart[id] = (cart[id] || 0) + n; commit(); toast('Mahsulot savatga qo‘shildi'); }
+  let flyFrom = null; // savatga qo‘shilganda: rasm shu joydan savat ikonkasiga uchadi
+  function fly() {
+    const f = flyFrom; flyFrom = null; if (!f || matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    const to = [...$$('.ibtn[href="cart.html"], .tabbar a[href="cart.html"]')].find(e => e.offsetParent), r = f.rect; if (!to || !r.width) return;
+    const t2 = to.getBoundingClientRect(), g = document.createElement('img'); g.src = f.src; g.alt = ''; g.className = 'flyimg';
+    g.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`; document.body.appendChild(g);
+    const dx = t2.left + t2.width / 2 - (r.left + r.width / 2), dy = t2.top + t2.height / 2 - (r.top + r.height / 2);
+    g.animate([{ transform: 'none', opacity: .95 }, { transform: `translate(${dx}px,${dy}px) scale(.08)`, opacity: .2 }], { duration: 650, easing: 'cubic-bezier(.5,0,.2,1)' }).onfinish = () => { g.remove(); $$('[data-count="cart"]').forEach(b => { b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }); };
+  }
+  function addCart(id, n = 1) { cart[id] = (cart[id] || 0) + n; commit(); toast('Mahsulot savatga qo‘shildi'); fly(); }
   function setQty(id, d) { cart[id] = (cart[id] || 0) + d; if (cart[id] <= 0) delete cart[id]; commit(); }
   function removeCart(id) { delete cart[id]; commit(); toast('Mahsulot savatdan olib tashlandi'); }
   function toggleFav(id) {
@@ -306,24 +356,70 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   const priceHtml = p => `${money(p.price)}${p.old ? `<s>${money(p.old)}</s>` : ''}${p.discountPercent ? `<span class="disc">−${p.discountPercent}%</span>` : ''}`;
   const card = p => {
     const fav = favs.includes(p.id), inCmp = cmp.includes(p.id), bd = p.badge || (p.discountPercent ? 'sale' : '');
-    return `<article class="card reveal in"><div class="card__img">${img(p)}${bd ? `<span class="pbadge pbadge--${bd}">${bd === 'sale' && p.discountPercent ? 'Aksiya' : BADGES[bd]}</span>` : ''}
+    return `<article class="card reveal in"><div class="card__img">${img(p)}<img class="card__alt" src="${altImg(p)}" alt="" width="400" height="500"${lz(altImg(p))} decoding="async" aria-hidden="true">${bd ? `<span class="pbadge pbadge--${bd}">${BADGES[bd]}</span>` : ''}
       <button class="fav" data-act="fav" data-id="${p.id}" aria-pressed="${fav}" aria-label="${fav ? 'Sevimlilardan olib tashlash' : 'Sevimlilarga qo‘shish'}: ${p.name}">${ICON.heart}</button>
       <button class="fav cmpb" data-act="cmp" data-id="${p.id}" aria-pressed="${inCmp}" aria-label="${inCmp ? 'Solishtirishdan olib tashlash' : 'Solishtirishga qo‘shish'}: ${p.name}">${ICON.compare}</button>
       <div class="card__ov"><button class="btn btn--glass btn--sm" data-act="details" data-id="${p.id}" aria-label="Tezkor ko‘rish: ${p.name}">${ICON.eye}Tezkor ko‘rish</button></div></div>
-      <div class="card__body"><span class="tag">${p.styleName} · ${p.colorName}</span><h3><a href="product.html?id=${p.id}">${p.name}</a></h3><p>${p.desc}</p>
+      <div class="card__body"><span class="tag"><i class="dot" style="background:${esc(p.hex)}"></i>${p.styleName} · ${p.colorName}</span><h3><a href="product.html?id=${p.id}">${p.name}</a></h3><p>${p.desc}</p>
         <div class="price">${priceHtml(p)}</div>
         <div class="card__act"><button class="btn btn--p btn--sm" data-act="cart" data-id="${p.id}" aria-label="Savatga qo‘shish: ${p.name}">${ICON.bag}Savatga</button>
         <button class="btn btn--o btn--sm touch" data-act="details" data-id="${p.id}" aria-label="Batafsil: ${p.name}">Batafsil</button></div></div></article>`;
   };
+  /* --- aqlli qidiruv: rang, uslub, nom, material, narx; o‘zbekcha/ruscha/inglizcha so‘zlar, apostrof va 1 harfli xatolarga chidamli --- */
+  const norm = v => String(v ?? '').toLowerCase().replace(/ё/g, 'е').replace(/[ʻʼ'`‘’´‛]/g, '').replace(/[^a-z0-9а-я\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  const SYN = {}; // sinonimlar: biridan boshqasi topiladi (masalan: qora = black = чёрный)
+  [['qora', 'black', 'черный'], ['oq', 'white', 'белый', 'ok'], ['jigarrang', 'brown', 'коричневый'], ['yongoq', 'walnut', 'орех'], ['yogoch', 'wood', 'дерево', 'oak', 'eman', 'дуб', 'daraxt'],
+   ['kulrang', 'gray', 'grey', 'серый'], ['klassik', 'classic', 'классика', 'классический'], ['zamonaviy', 'modern', 'современный'], ['minimal', 'minimalist', 'минимализм']]
+    .forEach(g => { const n = g.map(norm); n.forEach(w => { SYN[w] = n; }); });
+  const wordCache = new Map();
+  const wordsOf = p => { const k = p.id; if (!wordCache.has(k)) wordCache.set(k, norm(`${p.name} ${p.desc} ${p.long || ''} ${p.tags} ${p.colorName} ${p.styleName} ${p.material} ${p.price}`).split(' ')); return wordCache.get(k); };
+  const lev1 = (a, b) => { // tahrir masofasi ≤ 1 (almashtirish, tushib qolgan yoki ortiqcha harf)
+    if (a === b) return true; const d = a.length - b.length; if (d > 1 || d < -1) return false;
+    let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    if (d === 0) return a.slice(i + 1) === b.slice(i + 1); return d > 0 ? a.slice(i + 1) === b.slice(i) : a.slice(i) === b.slice(i + 1);
+  };
+  const near = (a, w) => a.length >= 5 && w.length >= 4 && [a.length - 1, a.length, a.length + 1].some(n => lev1(a, w.slice(0, n))); // 5+ harfli so‘zlarda 1 ta xatoga chidamli
+  const searchHit = (p, q) => { // barcha so‘zlar (VA) mos kelishi kerak: "qora modern" → qora VA modern
+    const toks = norm(q).split(' ').filter(Boolean); if (!toks.length) return true; const ws = wordsOf(p);
+    return toks.every(tk => (SYN[tk] || [tk]).some(a => ws.some(w => w.startsWith(a) || near(a, w) || (/^\d{3,}$/.test(a) && w.includes(a)))));
+  };
+  /* --- ko‘rilgan mahsulotlar tarixi (faqat shu qurilmada) --- */
+  const pushViewed = id => { const l = [id, ...store.get('viewed', []).filter(x => x !== id)].slice(0, 8); store.set('viewed', l); };
+  function renderViewed(skip) {
+    const sec = $('#viewedSec'), box = $('#viewedGrid'); if (!sec || !box) return;
+    const l = store.get('viewed', []).map(find).filter(p => p && p.id !== skip).slice(0, 4);
+    sec.hidden = !l.length; fit(box, l.length); box.innerHTML = l.map(card).join(''); translateDom(sec);
+  }
+  function renderRec() { // savat sahifasida: savatdagi eshiklarga o‘xshash va mashhur modellar
+    const sec = $('#recSec'), box = $('#recGrid'); if (!sec || !box) return;
+    const inCart = Object.keys(cart).map(find).filter(Boolean), pop = p => (p.badge === 'best' ? 2 : p.badge === 'premium' ? 1 : 0);
+    const score = p => pop(p) + inCart.reduce((a, c) => a + (c.style === p.style ? 1 : 0) + (c.color === p.color ? 1 : 0), 0) / Math.max(inCart.length, 1);
+    const l = PRODUCTS.filter(p => !cart[p.id]).sort((a, b) => score(b) - score(a)).slice(0, 3);
+    sec.hidden = !l.length; fit(box, l.length); box.innerHTML = l.map(card).join(''); translateDom(sec);
+  }
+  const fit = (el, n) => el.style.setProperty('--n', Math.min(Math.max(n, 3), 4)); // 3–4 teng ustun: kam kartada bo‘sh joy qolmasin
   const emptyBox = (ic, title, text) => `<div class="empty">${ICON[ic]}<h3>${title}</h3><p>${text}</p><a class="btn btn--p" href="doors.html">Katalogga o‘tish</a></div>`;
-  const view = { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '' };
+  const view = { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '', w: null, h: null };
   const sorts = { asc: (a, b) => a.price - b.price, desc: (a, b) => b.price - a.price, az: (a, b) => a.name.localeCompare(b.name), za: (a, b) => b.name.localeCompare(a.name) };
+  /* narx oralig‘i: mijoz "dan" va "gacha" summani o‘zi kiritadi; dan > gacha bo‘lsa, qiymatlar almashtiriladi */
+  const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const range = () => (view.min !== null && view.max !== null && view.min > view.max) ? [view.max, view.min, true] : [view.min, view.max, false];
+  const fitsSize = p => { const z = sizeOf(p); return (view.w === null || (view.w >= z.wMin && view.w <= z.wMax)) && (view.h === null || (view.h >= z.hMin && view.h <= z.hMax)); };
+  const inRange = p => { const [lo, hi] = range(); return (lo === null || p.price >= lo) && (hi === null || p.price <= hi); };
+  function priceHint(n) {
+    const [lo, hi, swapped] = range(), el = $('#priceHint'); if (!el) return;
+    const sz = view.w !== null || view.h !== null ? `${view.w !== null ? view.w : '…'} × ${view.h !== null ? view.h : '…'} mm` : '';
+    const txt = sz && lo === null && hi === null ? `${sz} o‘lchamga mos: ${n} ta eshik` : lo === null && hi === null ? '' : lo !== null && hi !== null ? `${fmt(lo)} – ${fmt(hi)} so‘m oralig‘ida: ${n} ta eshik` : lo !== null ? `${fmt(lo)} so‘mdan yuqori: ${n} ta eshik` : `${fmt(hi)} so‘mgacha: ${n} ta eshik`;
+    el.textContent = t(txt) + (swapped && txt ? ' ' + t('(narxlar almashtirildi)') : '') + (sz && (lo !== null || hi !== null) ? ` · ${sz}` : '');
+  }
   function renderDoors() {
-    const q = view.q.trim().toLowerCase();
-    let list = PRODUCTS.filter(p => matches(p, view.f) && (!view.color || p.color === view.color) && (!view.style || p.style === view.style) && (view.min === null || p.price >= view.min) && (view.max === null || p.price <= view.max) &&
-      (!q || `${p.name} ${p.desc} ${p.tags} ${p.colorName} ${p.styleName} ${p.material}`.toLowerCase().includes(q)));
+    const q = view.q.trim();
+    let list = PRODUCTS.filter(p => matches(p, view.f) && (!view.color || p.color === view.color) && (!view.style || p.style === view.style) && inRange(p) && fitsSize(p) &&
+      (!q || searchHit(p, q)));
     if (sorts[view.sort]) list = [...list].sort(sorts[view.sort]);
-    $('#doorsGrid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3><p>Boshqa so‘z yoki filtrni sinab ko‘ring.</p></div>`;
+    const prices = PRODUCTS.map(p => p.price), pr = prices.length ? `${fmt(Math.min(...prices))} – ${fmt(Math.max(...prices))} so‘m` : '';
+    $('#doorsGrid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3><p>${(view.w !== null || view.h !== null) ? `${t('Eshiklar shu o‘lchamlarda tayyorlanadi')}: ${SIZE.wMin}–${SIZE.wMax} × ${SIZE.hMin}–${SIZE.hMax} mm` : range().some(v => v !== null) && pr ? `${t('Katalogdagi narxlar')}: ${pr}` : 'Boshqa so‘z yoki filtrni sinab ko‘ring.'}</p><button class="btn btn--o" type="button" data-act="freset">Filtrlarni tozalash</button></div>`;
+    priceHint(list.length);
     $('#resCount').textContent = `${list.length} / ${PRODUCTS.length}`;
   }
   function renderCart() {
@@ -345,39 +441,49 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     const tabs = HOME_TABS.filter(([k, , f]) => k === 'all' || PRODUCTS.some(f));
     if (!homeTab || !tabs.some(x => x[0] === homeTab)) homeTab = tabs[0][0];
     $('#homeTabs').innerHTML = tabs.map(([k, n]) => `<button class="chip" data-act="htab" data-k="${k}" aria-pressed="${k === homeTab}">${n}</button>`).join('');
-    const f = HOME_TABS.find(x => x[0] === homeTab)[2], list = PRODUCTS.filter(f).slice(0, 6);
+    const ct = $('#colTitle'); if (ct && PRODUCTS.length) { const nc = new Set(PRODUCTS.map(p => p.color)).size; ct.innerHTML = LANG === 'ru' ? `${PRODUCTS.length} дверей. <em>${nc} цветов.</em>` : `${PRODUCTS.length} ta eshik. <em>${nc} ta rang.</em>`; }
+    const f = HOME_TABS.find(x => x[0] === homeTab)[2], list = PRODUCTS.filter(f).slice(0, 5);
+    fit($('#featured'), list.length);
+    $('#featured').classList.toggle('grid--show', list.length >= 5); // asimmetrik vitrina faqat 5 ta mahsulot bo‘lganda
     $('#featured').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3></div>`;
     const sale = PRODUCTS.filter(p => p.discountPercent || p.old).slice(0, 3); // maxsus takliflar: faqat haqiqiy chegirmalar
     let off = $('#offers');
     if (sale.length && !off) { $('#collection').insertAdjacentHTML('afterend', '<section class="section" id="offers"><div class="container"><div class="head reveal in"><p class="eyebrow">Aksiya</p><h2>Maxsus takliflar va chegirmalar</h2></div><div class="grid" id="offersGrid"></div></div></section>'); off = $('#offers'); }
-    if (off) { off.hidden = !sale.length; $('#offersGrid').innerHTML = sale.map(card).join(''); }
+    if (off) { off.hidden = !sale.length; fit($('#offersGrid'), sale.length); $('#offersGrid').innerHTML = sale.map(card).join(''); }
     const cols = [...new Map(PRODUCTS.map(p => [p.color, p])).values()];
     $('#colorsSec').hidden = !cols.length;
-    $('#swatches').innerHTML = cols.map(p => `<a class="sw" href="doors.html?f=${encodeURIComponent(p.color)}"><i style="background:${esc(p.hex)}"></i>${esc(p.colorName)}</a>`).join('');
+    $('#swatches').innerHTML = cols.map(p => `<a class="sw" href="doors.html?f=${encodeURIComponent(p.color)}"><img src="${doorImg(p)}" alt="${esc(p.colorName)} rangdagi MDF eshik" width="400" height="500"${lz(doorImg(p))} decoding="async"><span><i style="background:${esc(p.hex)}"></i>${esc(p.colorName)}</span></a>`).join('');
+    const rev = (CONTENT.reviews || []).filter(x => x.name && x.text); // faqat admin kiritgan haqiqiy fikrlar
+    $('#reviewsSec').hidden = !rev.length;
+    $('#reviewsList').innerHTML = rev.map(x => `<figure class="rev reveal in"><blockquote>${esc(x.text)}</blockquote><figcaption>${esc(x.name)}</figcaption></figure>`).join('');
     const faq = (CONTENT.faq || []).filter(x => x.q && x.a);
     $('#faqSec').hidden = !faq.length;
     $('#faqList').innerHTML = faq.map(x => `<details><summary>${esc(x.q)}</summary><p>${esc(x.a)}</p></details>`).join('');
   }
   /* --- konstruktor: uslub -> rang -> model + o‘lcham; tanlov buyurtma izohiga yoziladi --- */
-  const cfg = { style: '', color: '', id: 0, w: '', h: '' };
-  function cfgPool() { return PRODUCTS.filter(p => (!cfg.style || p.style === cfg.style) && (!cfg.color || p.color === cfg.color)); }
+  const cfg = { style: '', color: '', coat: '', handle: 'steel', id: 0, w: '', h: '' };
+  function cfgPool() { return PRODUCTS.filter(p => (!cfg.style || p.style === cfg.style) && (!cfg.color || p.color === cfg.color) && (!cfg.coat || p.material === cfg.coat)); }
   function renderConfig() {
     const box = $('#cfgRoot'); if (!box) return;
     $('#config').hidden = !PRODUCTS.length;
     const styles = [...new Map(PRODUCTS.map(p => [p.style, p.styleName])).entries()], colors = [...new Map(PRODUCTS.map(p => [p.color, p])).values()];
+    const coats = [...new Set(PRODUCTS.map(p => p.material).filter(Boolean))];
     const pool = cfgPool(); if (!pool.some(p => p.id === cfg.id)) cfg.id = pool[0] ? pool[0].id : 0;
-    const sel = find(cfg.id), wOk = +cfg.w >= SIZE.wMin && +cfg.w <= SIZE.wMax, hOk = +cfg.h >= SIZE.hMin && +cfg.h <= SIZE.hMax, sizeOk = wOk && hOk;
+    const sel = find(cfg.id), SZ = sizeOf(sel), wOk = +cfg.w >= SZ.wMin && +cfg.w <= SZ.wMax, hOk = +cfg.h >= SZ.hMin && +cfg.h <= SZ.hMax, sizeOk = wOk && hOk;
     const opt = (act, key, val, label, extra = '') => `<button class="opt" type="button" data-act="${act}" data-k="${esc(val)}" aria-pressed="${cfg[key] === val}">${extra}${esc(label)}</button>`;
-    box.innerHTML = `<div class="cfg__vis">${sel ? img(sel, false) : ''}</div><div class="cfg__f">
+    const area = +cfg.w * +cfg.h, est = sel && sizeOk ? Math.round(sel.price * Math.min(1.8, Math.max(.6, area / (800 * 2000))) / 10000) * 10000 : 0;
+    box.innerHTML = `<div class="cfg__vis">${sel ? `<img src="${doorImg(sel, '', cfg.handle)}" alt="${esc(sel.name)} — ${esc(HANDLES[cfg.handle][0])} dastak bilan" width="400" height="500">` : ''}</div><div class="cfg__f">
       <div><h3>Uslub</h3><div class="opts">${opt('cfs', 'style', '', 'Barchasi')}${styles.map(([k, n]) => opt('cfs', 'style', k, n)).join('')}</div></div>
       <div><h3>Rang</h3><div class="opts">${opt('cfc', 'color', '', 'Barchasi')}${colors.map(p => opt('cfc', 'color', p.color, p.colorName, `<i style="background:${esc(p.hex)}"></i>`)).join('')}</div></div>
+      <div><h3>Qoplama</h3><div class="opts">${opt('cfk', 'coat', '', 'Barchasi')}${coats.map(m => opt('cfk', 'coat', m, m)).join('')}</div></div>
+      <div><h3>Dastak</h3><div class="opts">${Object.entries(HANDLES).map(([k, h]) => `<button class="opt" type="button" data-act="cfh" data-k="${k}" aria-pressed="${cfg.handle === k}"><i style="background:linear-gradient(135deg,${h[1]},${h[2]})"></i>${h[0]}</button>`).join('')}</div></div>
       <div><h3>Model</h3><div class="opts">${pool.length ? pool.map(p => `<button class="opt" type="button" data-act="cfm" data-id="${p.id}" aria-pressed="${p.id === cfg.id}">${esc(p.name)}</button>`).join('') : '<p>Bu bo‘limda mos modellar yo‘q.</p>'}</div></div>
-      <div><h3>O‘lcham (mm)</h3><div class="dims"><label>Kenglik (mm)<input class="field" id="cfW" type="number" inputmode="numeric" min="${SIZE.wMin}" max="${SIZE.wMax}" value="${esc(cfg.w)}" placeholder="${SIZE.wMin}–${SIZE.wMax}"></label>
-        <label>Balandlik (mm)<input class="field" id="cfH" type="number" inputmode="numeric" min="${SIZE.hMin}" max="${SIZE.hMax}" value="${esc(cfg.h)}" placeholder="${SIZE.hMin}–${SIZE.hMax}"></label></div>
-        <div class="err" id="cfErr">${(cfg.w || cfg.h) && !sizeOk ? 'Kenglik 600–1200 mm, balandlik 1800–2400 mm oralig‘ida bo‘lsin.' : ''}</div></div>
-      ${sel ? `<div class="cfg__sum"><h3>Tanlovingiz</h3><dl><dt>Model</dt><dd>${esc(sel.name)}</dd></dl><dl><dt>Uslub</dt><dd>${esc(sel.styleName)}</dd></dl><dl><dt>Rang</dt><dd>${esc(sel.colorName)}</dd></dl>
-        <dl><dt>O‘lcham (mm)</dt><dd>${sizeOk ? `${+cfg.w} × ${+cfg.h}` : '—'}</dd></dl><dl><dt>Model narxi</dt><dd>${money(sel.price)}</dd></dl>
-        <p class="note">Narx modelga bog‘liq. O‘lchamga qarab yakuniy narxni operator tasdiqlaydi.</p>
+      <div><h3>O‘lcham (mm)</h3><div class="dims"><label>Kenglik (mm)<input class="field" id="cfW" type="number" inputmode="numeric" min="${SZ.wMin}" max="${SZ.wMax}" value="${esc(cfg.w)}" placeholder="${SZ.wMin}–${SZ.wMax}"></label>
+        <label>Balandlik (mm)<input class="field" id="cfH" type="number" inputmode="numeric" min="${SZ.hMin}" max="${SZ.hMax}" value="${esc(cfg.h)}" placeholder="${SZ.hMin}–${SZ.hMax}"></label></div>
+        <div class="err" id="cfErr">${(cfg.w || cfg.h) && !sizeOk ? t(`Kenglik ${SZ.wMin}–${SZ.wMax} mm, balandlik ${SZ.hMin}–${SZ.hMax} mm oralig‘ida bo‘lsin.`) : ''}</div></div>
+      ${sel ? `<div class="cfg__sum"><h3>Tanlovingiz</h3><dl><dt>Model</dt><dd>${esc(sel.name)}</dd></dl><dl><dt>Uslub</dt><dd>${esc(sel.styleName)}</dd></dl><dl><dt>Rang</dt><dd>${esc(sel.colorName)}</dd></dl><dl><dt>Qoplama</dt><dd>${esc(sel.material)}</dd></dl><dl><dt>Dastak</dt><dd>${HANDLES[cfg.handle][0]}</dd></dl>
+        <dl><dt>O‘lcham (mm)</dt><dd>${sizeOk ? `${+cfg.w} × ${+cfg.h}` : '—'}</dd></dl><dl><dt>Model narxi</dt><dd>${money(sel.price)}</dd></dl>${est ? `<dl class="est"><dt>Taxminiy narx</dt><dd>≈ ${money(est)}</dd></dl>` : ''}
+        <p class="note">Taxminiy narx standart 800 × 2000 mm o‘lchamga nisbatan hisoblanadi. Yakuniy narxni operator tasdiqlaydi.</p>
         <button class="btn btn--p" type="button" data-act="cfadd"${sizeOk ? '' : ' disabled'}>${ICON.bag}Buyurtmaga qo‘shish</button></div>` : ''}</div>`;
     translateDom(box);
   }
@@ -388,6 +494,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   function renderPdp() {
     const rootEl = $('#pdpRoot'), p = find(new URLSearchParams(location.search).get('id'));
     if (!p) { rootEl.innerHTML = emptyBox('search', 'Mahsulot topilmadi.', 'Katalogdan boshqa MDF eshikni tanlang.'); document.title = 'Mahsulot topilmadi — YasinDoors'; return; }
+    pushViewed(p.id);
     const ims = images(p); if (pdpImg >= ims.length) pdpImg = 0;
     const fav = favs.includes(p.id), inCmp = cmp.includes(p.id), sim = PRODUCTS.filter(x => x.id !== p.id && (x.style === p.style || x.color === p.color)).slice(0, 3);
     document.title = `${p.name} — MDF eshik — YasinDoors`;
@@ -399,7 +506,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       <div class="pdp"><div class="gal"><button class="gal__main" data-act="lb" aria-label="Rasmni kattalashtirish"><img src="${esc(ims[pdpImg])}" alt="${esc(p.name)} — ${esc(p.colorName.toLowerCase())} ${esc(p.styleName)} MDF eshik" width="400" height="500"><span class="gal__zoom">${ICON.zoom}</span></button>
         ${ims.length > 1 ? `<div class="thumbs">${ims.map((u, i) => `<button type="button" data-act="thumb" data-id="${i}" aria-pressed="${i === pdpImg}" aria-label="Rasm ${i + 1}"><img src="${esc(u)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}</div>
         <div class="pinfo"><p class="eyebrow">${esc(p.styleName)} · ${esc(p.colorName)}</p><h1>${esc(p.name)}</h1><div class="price">${priceHtml(p)}</div><p>${esc(p.long)}</p>
-          <ul class="spec"><li><span>Material</span>${esc(p.material)}</li><li><span>Rang</span>${esc(p.colorName)}</li><li><span>Uslub</span>${esc(p.styleName)}</li><li><span>O‘lcham (mm)</span>${SIZE.wMin}–${SIZE.wMax} × ${SIZE.hMin}–${SIZE.hMax}</li><li><span>Mavjudligi</span>${p.stock ? 'Mavjud' : 'Buyurtma asosida'}</li></ul>
+          <ul class="spec"><li><span>Material</span>${esc(p.material)}</li><li><span>Rang</span>${esc(p.colorName)}</li><li><span>Uslub</span>${esc(p.styleName)}</li><li><span>O‘lcham (mm)</span>${sizeOf(p).wMin}–${sizeOf(p).wMax} × ${sizeOf(p).hMin}–${sizeOf(p).hMax}</li><li><span>Mavjudligi</span>${p.stock ? 'Mavjud' : 'Buyurtma asosida'}</li></ul>
           <div class="pbuy"><button class="btn btn--p" data-act="cart" data-id="${p.id}">${ICON.bag}Savatga qo‘shish</button><button class="btn btn--o" data-act="fav" data-id="${p.id}" aria-pressed="${fav}">${ICON.heart}${fav ? 'Sevimlilarda' : 'Sevimlilarga qo‘shish'}</button>
           <button class="btn btn--o" data-act="cmp" data-id="${p.id}" aria-pressed="${inCmp}">${ICON.compare}${inCmp ? 'Solishtirishda' : 'Solishtirish'}</button></div></div></div>
       ${sim.length ? `<div class="related"><div class="head"><h2>O‘xshash eshiklar</h2></div><div class="grid">${sim.map(card).join('')}</div></div>` : ''}`;
@@ -412,14 +519,16 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   }
   function renderPage() {
     try { renderPageInner(); } catch (e) { console.error(e); }
+    $$('[aria-busy]').forEach(el => el.removeAttribute('aria-busy'));
     translateDom(document.querySelector('main'));
   }
   function renderPageInner() {
     if (page === 'home' && $('#homeTabs')) { renderHome(); renderConfig(); }
+    if (page === 'home' || page === 'doors' || page === 'product') renderViewed(page === 'product' ? +new URLSearchParams(location.search).get('id') : 0);
     if (page === 'doors') renderDoors();
     if (page === 'product') renderPdp();
     if (page === 'favorites') { const l = PRODUCTS.filter(p => favs.includes(p.id)); $('#favGrid').innerHTML = l.length ? l.map(card).join('') : emptyBox('heart', 'Sevimli mahsulotlar hozircha yo‘q', 'O‘zingizga yoqqan eshiklarni saqlab qo‘ying.'); }
-    if (page === 'cart') renderCart();
+    if (page === 'cart') { renderCart(); renderRec(); }
   }
 
   /* ---------- 9. Modal: tezkor ko‘rish ---------- */
@@ -439,7 +548,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       <a class="btn btn--o" href="product.html?id=${p.id}">To‘liq sahifa ${ICON.arrow}</a></div>`;
   }
   const openBox = () => { translateDom($('#modalBox')); $('#modal').classList.add('open'); document.body.classList.add('lock'); };
-  function openModal(id) { lastFocus = document.activeElement; modalId = +id; modalQty = 1; syncModal(); translateDom($('#modalBox')); openBox(); $('.modal__x').focus(); }
+  function openModal(id) { lastFocus = document.activeElement; modalId = +id; pushViewed(+id); modalQty = 1; syncModal(); translateDom($('#modalBox')); openBox(); $('.modal__x').focus(); }
   function closeModal() {
     if (!$('#modal').classList.contains('open')) return;
     modalId = null; $('#modal').classList.remove('open'); document.body.classList.remove('lock'); if (lastFocus) lastFocus.focus();
@@ -467,32 +576,52 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     const f = $('#contactForm');
     const valid = bindValidation(f, {
       name: v => v.trim().length >= 2 || 'Ismingizni kiriting.', phone: phoneOk,
-      message: v => v.trim().length >= 10 || 'Xabar kamida 10 ta belgidan iborat bo‘lsin.'
+      message: v => v.trim().length >= 10 || 'Xabar kamida 10 ta belgidan iborat bo‘lsin.',
+      email: v => !v.trim() || /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(v.trim()) || 'Email noto‘g‘ri. Masalan: ism@example.com'
     }, 'e-');
     f.addEventListener('submit', async e => {
       e.preventDefault(); if (!valid()) return;
       const btn = $('#cBtn'), el = f.elements; btn.disabled = true; $('#cErr').innerHTML = '';
       try {
-        const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: el.name.value, phone: el.phone.value, message: el.message.value, website: el.website.value }) });
+        const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: el.name.value, phone: el.phone.value, email: el.email.value, message: el.message.value, website: el.website.value }) });
         const d = await r.json().catch(() => ({})); if (!r.ok || !d.ok) throw new Error(d.error || 'fail');
         f.reset(); $$('.field', f).forEach(i => delete i.dataset.t); toast('Xabaringiz qabul qilindi!');
-      } catch { $('#cErr').innerHTML = ICON.x + `<span>${t('Xabar yuborilmadi. Qaytadan urinib ko‘ring.')}</span>`; }
+      } catch (err) { const m = err && err.message; $('#cErr').innerHTML = ICON.x + `<span>${m && m !== 'fail' && !/fetch|network|load failed|abort/i.test(m) ? esc(m) : t('Xabar yuborilmadi. Qaytadan urinib ko‘ring.')}</span>`; }
+      finally { btn.disabled = false; }
+    });
+  }
+
+  function initStatus() { // buyurtma holatini zakaz raqami + telefon bilan tekshirish
+    const f = $('#statusForm'); if (!f) return;
+    const last = store.get('lastOrder', null); if (last && last.id) { f.elements.id.value = last.id; f.elements.phone.value = last.phone || ''; }
+    f.addEventListener('submit', async e => {
+      e.preventDefault(); const btn = $('#stBtn'), out = $('#stRes'), err = $('#stErr'); out.innerHTML = ''; err.innerHTML = '';
+      const id = f.elements.id.value.trim(), ph = f.elements.phone.value.trim();
+      if (!id || ph.replace(/\D/g, '').length < 9) { err.innerHTML = ICON.x + `<span>${t('Zakaz raqami va telefonni to‘g‘ri kiriting.')}</span>`; return; }
+      btn.disabled = true;
+      try {
+        const r = await fetch(`/api/order-status?id=${encodeURIComponent(id)}&phone=${encodeURIComponent(ph)}`, { cache: 'no-store' }), d = await r.json().catch(() => ({}));
+        if (!r.ok || !d.ok) throw new Error(d.error || 'fail');
+        const fmt = ts => { const x = new Date(ts); return isNaN(x) ? '' : x.toLocaleString(LANG === 'ru' ? 'ru-RU' : 'uz-UZ', { dateStyle: 'medium', timeStyle: 'short' }); };
+        out.innerHTML = `<div class="stat-card"><p class="eyebrow">${esc(d.id)}</p><h3>${esc(d.label)}</h3><p>${t('Jami')}: <b>${money(d.total)}</b></p><ol class="steps">${(d.history || []).map(h => `<li><b>${esc(h.label)}</b><span>${fmt(h.ts)}</span></li>`).join('')}</ol></div>`;
+      } catch (x) { err.innerHTML = ICON.x + `<span>${t(x && x.message && x.message !== 'fail' && !/fetch|network|load failed/i.test(x.message) ? x.message : 'Zakaz topilmadi. Raqam va telefonni tekshiring.')}</span>`; }
       finally { btn.disabled = false; }
     });
   }
 
   /* ---------- 11. Zakaz: POST /api/order -> server.js -> Telegram ---------- */
-  const ORDER_ERR = 'Zakaz yuborilmadi. Iltimos, qaytadan urinib ko‘ring.';
   const fl = (id, name, label, ph, extra = '') => `<div class="fl"><input class="field" id="${id}" name="${name}" placeholder=" " ${extra}><label for="${id}">${label}</label><div class="err" id="e-o-${name}"></div></div>`;
   function openOrder() {
     if (!cartCount()) return;
     lastFocus = document.activeElement; modalId = null; boxClass('order');
     $('#modalBox').innerHTML = `<button class="modal__x" data-act="close" aria-label="Yopish">${ICON.x}</button>
-      <form class="order-form" id="orderForm" novalidate><h2>Zakaz berish</h2><p>Umumiy summa: <b>${money(totals().total)}</b></p>
+      <form class="order-form" id="orderForm" novalidate><h2>Zakaz berish</h2>
+      <ul class="ord-items">${Object.keys(cart).map(id => { const p = find(id); return `<li><span>${esc(p.name)} × ${cart[id]}</span><b>${money(p.price * cart[id])}</b></li>`; }).join('')}<li><span>Yetkazib berish</span><b>${totals().fee ? money(totals().fee) : 'Bepul'}</b></li></ul>
+      <p class="ord-total">Jami: <b>${money(totals().total)}</b></p>
       ${fl('o-name', 'name', 'Ism', '', 'autocomplete="name" maxlength="100"')}${fl('o-phone', 'phone', 'Telefon raqam', '', 'type="tel" autocomplete="tel" maxlength="30"')}
       ${fl('o-address', 'address', 'Manzil', '', 'autocomplete="street-address" maxlength="300"')}
       <div class="fl"><textarea class="field" id="o-note" name="note" placeholder=" " rows="3" maxlength="500">${esc(store.get('cfgNote', ''))}</textarea><label for="o-note">Qo‘shimcha izoh</label></div>
-      <div class="notice" id="o-err" role="alert"></div><button class="btn btn--p" type="submit" id="orderBtn">Zakazni yuborish</button></form>`;
+      <div class="notice" id="o-err" role="alert"></div><button class="btn btn--p" type="submit" id="orderBtn">Zakazni tasdiqlash</button></form>`;
     openBox(); $('#o-name').focus();
     const f = $('#orderForm');
     const valid = bindValidation(f, { name: v => v.trim().length >= 2 || 'Ismingizni kiriting.', phone: phoneOk, address: v => v.trim().length >= 5 || 'Manzilni kiriting.' }, 'e-o-');
@@ -508,10 +637,11 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
         body: JSON.stringify({ name: el.name.value, phone: el.phone.value, address: el.address.value, note: el.note.value, items, delivery: tot.fee }) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok || !d.ok) throw new Error(d.error || (r.status === 404 || r.status === 405 ? 'noserver' : 'order failed'));
+      store.set('lastOrder', { id: d.id, phone: el.phone.value }); // zakaz holatini tekshirish formasi shu ma’lumot bilan to‘ldiriladi
       cart = {}; store.set('cfgNote', ''); commit();   // faqat muvaffaqiyatdan keyin savat tozalanadi
       $('#modalBox').innerHTML = `<button class="modal__x" data-act="close" aria-label="Yopish">${ICON.x}</button><div class="state">
         <svg class="bigcheck" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l8 8 14-16"/></svg>
-        <h2>Zakaz qabul qilindi</h2>${d.id ? `<p>Zakaz raqami: <b>${esc(d.id)}</b></p>` : ''}<p>Tez orada siz bilan bog‘lanamiz.</p><a class="btn btn--p" href="doors.html">Katalogga qaytish</a></div>`;
+        <h2>Zakaz qabul qilindi</h2>${d.id ? `<p>Zakaz raqami: <b>${esc(d.id)}</b></p>` : ''}<p>Tez orada siz bilan bog‘lanamiz.</p><a class="btn btn--p" href="doors.html">Katalogga qaytish</a><a class="btn btn--o" href="contact.html#statusSec">Zakaz holatini tekshirish</a></div>`;
     } catch (err) {
       const m = err && err.message, net = !m || m === 'noserver' || m === 'order failed' || /fetch|abort|network|load failed/i.test(m);
       if (net) console.warn('Zakaz serveri javob bermadi (/api/order). Sayt node server.js orqali ochilganini tekshiring.');
@@ -526,11 +656,19 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     } finally { clearTimeout(timer); }
   }
 
+  /* telefon raqam: maydondan chiqilganda +998 XX XXX XX XX ko‘rinishiga keltiriladi */
+  document.addEventListener('focusout', e => {
+    const i = e.target; if (!(i instanceof HTMLInputElement) || i.type !== 'tel') return;
+    let d = i.value.replace(/\D/g, ''); if (d.length === 9) d = '998' + d; if (!/^998\d{9}$/.test(d)) return;
+    i.value = `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10)}`; i.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
   /* ---------- 12. Hodisalar (event delegation) ---------- */
   document.addEventListener('click', e => {
     if (e.target === $('#modal')) return closeModal();
     const b = e.target.closest('[data-act]'); if (!b) return;
     const id = +b.dataset.id, a = b.dataset.act;
+    if (a === 'cart' || a === 'cartq' || a === 'cfadd') { const el = b.closest('.card, .modal__box, .pdp, .cfg'); const im = el && $('.card__img img, .modal__img img, .gal__main img, .cfg__vis img', el); flyFrom = im ? { src: im.currentSrc || im.src, rect: im.getBoundingClientRect() } : null; } // rasm joyi savat yangilanishidan oldin olinadi
     if (a === 'search' && page === 'doors') { e.preventDefault(); $('#search').focus(); return; }
     ({
       fav: () => toggleFav(id), cart: () => addCart(id), cartq: () => { addCart(id, modalQty); closeModal(); }, details: () => openModal(id), close: closeModal,
@@ -538,9 +676,9 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       htab: () => { homeTab = b.dataset.k; renderHome(); translateDom($('#homeTabs')); translateDom($('#featured')); },
       cmp: () => toggleCmp(id), cmpopen: openCompare, cmpclear: () => { cmp = []; commit(); closeModal(); },
       cmprm: () => { cmp = cmp.filter(x => x !== id); commit(); cmp.length > 1 ? openCompare() : closeModal(); },
-      lang: () => { try { localStorage.setItem('lang', LANG === 'ru' ? 'uz' : 'ru'); } catch { /* ignore */ } location.reload(); },
+      freset: () => $('#fReset').click(), lang: () => { try { localStorage.setItem('lang', LANG === 'ru' ? 'uz' : 'ru'); } catch { /* ignore */ } location.reload(); },
       top: () => scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth' }),
-      cfs: () => { cfg.style = b.dataset.k; renderConfig(); }, cfc: () => { cfg.color = b.dataset.k; renderConfig(); }, cfm: () => { cfg.id = id; renderConfig(); },
+      cfs: () => { cfg.style = b.dataset.k; renderConfig(); }, cfk: () => { cfg.coat = b.dataset.k; renderConfig(); }, cfh: () => { cfg.handle = b.dataset.k; renderConfig(); }, cfc: () => { cfg.color = b.dataset.k; renderConfig(); }, cfm: () => { cfg.id = id; renderConfig(); },
       cfadd: addConfigured, lb: openLightbox, thumb: () => { pdpImg = id; renderPdp(); translateDom($('#pdpRoot')); },
       lbz: () => $('#lbIn').classList.toggle('z'),
       'mq+': () => { modalQty = Math.min(modalQty + 1, 20); syncModal(); }, 'mq-': () => { modalQty = Math.max(modalQty - 1, 1); syncModal(); }
@@ -548,8 +686,8 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   });
   document.addEventListener('input', e => { if (e.target.id === 'cfW') { cfg.w = e.target.value; cfgKeep(); } if (e.target.id === 'cfH') { cfg.h = e.target.value; cfgKeep(); } });
   function addConfigured() { // tanlangan model savatga qo‘shiladi, parametrlar zakaz izohiga tushishi uchun saqlanadi
-    const p = find(cfg.id); if (!p || !(+cfg.w >= SIZE.wMin && +cfg.w <= SIZE.wMax && +cfg.h >= SIZE.hMin && +cfg.h <= SIZE.hMax)) return;
-    store.set('cfgNote', `Konstruktor: ${p.name}, ${p.colorName}, ${p.styleName}, ${+cfg.w}×${+cfg.h} mm`); addCart(p.id);
+    const p = find(cfg.id); const SZ = sizeOf(p); if (!p || !(+cfg.w >= SZ.wMin && +cfg.w <= SZ.wMax && +cfg.h >= SZ.hMin && +cfg.h <= SZ.hMax)) return;
+    store.set('cfgNote', `Konstruktor: ${p.name}, ${p.colorName}, ${p.styleName}, qoplama: ${p.material}, dastak: ${HANDLES[cfg.handle][0]}, ${+cfg.w}×${+cfg.h} mm`); addCart(p.id);
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeNav(); } });
 
@@ -573,6 +711,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       header.classList.toggle('scrolled', scrollY > 24); const tt = $('#toTop'); if (tt) tt.classList.toggle('show', scrollY > 600);
       const max = document.documentElement.scrollHeight - innerHeight; bar.style.width = (max > 0 ? scrollY / max * 100 : 0) + '%';
       const vis = $('.hero__vis'); if (vis && !still && scrollY < 900) vis.style.setProperty('--py', scrollY * .05 + 'px');
+      const hero = $('.hero'); if (hero && !still && scrollY < innerHeight * 1.2) hero.style.setProperty('--hp', Math.min(scrollY / innerHeight, 1).toFixed(3));
     };
     addEventListener('scroll', onScroll, { passive: true }); onScroll();
   }
@@ -584,14 +723,19 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     $('#fStyle').innerHTML = `<option value="">Barcha uslublar</option>` + styles.map(([k, n]) => `<option value="${esc(k)}">${esc(n)}</option>`).join('');
     const setChip = k => { view.f = k; $$('.chip', chips).forEach(x => x.setAttribute('aria-pressed', x.dataset.f === k)); };
     chips.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { setChip(c.dataset.f); renderDoors(); } });
-    const num = v => (v === '' || isNaN(+v) || +v < 0 ? null : +v);
+    const num = v => { const d = String(v).replace(/\D/g, ''); return d ? +d : null; };
+    const money2 = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 10); e.target.value = d ? fmt(d) : ''; };
+    const mm = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 4); e.target.value = d; return d ? +d : null; };
+    $('#fW').addEventListener('input', e => { view.w = mm(e); renderDoors(); });
+    $('#fH').addEventListener('input', e => { view.h = mm(e); renderDoors(); });
+    const prices = PRODUCTS.map(p => p.price); if (prices.length) { $('#fMin').placeholder = fmt(Math.min(...prices)); $('#fMax').placeholder = fmt(Math.max(...prices)); }
     $('#fColor').addEventListener('change', e => { view.color = e.target.value; renderDoors(); });
     $('#fStyle').addEventListener('change', e => { view.style = e.target.value; renderDoors(); });
-    $('#fMin').addEventListener('input', e => { view.min = num(e.target.value); renderDoors(); });
-    $('#fMax').addEventListener('input', e => { view.max = num(e.target.value); renderDoors(); });
+    $('#fMin').addEventListener('input', e => { money2(e); view.min = num(e.target.value); renderDoors(); });
+    $('#fMax').addEventListener('input', e => { money2(e); view.max = num(e.target.value); renderDoors(); });
     $('#fReset').addEventListener('click', () => {
-      Object.assign(view, { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '' }); setChip('all');
-      ['#fColor', '#fStyle', '#fMin', '#fMax', '#search'].forEach(i => { $(i).value = ''; }); $('#sort').value = 'rec'; renderDoors();
+      Object.assign(view, { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '', w: null, h: null }); setChip('all');
+      ['#fColor', '#fStyle', '#fMin', '#fMax', '#fW', '#fH', '#search'].forEach(i => { $(i).value = ''; }); $('#sort').value = 'rec'; renderDoors();
     });
     const col = qp.get('f'); if (col && colors.some(([k]) => k === col)) { view.color = col; $('#fColor').value = col; }
     /* qidiruv: mos mahsulotlarni avtomatik tavsiya qilish */
@@ -599,7 +743,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     const hide = () => { box.hidden = true; inp.setAttribute('aria-expanded', 'false'); on = -1; };
     const sug = () => {
       const q = inp.value.trim().toLowerCase(); if (q.length < 2) return hide();
-      const l = PRODUCTS.filter(p => `${p.name} ${p.tags} ${p.colorName} ${p.styleName}`.toLowerCase().includes(q)).slice(0, 5); if (!l.length) return hide();
+      const l = PRODUCTS.filter(p => searchHit(p, q)).slice(0, 5); if (!l.length) return hide();
       box.innerHTML = l.map(p => `<li role="option"><a href="product.html?id=${p.id}"><img src="${doorImg(p)}" alt="" width="34" height="42"><span>${esc(p.name)}<small>${esc(p.styleName)} · ${esc(p.colorName)} · ${money(p.price)}</small></span></a></li>`).join('');
       box.hidden = false; inp.setAttribute('aria-expanded', 'true');
     };
@@ -621,6 +765,90 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     items.forEach(el => io.observe(el));
   }
 
+  /* ---------- 13a. Scroll sahnasi: eshik tayyorlanishi (7 bosqich), so‘z-so‘z matn, navbar kuzatuvi ---------- */
+  const STAGES = [
+    ['O‘lchov', 'Hammasi aniq o‘lchovdan boshlanadi.', 'Mutaxassis eshik oralig‘ini o‘lchaydi: kenglik, balandlik va devor qalinligi. Eshik joyiga aynan mos tayyorlanadi.', ['Kenglik × balandlik', 'Devor qalinligi', 'Eshik oralig‘i']],
+    ['Material', 'Sifatli MDF plita tanlanadi.', 'Zich va bir tekis MDF plita: namlik va harorat o‘zgarishiga barqaror, yuzasi silliq.', ['MDF plita', 'Bir tekis zichlik', 'Silliq yuza']],
+    ['Dizayn', 'Model aniq kesib chiqiladi.', 'Tanlangan modelga qarab panel va chiziqlar frezer stanokda aniq o‘yiladi.', ['Classic', 'Modern', 'Minimal']],
+    ['Qoplama', 'Rang va qoplama beriladi.', 'Emal, mat PVX yoki yog‘och tekstura — interyeringizga mos rangni tanlaysiz.', ['Oq', 'Qora', 'Yog‘och', 'Jigarrang']],
+    ['Furnitura', 'Dastak va petlalar o‘rnatiladi.', 'Po‘lat, mat qora yoki oltin dastak; petlalar eshik og‘irligiga mos tanlanadi.', ['Po‘lat', 'Mat qora', 'Oltin']],
+    ['Sifat nazorati', 'Har bir eshik tekshiriladi.', 'O‘lcham, yuza va furnitura yetkazib berishdan oldin nazoratdan o‘tadi.', ['O‘lcham', 'Yuza', 'Furnitura']],
+    ['O‘rnatish', 'Eshik joyiga o‘rnatiladi.', 'Eshik oraliqqa qo‘yilib, tekislanadi va sozlanadi — yopiladi ham, ochiladi ham silliq.', ['Tekislash', 'Sozlash', 'Yakuniy tekshiruv']]
+  ];
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+  const SCENE = `<svg class="proc__svg" viewBox="-322 0 1245 700" role="img" aria-label="MDF eshikning tayyorlanish bosqichlari" preserveAspectRatio="xMidYMid meet"><defs>
+    <linearGradient id="scW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wall-a)"/><stop offset="1" style="stop-color:var(--wall-b)"/></linearGradient>
+    <linearGradient id="scF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--floor-a)"/><stop offset="1" style="stop-color:var(--floor-b)"/></linearGradient>
+    <radialGradient id="scL"><stop offset="0" stop-color="#ffc98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffc98a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="scB" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd9a3" stop-opacity=".95"/><stop offset="1" stop-color="#ffb866" stop-opacity=".55"/></linearGradient>
+    <pattern id="scG" width="9" height="60" patternUnits="userSpaceOnUse"><path d="M2 0v60M6 0v60" stroke="#000" stroke-opacity=".07"/></pattern></defs>
+    <rect class="sc-wall" x="-2000" y="-900" width="5000" height="1420" fill="url(#scW)"/><rect class="sc-floor" x="-2000" y="520" width="5000" height="1400" fill="url(#scF)"/><rect class="sc-base" x="-2000" y="506" width="5000" height="14"/>
+    <polygon class="sc-spill" points="640,520 940,520 1000,700 560,700"/><circle class="sc-lamp" cx="800" cy="170" r="300" fill="url(#scL)"/>
+    <rect class="sc-hole" x="380" y="120" width="240" height="400"/><rect class="sc-behind" x="380" y="120" width="240" height="400" fill="url(#scB)"/>
+    <rect class="sc-casing" x="368" y="108" width="264" height="412"/>
+    <g class="sc-dims"><path pathLength="1" d="M380 88H620M380 76v24M620 76v24"/><path pathLength="1" d="M338 120V520M326 120h24M326 520h24"/><text x="500" y="70" text-anchor="middle">Kenglik</text><text x="318" y="330" text-anchor="middle" transform="rotate(-90 318 330)">Balandlik</text></g>
+    <ellipse class="sc-shadow" cx="500" cy="528" rx="150" ry="10"/>
+    <g class="sc-door"><g class="sc-slab"><rect x="392" y="132" width="216" height="388" fill="var(--mdf)"/><rect x="392" y="132" width="216" height="388" fill="url(#scG)"/></g>
+      <rect class="sc-paint" x="392" y="132" width="216" height="388"/>
+      <g class="sc-grooves"><path pathLength="1" d="M412 152H588V298H412ZM412 320H588V500H412Z"/><path pathLength="1" d="M500 152V298M500 320V500"/></g>
+      <g class="sc-hw"><rect x="388" y="168" width="8" height="34" rx="2"/><rect x="388" y="330" width="8" height="34" rx="2"/><rect x="388" y="450" width="8" height="34" rx="2"/><rect class="sc-hd1" x="556" y="318" width="40" height="9" rx="4.5"/><circle class="sc-hd2" cx="590" cy="322.5" r="11"/></g>
+      <g class="sc-scan"><rect x="392" y="132" width="3" height="388"/></g></g>
+    <g class="sc-ok"><circle cx="640" cy="150" r="26"/><path d="M628 150l9 9 16-18"/></g>
+    <g class="sc-sw"></g></svg>`;
+  function initProcess() {
+    const sec = $('#process'); if (!sec) return;
+    const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const lum = h => { const n = parseInt(String(h).replace('#', ''), 16) || 0; return ((n >> 16) & 255) * .3 + ((n >> 8) & 255) * .59 + (n & 255) * .11; };
+    const cols = [...new Map(PRODUCTS.map(p => [p.color, p.hex])).values()].sort((x, y) => lum(y) - lum(x)); if (!cols.length) cols.push('#e8e4da', '#6b4a33', '#232323'); // och → to‘q: oxirgi rang to‘q bo‘ladi
+    $('#procScene').innerHTML = SCENE; translateDom($('#procScene')); const svg = $('.proc__svg', sec), sw = $('.sc-sw', svg);
+    const setVB = () => svg.setAttribute('viewBox', innerWidth <= 900 ? '262 24 476 600' : '-322 0 1245 700'); // eshik kompyuterda o‘ngda, telefonda markazda
+    setVB(); addEventListener('resize', setVB);
+    sw.innerHTML = cols.slice(0, 5).map((c, i) => `<circle cx="${500 + (i - (Math.min(cols.length, 5) - 1) / 2) * 44}" cy="600" r="14" fill="${esc(c)}"/>`).join('');
+    $('#procList').innerHTML = STAGES.map(([lb, h, p, ch], i) => `<li><span>${String(i + 1).padStart(2, '0')} / 07 · ${t(lb)}</span><h3>${t(h)}</h3><p>${t(p)}</p></li>`).join('');
+    const txt = $('#procTxt'); let cur = -1, color = -1;
+    const setText = i => {
+      const [lb, h, p, ch] = STAGES[i];
+      txt.innerHTML = `<p class="proc__no">${String(i + 1).padStart(2, '0')} / 07</p><p class="proc__lb">${t(lb)} — ${String(i + 1).padStart(2, '0')} / 07</p><h2>${t(h)}</h2><p class="proc__p">${t(p)}</p><ul class="proc__chips">${ch.map(c => `<li>${t(c)}</li>`).join('')}</ul>`;
+      txt.classList.remove('in'); void txt.offsetWidth; txt.classList.add('in');
+      $('#procCount').textContent = `${ROMAN[i]} / VII`; sec.dataset.stage = i + 1;
+      $$('.proc__dots i', sec).forEach((d, k) => d.classList.toggle('on', k <= i));
+    };
+    $('#procDots').innerHTML = STAGES.map(() => '<i></i>').join('');
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const tick = () => {
+      const r = sec.getBoundingClientRect(), total = sec.offsetHeight - innerHeight;
+      const p = calm ? 1 : clamp(-r.top / Math.max(total, 1)), x = p * 7, i = Math.min(6, Math.floor(x));
+      for (let k = 1; k <= 7; k++) svg.style.setProperty('--a' + k, calm ? 1 : clamp(x - (k - 1)).toFixed(3));
+      const ci = Math.min(cols.length - 1, Math.floor(clamp(x - 3) * 0.999 * cols.length)); // 4-bosqichda ranglar almashadi
+      if (ci !== color) { color = ci; svg.style.setProperty('--door', cols[ci]); $$('.sc-sw circle', svg).forEach((c, k) => c.classList.toggle('on', k === ci)); }
+      if (i !== cur) { cur = i; setText(i); }
+    };
+    addEventListener('scroll', tick, { passive: true }); addEventListener('resize', tick); tick();
+    $$('.proc__time button', sec).forEach(b => b.addEventListener('click', () => { sec.dataset.time = b.dataset.time; $$('.proc__time button', sec).forEach(x => x.setAttribute('aria-pressed', x === b)); }));
+  }
+  function initStatement() { // so‘zlar scroll bilan birin-ketin yorishadi
+    const sec = $('#statement'), box = $('#stmText'); if (!sec || !box) return;
+    const words = t(box.textContent.trim()).split(/\s+/); box.innerHTML = words.map(w => `<span class="w">${esc(w)}</span>`).join(' ');
+    const ws = $$('.w', box), calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const tick = () => {
+      const r = sec.getBoundingClientRect(), p = calm ? 1 : Math.min(1, Math.max(0, -r.top / Math.max(sec.offsetHeight - innerHeight, 1) * 1.15 + .05));
+      const n = Math.round(p * ws.length); ws.forEach((w, i) => w.classList.toggle('on', i < n));
+    };
+    addEventListener('scroll', tick, { passive: true }); tick();
+  }
+  function initSpy() { // bosh sahifada navbar bo‘limga qarab yoritiladi
+    if (page !== 'home') return;
+    const items = $$('#nav a[data-k]'), map = { top: 'home', process: 'process', collection: 'doors', config: 'config' };
+    const set = k => items.forEach(a => { const on = a.dataset.k === k; a.classList.toggle('active', on); if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+    const tick = () => {
+      let k = 'home'; const line = innerHeight * .4;
+      Object.keys(map).forEach(id => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= line && !el.hidden) k = map[id]; });
+      const st = document.getElementById('statement'); if (st && st.getBoundingClientRect().top <= line && k === 'process') k = 'home';
+      set(k);
+    };
+    addEventListener('scroll', tick, { passive: true }); tick();
+  }
+
   /* ---------- 13. Ishga tushirish ---------- */
   renderLayout();
   applyTheme(root.dataset.theme || 'light');
@@ -628,7 +856,8 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   $$('[data-door]').forEach(el => { const p = find(el.dataset.door) || PRODUCTS[0]; if (p) el.src = doorImg(p); });
   const safe = f => { try { f(); } catch (e) { console.error(e); } };
   if (page === 'doors') safe(initDoors);
-  if (page === 'contact') safe(initContact);
+  if (page === 'home') { safe(initProcess); safe(initStatement); safe(initSpy); }
+  if (page === 'contact') { safe(initContact); safe(initStatus); }
 
   /* ---------- 14. Yengil effektlar: sarlavha, hero ---------- */
   // Dog‘lar, marquee, 3D burilish olib tashlandi — dizayn sokin va tez ishlashi uchun.
@@ -636,6 +865,14 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   /* ---------- 15. Yana effektlar: kirish animatsiyasi, hero rang tanlash, raqamlar, kursor nuri, magnit tugmalar ---------- */
   function initFx2() {
     const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    // 0) Desktop kursor halqasi: faqat sichqoncha bor qurilmada, odatiy kursorni yashirmaydi
+    if (!calm && matchMedia('(hover:hover) and (pointer:fine)').matches) {
+      document.body.insertAdjacentHTML('beforeend', '<div class="cring" aria-hidden="true"></div>');
+      const ring = $('.cring'); let rx = 0, ry = 0, tx = 0, ty = 0, run = 0;
+      const loop = () => { rx += (tx - rx) * .2; ry += (ty - ry) * .2; ring.style.transform = `translate(${rx}px,${ry}px)`; run = Math.abs(tx - rx) + Math.abs(ty - ry) > .5 ? requestAnimationFrame(loop) : 0; };
+      addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; ring.classList.add('on'); ring.classList.toggle('big', !!e.target.closest('a,button,.card,.sw,.opt,.chip,[data-act]')); if (!run) run = requestAnimationFrame(loop); }, { passive: true });
+      document.addEventListener('pointerleave', () => ring.classList.remove('on'));
+    }
     // 1) Kirish: eshik ochilishi (sessiyada bir marta, faqat bosh sahifa)
     let seen = false; try { seen = sessionStorage.getItem('intro') === '1'; sessionStorage.setItem('intro', '1'); } catch { /* ignore */ }
     if (page === 'home' && !seen && !calm) {

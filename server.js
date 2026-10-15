@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const express = require('express');
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const TG_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || '').trim(), TG_CHAT = (process.env.TELEGRAM_CHAT_ID || '').trim(); // faqat .env dan; frontendga chiqmaydi
 const ADMIN_ENABLED = ADMIN_PASSWORD.length >= 8; // 8 belgidan kam parol bilan admin panel o‘chiq turadi
 
 /* ---------- Saqlash: data/*.json fayllari (yozishda avval vaqtinchalik faylga, keyin almashtiriladi) ---------- */
@@ -24,6 +25,7 @@ function save(file, data) {
 }
 function logError(where, err) { // xatolar data/errors.log fayliga yoziladi (token yashiriladi)
   let line = `${new Date().toISOString()} [${where}] ${(err && (err.stack || err.message)) || err}`;
+  if (TG_TOKEN) line = line.split(TG_TOKEN).join('***'); // Telegram tokeni logga tushmaydi
   console.error(line);
   try {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -92,12 +94,26 @@ function publicProduct(p) { // faqat saytga kerakli maydonlar (tannarx, ta'minot
   const act = discountState(p) === 'active', price = effectivePrice(p);
   return { id: p.id, name: p.name, price, old: act ? p.price : (p.old && p.old > price ? p.old : null), discountPercent: act ? p.discountPercent : 0, discountEnd: act ? p.discountEnd : '',
     color: p.color, style: p.style, hex: p.hex, edge: p.edge, badge: p.badge, tags: p.tags, desc: p.desc, long: p.long, material: p.material,
-    colorName: p.colorName, styleName: p.styleName, stock: inStock(p), image: p.image, gallery: p.gallery || [] };
+    colorName: p.colorName, styleName: p.styleName, stock: inStock(p), image: p.image, gallery: p.gallery || [],
+    sizes: Object.fromEntries(['wMin', 'wMax', 'hMin', 'hMax'].filter(k => Number.isInteger(p[k])).map(k => [k, p[k]])) };
 }
 const adminProduct = p => ({ ...p, effectivePrice: effectivePrice(p), discountState: discountState(p), inStock: inStock(p), tracked: tracked(p), low: isLow(p) });
 
 /* ---------- Bildirishnomalar, faoliyat tarixi ---------- */
 const persist = { notifications: () => save('notifications.json', notifications), activity: () => save('activity.json', activity), movements: () => save('movements.json', movements), messages: () => save('messages.json', messages) };
+/* ---------- Telegram: yangi zakaz va xabarlar adminga yuboriladi (token faqat serverda) ---------- */
+const tgEsc = v => String(v ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+function sendTelegram(html) { // zakaz saqlanganidan keyin chaqiriladi; xato bo‘lsa zakazga ta’sir qilmaydi
+  if (!TG_TOKEN || !TG_CHAT) return Promise.resolve(false);
+  return fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(8000),
+    body: JSON.stringify({ chat_id: TG_CHAT, text: html.slice(0, 4000), parse_mode: 'HTML', disable_web_page_preview: true })
+  }).then(async r => { if (!r.ok) throw new Error(`Telegram HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`); return true; })
+    .catch(e => { logError('telegram', e); return false; });
+}
+const orderText = o => `🆕 <b>Yangi zakaz ${tgEsc(o.id)}</b>\n👤 ${tgEsc(o.name)}\n📞 ${tgEsc(o.phone)}\n📍 ${tgEsc(o.address)}\n\n` +
+  o.items.map(i => `• ${tgEsc(i.name)} × ${i.qty} — ${money(i.price * i.qty)}`).join('\n') +
+  `\n\nYetkazib berish: ${o.delivery ? money(o.delivery) : 'bepul'}\n<b>Jami: ${money(o.total)}</b>` + (o.note ? `\n💬 ${tgEsc(o.note)}` : '');
 function notify(type, title, text, link) {
   notifications.unshift({ id: uid(), ts: new Date().toISOString(), type, title, text, link, read: false });
   if (notifications.length > 500) notifications.length = 500;
@@ -157,7 +173,8 @@ activity = load('activity.json', []);
 customerNotes = load('customers.json', {});
 const savedContent = load('content.json', {});
 content = { hero: { ...CONTENT_DEFAULT.hero, ...savedContent.hero }, promo: { ...CONTENT_DEFAULT.promo, ...savedContent.promo },
-  contacts: { ...CONTENT_DEFAULT.contacts, ...savedContent.contacts }, faq: Array.isArray(savedContent.faq) ? savedContent.faq : CONTENT_DEFAULT.faq };
+  contacts: { ...CONTENT_DEFAULT.contacts, ...savedContent.contacts }, faq: Array.isArray(savedContent.faq) ? savedContent.faq : CONTENT_DEFAULT.faq,
+  reviews: Array.isArray(savedContent.reviews) ? savedContent.reviews : [] }; // mijoz fikrlari faqat admin kiritganda ko‘rinadi
   migrate();
 }
 init();
@@ -173,6 +190,12 @@ const PAGES = ['index.html', 'doors.html', 'product.html', 'about.html', 'contac
 const send = f => (req, res) => res.sendFile(path.join(ROOT, f));
 app.get('/', send('index.html'));
 PAGES.forEach(f => app.get('/' + f, send(f)));
+const origin = req => (process.env.SITE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nDisallow: /api/\nSitemap: ${origin(req)}/sitemap.xml\n`));
+app.get('/sitemap.xml', (req, res) => {
+  const o = origin(req), urls = ['', 'doors.html', 'about.html', 'contact.html', ...(products || []).filter(p => !p.hidden).map(p => 'product.html?id=' + p.id)];
+  res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(u => `<url><loc>${o}/${u.replace(/&/g, '&amp;')}</loc></url>`).join('')}</urlset>`);
+});
 app.use('/img', express.static(path.join(ROOT, 'img'), { dotfiles: 'deny' })); // haqiqiy rasmlar uchun (ixtiyoriy)
 const adminPage = (req, res) => { res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' }); res.sendFile(path.join(ROOT, 'admin.html')); };
 app.get(['/admin', '/admin.html'], adminPage);
@@ -195,14 +218,17 @@ app.post('/api/contact', (req, res) => { // aloqa formasi: xabar saqlanadi, admi
   if (clean(b.website, 100)) return res.json({ ok: true }); // spam tuzoq: oddiy foydalanuvchi bu maydonni ko‘rmaydi
   if (contactLimited(req.ip)) return fail(res, 429, 'Juda ko‘p so‘rov. Birozdan so‘ng urinib ko‘ring.');
   const name = clean(b.name, 100), message = clean(b.message, 2000), digits = clean(b.phone, 30).replace(/\D/g, '');
+  const email = clean(b.email, 80);
+  if (email && !/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(email)) return fail(res, 400, 'Email noto‘g‘ri.');
   if (name.length < 2) return fail(res, 400, 'Ismni kiriting.');
   if (!/^(998)?\d{9}$/.test(digits)) return fail(res, 400, 'Telefon raqami noto‘g‘ri.');
   if (message.length < 10) return fail(res, 400, 'Xabar kamida 10 ta belgidan iborat bo‘lsin.');
   seq.m += 1; save('seq.json', seq);
   const d = digits.length === 9 ? '998' + digits : digits;
-  const m = { id: 'M-' + String(seq.m).padStart(4, '0'), createdAt: new Date().toISOString(), name, phone: `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10, 12)}`, message, read: false };
+  const m = { id: 'M-' + String(seq.m).padStart(4, '0'), createdAt: new Date().toISOString(), name, phone: `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10, 12)}`, email, message, read: false };
   messages.unshift(m); persist.messages();
   notify('message', 'Yangi xabar', `${name}: ${message.slice(0, 80)}`, '#messages');
+  sendTelegram(`✉️ <b>Yangi xabar ${tgEsc(m.id)}</b>\n👤 ${tgEsc(name)}\n📞 ${tgEsc(m.phone)}${email ? `\n✉️ ${tgEsc(email)}` : ''}\n\n${tgEsc(message)}`);
   res.json({ ok: true });
 });
 
@@ -247,6 +273,7 @@ app.post('/api/order', async (req, res) => {
   }
   orders.unshift(order); save('orders.json', orders); saveStock();
   notify('order', 'Yangi zakaz', `${order.id} · ${name} · ${money(total)}`, '#orders?id=' + order.id); // admin panelda bildirishnoma
+  sendTelegram(orderText(order)); // kutilmaydi: Telegram sekin bo‘lsa ham mijozga javob darhol qaytadi
   res.json({ ok: true, id: order.id });
 });
 
@@ -382,6 +409,11 @@ function parseProduct(b, old) { // { error } yoki tayyor mahsulot maydonlari
     if (!isYmd(ds) || !isYmd(de)) return { error: 'Chegirma uchun boshlanish va tugash sanasini kiriting.' };
     if (de < ds) return { error: 'Chegirma tugash sanasi boshlanishidan oldin bo‘lishi mumkin emas.' };
   }
+  const sz = {}; // ixtiyoriy: shu model tayyorlanadigan o‘lcham chegaralari (mm); bo‘sh bo‘lsa, saytdagi umumiy chegara ishlatiladi
+  for (const [k, lo, hi, nm] of [['wMin', 300, 2000, 'Kenglik (dan)'], ['wMax', 300, 2000, 'Kenglik (gacha)'], ['hMin', 1000, 3000, 'Balandlik (dan)'], ['hMax', 1000, 3000, 'Balandlik (gacha)']]) {
+    const v = optInt(b[k], lo, hi); if (v.bad) return { error: `${nm}: ${lo}–${hi} mm oralig‘ida butun son bo‘lsin (yoki bo‘sh).` }; sz[k] = v.v;
+  }
+  if ((sz.wMin !== null && sz.wMax !== null && sz.wMin > sz.wMax) || (sz.hMin !== null && sz.hMax !== null && sz.hMin > sz.hMax)) return { error: 'O‘lcham: “dan” qiymati “gacha” dan katta bo‘lmasin.' };
   const colorChanged = !old || old.color !== color;
   return {
     name, price, old: oldPrice.v, color, style, styleName: STYLES[style], badge, image, gallery, sku, qty: qty.v, minQty: minQty.v ?? 0, cost: cost.v, supplier: clean(b.supplier, 80),
@@ -389,7 +421,7 @@ function parseProduct(b, old) { // { error } yoki tayyor mahsulot maydonlari
     colorName: clean(b.colorName, 40) || (color[0].toUpperCase() + color.slice(1)),
     material: clean(b.material, 80) || 'MDF', desc: clean(b.desc, 200), long: clean(b.long, 1000), tags: clean(b.tags, 200).toLowerCase(),
     hex: colorChanged ? COLORS[color][0] : old.hex, edge: colorChanged ? COLORS[color][1] : old.edge,
-    stock: qty.v === null ? !!b.stock : qty.v > 0, hidden: !!b.hidden
+    stock: qty.v === null ? !!b.stock : qty.v > 0, hidden: !!b.hidden, wMin: sz.wMin, wMax: sz.wMax, hMin: sz.hMin, hMax: sz.hMax
   };
 }
 admin.get('/products', (req, res) => res.json({ ok: true, products: products.map(adminProduct) }));
@@ -601,7 +633,11 @@ function parseContent(b) {
   if (faqIn.length > 12) return { error: 'Savollar 12 tadan oshmasin.' };
   const faq = faqIn.map(x => ({ q: clean(x && x.q, 150), a: clean(x && x.a, 600) })).filter(x => x.q || x.a);
   if (faq.some(x => !x.q || !x.a)) return { error: 'Har bir savol va javob to‘ldirilishi kerak.' };
-  return { content: { hero, promo, contacts, faq } };
+  const revIn = Array.isArray(b.reviews) ? b.reviews : [];
+  if (revIn.length > 6) return { error: 'Fikrlar 6 tadan oshmasin.' };
+  const reviews = revIn.map(x => ({ name: clean(x && x.name, 60), text: clean(x && x.text, 400) })).filter(x => x.name || x.text);
+  if (reviews.some(x => !x.name || !x.text)) return { error: 'Har bir fikrda ism va matn bo‘lishi kerak.' };
+  return { content: { hero, promo, contacts, faq, reviews } };
 }
 admin.get('/content', (req, res) => res.json({ ok: true, content }));
 admin.put('/content', (req, res) => {

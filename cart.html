@@ -7,7 +7,11 @@
   <meta name="description" content="Sizning savatingiz.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="canonical" href="/cart.html">
+  <meta property="og:title" content="Savat — YasinDoors"><meta property="og:type" content="website"><meta property="og:locale" content="uz_UZ">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script>
 </head>
@@ -17,6 +21,10 @@
   <main id="main">
     <section class="phero"><div class="container reveal"><p class="eyebrow">YasinDoors</p><h1>Sizning savatingiz</h1><p>Tanlangan MDF eshiklar shu yerda saqlanadi.</p></div></section>
     <section class="section"><div class="container" id="cartRoot"></div></section>
+    <section class="section section--alt" id="recSec" hidden><div class="container">
+      <div class="head"><p class="eyebrow">Tavsiya</p><h2>Sizga yoqishi mumkin</h2></div>
+      <div class="grid" id="recGrid"></div>
+    </div></section>
   </main>
   <footer class="footer" id="site-footer"></footer>
   <script src="script.js"></script>
