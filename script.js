@@ -100,6 +100,7 @@
     'Buyurtmani qanday beraman?': 'Как оформить заказ?'
   };
   Object.assign(RU, {
+    'Filtrlarni tozalash': 'Сбросить фильтры', 'Katalogdagi narxlar': 'Цены в каталоге', '(narxlar almashtirildi)': '(значения поменяны местами)', 'Narx dan (so‘m)': 'Цена от (сум)', 'Narx gacha (so‘m)': 'Цена до (сум)',
     'Eshik tanlashda': 'С выбором двери', 'yordam beramiz': 'поможем', 'Savol bering, o‘lcham yoki rang bo‘yicha maslahat oling — tez orada javob beramiz.': 'Задайте вопрос, получите совет по размеру или цвету — скоро ответим.',
     'Qo‘ng‘iroq qilish': 'Позвонить', 'Telegramda yozish': 'Написать в Telegram', 'Xabar qoldirish': 'Оставить сообщение', 'Email (ixtiyoriy)': 'Email (необязательно)', 'Xabaringiz': 'Ваше сообщение', 'Telefon raqam': 'Номер телефона',
     'Uyingizga': 'Придайте дому', 'yangi uslub': 'новый стиль', 'bering': '\u200b', 'Eshik tanlash': 'Выбрать дверь', 'Pastga': 'Вниз', 'Vitrina': 'Витрина', 'Premium kolleksiya': 'Премиум коллекция',
@@ -355,12 +356,23 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   const emptyBox = (ic, title, text) => `<div class="empty">${ICON[ic]}<h3>${title}</h3><p>${text}</p><a class="btn btn--p" href="doors.html">Katalogga o‘tish</a></div>`;
   const view = { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '' };
   const sorts = { asc: (a, b) => a.price - b.price, desc: (a, b) => b.price - a.price, az: (a, b) => a.name.localeCompare(b.name), za: (a, b) => b.name.localeCompare(a.name) };
+  /* narx oralig‘i: mijoz "dan" va "gacha" summani o‘zi kiritadi; dan > gacha bo‘lsa, qiymatlar almashtiriladi */
+  const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const range = () => (view.min !== null && view.max !== null && view.min > view.max) ? [view.max, view.min, true] : [view.min, view.max, false];
+  const inRange = p => { const [lo, hi] = range(); return (lo === null || p.price >= lo) && (hi === null || p.price <= hi); };
+  function priceHint(n) {
+    const [lo, hi, swapped] = range(), el = $('#priceHint'); if (!el) return;
+    const txt = lo === null && hi === null ? '' : lo !== null && hi !== null ? `${fmt(lo)} – ${fmt(hi)} so‘m oralig‘ida: ${n} ta eshik` : lo !== null ? `${fmt(lo)} so‘mdan yuqori: ${n} ta eshik` : `${fmt(hi)} so‘mgacha: ${n} ta eshik`;
+    el.textContent = t(txt) + (swapped && txt ? ' ' + t('(narxlar almashtirildi)') : '');
+  }
   function renderDoors() {
     const q = view.q.trim().toLowerCase();
-    let list = PRODUCTS.filter(p => matches(p, view.f) && (!view.color || p.color === view.color) && (!view.style || p.style === view.style) && (view.min === null || p.price >= view.min) && (view.max === null || p.price <= view.max) &&
+    let list = PRODUCTS.filter(p => matches(p, view.f) && (!view.color || p.color === view.color) && (!view.style || p.style === view.style) && inRange(p) &&
       (!q || `${p.name} ${p.desc} ${p.tags} ${p.colorName} ${p.styleName} ${p.material}`.toLowerCase().includes(q)));
     if (sorts[view.sort]) list = [...list].sort(sorts[view.sort]);
-    $('#doorsGrid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3><p>Boshqa so‘z yoki filtrni sinab ko‘ring.</p></div>`;
+    const prices = PRODUCTS.map(p => p.price), pr = prices.length ? `${fmt(Math.min(...prices))} – ${fmt(Math.max(...prices))} so‘m` : '';
+    $('#doorsGrid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">${ICON.search}<h3>Mahsulot topilmadi</h3><p>${range().some(v => v !== null) && pr ? `${t('Katalogdagi narxlar')}: ${pr}` : 'Boshqa so‘z yoki filtrni sinab ko‘ring.'}</p><button class="btn btn--o" type="button" data-act="freset">Filtrlarni tozalash</button></div>`;
+    priceHint(list.length);
     $('#resCount').textContent = `${list.length} / ${PRODUCTS.length}`;
   }
   function renderCart() {
@@ -605,7 +617,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       htab: () => { homeTab = b.dataset.k; renderHome(); translateDom($('#homeTabs')); translateDom($('#featured')); },
       cmp: () => toggleCmp(id), cmpopen: openCompare, cmpclear: () => { cmp = []; commit(); closeModal(); },
       cmprm: () => { cmp = cmp.filter(x => x !== id); commit(); cmp.length > 1 ? openCompare() : closeModal(); },
-      lang: () => { try { localStorage.setItem('lang', LANG === 'ru' ? 'uz' : 'ru'); } catch { /* ignore */ } location.reload(); },
+      freset: () => $('#fReset').click(), lang: () => { try { localStorage.setItem('lang', LANG === 'ru' ? 'uz' : 'ru'); } catch { /* ignore */ } location.reload(); },
       top: () => scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth' }),
       cfs: () => { cfg.style = b.dataset.k; renderConfig(); }, cfk: () => { cfg.coat = b.dataset.k; renderConfig(); }, cfh: () => { cfg.handle = b.dataset.k; renderConfig(); }, cfc: () => { cfg.color = b.dataset.k; renderConfig(); }, cfm: () => { cfg.id = id; renderConfig(); },
       cfadd: addConfigured, lb: openLightbox, thumb: () => { pdpImg = id; renderPdp(); translateDom($('#pdpRoot')); },
@@ -652,11 +664,13 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     $('#fStyle').innerHTML = `<option value="">Barcha uslublar</option>` + styles.map(([k, n]) => `<option value="${esc(k)}">${esc(n)}</option>`).join('');
     const setChip = k => { view.f = k; $$('.chip', chips).forEach(x => x.setAttribute('aria-pressed', x.dataset.f === k)); };
     chips.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { setChip(c.dataset.f); renderDoors(); } });
-    const num = v => (v === '' || isNaN(+v) || +v < 0 ? null : +v);
+    const num = v => { const d = String(v).replace(/\D/g, ''); return d ? +d : null; };
+    const money2 = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 10); e.target.value = d ? fmt(d) : ''; };
+    const prices = PRODUCTS.map(p => p.price); if (prices.length) { $('#fMin').placeholder = fmt(Math.min(...prices)); $('#fMax').placeholder = fmt(Math.max(...prices)); }
     $('#fColor').addEventListener('change', e => { view.color = e.target.value; renderDoors(); });
     $('#fStyle').addEventListener('change', e => { view.style = e.target.value; renderDoors(); });
-    $('#fMin').addEventListener('input', e => { view.min = num(e.target.value); renderDoors(); });
-    $('#fMax').addEventListener('input', e => { view.max = num(e.target.value); renderDoors(); });
+    $('#fMin').addEventListener('input', e => { money2(e); view.min = num(e.target.value); renderDoors(); });
+    $('#fMax').addEventListener('input', e => { money2(e); view.max = num(e.target.value); renderDoors(); });
     $('#fReset').addEventListener('click', () => {
       Object.assign(view, { f: 'all', q: '', sort: 'rec', min: null, max: null, color: '', style: '' }); setChip('all');
       ['#fColor', '#fStyle', '#fMin', '#fMax', '#search'].forEach(i => { $(i).value = ''; }); $('#sort').value = 'rec'; renderDoors();
