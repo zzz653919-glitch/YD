@@ -174,6 +174,12 @@ const PAGES = ['index.html', 'doors.html', 'product.html', 'about.html', 'contac
 const send = f => (req, res) => res.sendFile(path.join(ROOT, f));
 app.get('/', send('index.html'));
 PAGES.forEach(f => app.get('/' + f, send(f)));
+const origin = req => (process.env.SITE_URL || `${req.get('x-forwarded-proto') || req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nDisallow: /api/\nSitemap: ${origin(req)}/sitemap.xml\n`));
+app.get('/sitemap.xml', (req, res) => {
+  const o = origin(req), urls = ['', 'doors.html', 'about.html', 'contact.html', ...(products || []).filter(p => !p.hidden).map(p => 'product.html?id=' + p.id)];
+  res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(u => `<url><loc>${o}/${u.replace(/&/g, '&amp;')}</loc></url>`).join('')}</urlset>`);
+});
 app.use('/img', express.static(path.join(ROOT, 'img'), { dotfiles: 'deny' })); // haqiqiy rasmlar uchun (ixtiyoriy)
 const adminPage = (req, res) => { res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' }); res.sendFile(path.join(ROOT, 'admin.html')); };
 app.get(['/admin', '/admin.html'], adminPage);

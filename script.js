@@ -259,7 +259,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   const toggleTheme = () => {
     const next = () => applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true), b = $('#themeBtn');
     if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches && b) { // doira bo‘lib ochiladigan o‘tish
-      const r = b.getBoundingClientRect(); root.style.setProperty('--thx', r.left + r.width / 2 + 'px'); root.style.setProperty('--thy', r.top + r.height / 2 + 'px'); document.startViewTransition(next);
+      const r = b.getBoundingClientRect(); root.style.setProperty('--thx', r.left + r.width / 2 + 'px'); root.style.setProperty('--thy', r.top + r.height / 2 + 'px'); root.classList.add('theming'); document.startViewTransition(next).finished.finally(() => root.classList.remove('theming'));
     } else next();
   };
   function toast(msg) {
@@ -450,6 +450,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   }
   function renderPage() {
     try { renderPageInner(); } catch (e) { console.error(e); }
+    $$('[aria-busy]').forEach(el => el.removeAttribute('aria-busy'));
     translateDom(document.querySelector('main'));
   }
   function renderPageInner() {

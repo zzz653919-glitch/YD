@@ -293,7 +293,7 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 .hero__vis{margin-bottom:34px}
 /* tema almashish: doira bo'lib ochilish */
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
-::view-transition-new(root){animation:themeIn .65s ease-out}
+html.theming::view-transition-new(root){animation:themeIn .65s ease-out}
 @keyframes themeIn{from{clip-path:circle(0 at var(--thx,50%) var(--thy,0))}to{clip-path:circle(150% at var(--thx,50%) var(--thy,0))}}
 
 @media(prefers-reduced-motion:reduce){.gate{display:none}}
@@ -455,3 +455,11 @@ body{font-size:16.5px;letter-spacing:.005em}
   .box,.timeline li{padding:22px 0 0}.cta .btn{width:100%}.footer__in{grid-template-columns:1fr;gap:34px}
   .grid--show .card:first-child{grid-column:1/-1}
 }
+
+/* sahifalar orasidagi o'tish: yumshoq fade + ko'tarilish (tema almashtirishda doira) */
+@keyframes pgOut{to{opacity:0;transform:translateY(-10px)}}@keyframes pgIn{from{opacity:0;transform:translateY(14px)}}
+html:not(.theming)::view-transition-old(root){animation:.28s ease both pgOut}
+html:not(.theming)::view-transition-new(root){animation:.5s cubic-bezier(.2,.7,.2,1) both pgIn}
+/* yuklanish skeletonlari (katalog kelguncha) */
+.grid.is-loading .sk{aspect-ratio:auto}
+@media(prefers-reduced-motion:reduce){html::view-transition-old(root),html::view-transition-new(root){animation:none}}
