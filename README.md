@@ -32,3 +32,8 @@ Birinchi ishga tushirishda katalog 8 ta standart modeldan yaratiladi; keyin hamm
 
 ## Mijoz imkoniyatlari
 Katalog filtrlari (rang, uslub, narx oralig'ini o'zi kiritish, o'lcham) va aqlli qidiruv (rang/nom/narx, UZ/RU/EN so'zlar, xatolarga chidamli), solishtirish, sevimlilar, ko'rilganlar tarixi, eshik konstruktori (model, rang, qoplama, dastak, o'lcham, taxminiy narx), UZ/RU tili, dark/light rejim, buyurtma holatini tekshirish (Aloqa sahifasida: zakaz raqami + telefon).
+
+## Bosh sahifa (scroll sahnasi)
+- **Jarayon** — eshik tayyorlanishining 7 bosqichi scroll bilan jonlanadi (o'lchov → material → dizayn → qoplama → furnitura → sifat nazorati → o'rnatish), kunduzi/kechqurun yoritilishi almashadi.
+- **So'z-so'z matn** — scroll bilan so'zlar birin-ketin yorishadi.
+- Suzuvchi shisha navbar bo'limga qarab yoritiladi. `prefers-reduced-motion` yoqilgan bo'lsa, sahna oddiy ro'yxatga aylanadi.

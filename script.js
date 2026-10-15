@@ -26,7 +26,7 @@
   ];
   const FILTERS = [['all', 'Barchasi'], ['new', 'Yangi'], ['sale', 'Chegirmali'], ['classic', 'Classic'], ['modern', 'Modern'], ['minimal', 'Minimal'], ['yogoch', 'Wood'], ['oq', 'White'], ['qora', 'Black']];
   const matches = (p, f) => f === 'all' || (f === 'new' ? p.badge === 'new' : f === 'sale' ? !!(p.discountPercent || p.old) : [p.color, p.style, ...p.tags.split(' ')].includes(f));
-  const NAV = [['index.html', 'Bosh sahifa', 'home'], ['doors.html', 'MDF Eshiklar', 'doors'], ['about.html', 'Biz haqimizda', 'about'], ['contact.html', 'Aloqa', 'contact']];
+  const NAV = [['index.html', 'Bosh sahifa', 'home'], ['index.html#process', 'Jarayon', 'process'], ['doors.html', 'MDF Eshiklar', 'doors'], ['index.html#config', 'Konstruktor', 'config'], ['about.html', 'Biz haqimizda', 'about'], ['contact.html', 'Aloqa', 'contact']];
   const DELIVERY = { fee: 100000, freeFrom: 5000000 }; // 5 mln dan yuqori buyurtmada yetkazib berish bepul
   // Katalog, yetkazib berish va sayt matnlari serverdan (admin paneldan) olinadi; server ishlamasa, yuqoridagi standart ma'lumot qoladi.
   const CONTENT = { hero: {}, promo: { enabled: false }, contacts: {}, faq: [] };
@@ -101,13 +101,29 @@
     'Buyurtmani qanday beraman?': 'Как оформить заказ?'
   };
   Object.assign(RU, {
+    'Kenglik': 'Ширина', 'Balandlik': 'Высота',
+    'O‘lchov': 'Замер', 'Material': 'Материал', 'Dizayn': 'Дизайн', 'Furnitura': 'Фурнитура', 'Sifat nazorati': 'Контроль качества', 'O‘rnatish': 'Установка',
+    'Hammasi aniq o‘lchovdan boshlanadi.': 'Всё начинается с точного замера.', 'Mutaxassis eshik oralig‘ini o‘lchaydi: kenglik, balandlik va devor qalinligi. Eshik joyiga aynan mos tayyorlanadi.': 'Специалист замеряет проём: ширину, высоту и толщину стены. Дверь изготавливается строго под ваш проём.',
+    'Kenglik × balandlik': 'Ширина × высота', 'Devor qalinligi': 'Толщина стены', 'Eshik oralig‘i': 'Дверной проём',
+    'Sifatli MDF plita tanlanadi.': 'Выбирается качественная MDF плита.', 'Zich va bir tekis MDF plita: namlik va harorat o‘zgarishiga barqaror, yuzasi silliq.': 'Плотная и ровная MDF плита: устойчива к влаге и перепадам температуры, поверхность гладкая.',
+    'MDF plita': 'MDF плита', 'Bir tekis zichlik': 'Ровная плотность', 'Silliq yuza': 'Гладкая поверхность',
+    'Model aniq kesib chiqiladi.': 'Модель точно вырезается.', 'Tanlangan modelga qarab panel va chiziqlar frezer stanokda aniq o‘yiladi.': 'Панели и линии выбранной модели точно фрезеруются на станке.',
+    'Rang va qoplama beriladi.': 'Наносятся цвет и покрытие.', 'Emal, mat PVX yoki yog‘och tekstura — interyeringizga mos rangni tanlaysiz.': 'Эмаль, матовый ПВХ или текстура дерева — вы выбираете цвет под интерьер.',
+    'Oq': 'Белый', 'Qora': 'Чёрный', 'Yog‘och': 'Дерево', 'Jigarrang': 'Коричневый',
+    'Dastak va petlalar o‘rnatiladi.': 'Устанавливаются ручка и петли.', 'Po‘lat, mat qora yoki oltin dastak; petlalar eshik og‘irligiga mos tanlanadi.': 'Ручка из стали, матовая чёрная или золотая; петли подбираются по весу двери.',
+    'Har bir eshik tekshiriladi.': 'Каждая дверь проверяется.', 'O‘lcham, yuza va furnitura yetkazib berishdan oldin nazoratdan o‘tadi.': 'Размер, поверхность и фурнитура проходят контроль перед доставкой.', 'O‘lcham': 'Размер', 'Yuza': 'Поверхность',
+    'Eshik joyiga o‘rnatiladi.': 'Дверь устанавливается на место.', 'Eshik oraliqqa qo‘yilib, tekislanadi va sozlanadi — yopiladi ham, ochiladi ham silliq.': 'Дверь ставится в проём, выравнивается и настраивается — закрывается и открывается плавно.',
+    'Tekislash': 'Выравнивание', 'Sozlash': 'Регулировка', 'Yakuniy tekshiruv': 'Финальная проверка',
+    'Ba’zi eshiklar shunchaki o‘rnatiladi va unutiladi. Bu eshik esa uyingizning birinchi taassuroti bo‘ladi — har kuni, har kirishda.': 'Некоторые двери просто устанавливают и забывают. А эта дверь становится первым впечатлением о вашем доме — каждый день, при каждом входе.',
+    'Rang va uslubni tanlang — har bir eshik alohida sahifa, tezkor ko‘rish va konstruktor bilan.': 'Выберите цвет и стиль — у каждой двери своя страница, быстрый просмотр и конструктор.',
+    'Eshik tanlash': 'Выбрать дверь', 'Kunduzi': 'День', 'Kechqurun': 'Вечер', 'Jarayon': 'Процесс', 'Konstruktor': 'Конструктор', 'MDF Eshiklar': 'MDF двери',
     'Sizga yoqishi mumkin': 'Вам может понравиться', 'Zakazni tasdiqlash': 'Подтвердить заказ', 'Yetkazib berish': 'Доставка', 'Zakaz holatini tekshirish': 'Проверить статус заказа', 'Kenglik (mm)': 'Ширина (мм)', 'Balandlik (mm)': 'Высота (мм)', 'Eshiklar shu o‘lchamlarda tayyorlanadi': 'Двери изготавливаются в размерах',
     'Nom, rang yoki uslub bo‘yicha qidiring…': 'Поиск по названию, цвету или стилю…',
     'Filtrlarni tozalash': 'Сбросить фильтры', 'Katalogdagi narxlar': 'Цены в каталоге', '(narxlar almashtirildi)': '(значения поменяны местами)', 'Narx dan (so‘m)': 'Цена от (сум)', 'Narx gacha (so‘m)': 'Цена до (сум)',
     'Eshik tanlashda': 'С выбором двери', 'yordam beramiz': 'поможем', 'Savol bering, o‘lcham yoki rang bo‘yicha maslahat oling — tez orada javob beramiz.': 'Задайте вопрос, получите совет по размеру или цвету — скоро ответим.',
     'Qo‘ng‘iroq qilish': 'Позвонить', 'Telegramda yozish': 'Написать в Telegram', 'Xabar qoldirish': 'Оставить сообщение', 'Email (ixtiyoriy)': 'Email (необязательно)', 'Xabaringiz': 'Ваше сообщение', 'Telefon raqam': 'Номер телефона',
-    'Uyingizga': 'Придайте дому', 'yangi uslub': 'новый стиль', 'bering': '\u200b', 'Eshik tanlash': 'Выбрать дверь', 'Pastga': 'Вниз', 'Vitrina': 'Витрина', 'Premium kolleksiya': 'Премиум коллекция',
-    'Galereya': 'Галерея', 'Ranglar va dizaynlar': 'Цвета и дизайн', 'Konstruktor': 'Конструктор', 'O‘z eshigingizni yarating': 'Создайте свою дверь', 'Qoplama': 'Покрытие', 'Dastak': 'Ручка',
+    'Uyingizga': 'Придайте дому', 'yangi uslub': 'новый стиль', 'bering': '\u200b', 'Pastga': 'Вниз', 'Vitrina': 'Витрина', 'Premium kolleksiya': 'Премиум коллекция',
+    'Galereya': 'Галерея', 'Ranglar va dizaynlar': 'Цвета и дизайн', 'O‘z eshigingizni yarating': 'Создайте свою дверь', 'Qoplama': 'Покрытие', 'Dastak': 'Ручка',
     'Po‘lat': 'Сталь', 'Mat qora': 'Матовый чёрный', 'Oltin': 'Золото', 'Taxminiy narx': 'Примерная цена', 'Fikrlar': 'Отзывы', 'Mijozlarimiz nima deydi': 'Что говорят клиенты', 'Tarix': 'История',
     'Siz ko‘rgan eshiklar': 'Вы смотрели', 'Mashhur': 'Популярное', 'Chegirma': 'Скидка', 'Buyurtma holatini tekshirish': 'Проверить статус заказа', 'Zakaz raqami': 'Номер заказа', 'Tekshirish': 'Проверить',
     'Sahifalar': 'Страницы', 'Zakaz': 'Заказ', 'Jami': 'Итого', 'Tezkor ko‘rish': 'Быстрый просмотр', 'Rang': 'Цвет', 'Uslub': 'Стиль', 'Natija:': 'Результат:', 'Tozalash': 'Сбросить'
@@ -220,13 +236,14 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     $$('[data-content]').forEach(el => { const [g, k] = el.dataset.content.split('.'), v = CONTENT[g] && CONTENT[g][k]; if (v) el.textContent = v; });
   }
   function renderLayout() {
-    const links = NAV.map(([h, t, k]) => `<li><a href="${h}"${page === k ? ' class="active" aria-current="page"' : ''}>${t}</a></li>`).join('');
+    const links = NAV.map(([h, t, k]) => `<li><a href="${h}" data-k="${k}"${page === k ? ' class="active" aria-current="page"' : ''}>${t}</a></li>`).join('');
     $('#site-header').innerHTML = `<div class="container header__in">
       <a href="index.html" class="logo" aria-label="YasinDoors — bosh sahifa">${ICON.door}<span class="logo__t"><b>YASIN</b><i>DOORS</i></span></a>
       <nav class="nav" id="nav" aria-label="Asosiy menyu"><ul>${links}
         <li class="only-m"><a href="favorites.html">${ICON.heart}Sevimlilar ${counter('fav', 'count')}</a></li>
         <li class="only-m"><a href="cart.html">${ICON.bag}Savat ${counter('cart', 'count')}</a></li></ul></nav>
       <div class="actions">
+        <a href="doors.html" class="btn btn--p btn--sm hdr-cta">Eshik tanlash</a>
         <a href="doors.html?focus=search" class="ibtn" data-act="search" aria-label="MDF eshik qidirish">${ICON.search}</a>
         <a href="favorites.html" class="ibtn hm" aria-label="Sevimlilar">${ICON.heart}${counter('fav')}</a>
         <a href="cart.html" class="ibtn hm" aria-label="Savat">${ICON.bag}${counter('cart')}</a>
@@ -424,6 +441,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     const tabs = HOME_TABS.filter(([k, , f]) => k === 'all' || PRODUCTS.some(f));
     if (!homeTab || !tabs.some(x => x[0] === homeTab)) homeTab = tabs[0][0];
     $('#homeTabs').innerHTML = tabs.map(([k, n]) => `<button class="chip" data-act="htab" data-k="${k}" aria-pressed="${k === homeTab}">${n}</button>`).join('');
+    const ct = $('#colTitle'); if (ct && PRODUCTS.length) { const nc = new Set(PRODUCTS.map(p => p.color)).size; ct.innerHTML = LANG === 'ru' ? `${PRODUCTS.length} дверей. <em>${nc} цветов.</em>` : `${PRODUCTS.length} ta eshik. <em>${nc} ta rang.</em>`; }
     const f = HOME_TABS.find(x => x[0] === homeTab)[2], list = PRODUCTS.filter(f).slice(0, 5);
     fit($('#featured'), list.length);
     $('#featured').classList.toggle('grid--show', list.length >= 5); // asimmetrik vitrina faqat 5 ta mahsulot bo‘lganda
@@ -747,6 +765,90 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     items.forEach(el => io.observe(el));
   }
 
+  /* ---------- 13a. Scroll sahnasi: eshik tayyorlanishi (7 bosqich), so‘z-so‘z matn, navbar kuzatuvi ---------- */
+  const STAGES = [
+    ['O‘lchov', 'Hammasi aniq o‘lchovdan boshlanadi.', 'Mutaxassis eshik oralig‘ini o‘lchaydi: kenglik, balandlik va devor qalinligi. Eshik joyiga aynan mos tayyorlanadi.', ['Kenglik × balandlik', 'Devor qalinligi', 'Eshik oralig‘i']],
+    ['Material', 'Sifatli MDF plita tanlanadi.', 'Zich va bir tekis MDF plita: namlik va harorat o‘zgarishiga barqaror, yuzasi silliq.', ['MDF plita', 'Bir tekis zichlik', 'Silliq yuza']],
+    ['Dizayn', 'Model aniq kesib chiqiladi.', 'Tanlangan modelga qarab panel va chiziqlar frezer stanokda aniq o‘yiladi.', ['Classic', 'Modern', 'Minimal']],
+    ['Qoplama', 'Rang va qoplama beriladi.', 'Emal, mat PVX yoki yog‘och tekstura — interyeringizga mos rangni tanlaysiz.', ['Oq', 'Qora', 'Yog‘och', 'Jigarrang']],
+    ['Furnitura', 'Dastak va petlalar o‘rnatiladi.', 'Po‘lat, mat qora yoki oltin dastak; petlalar eshik og‘irligiga mos tanlanadi.', ['Po‘lat', 'Mat qora', 'Oltin']],
+    ['Sifat nazorati', 'Har bir eshik tekshiriladi.', 'O‘lcham, yuza va furnitura yetkazib berishdan oldin nazoratdan o‘tadi.', ['O‘lcham', 'Yuza', 'Furnitura']],
+    ['O‘rnatish', 'Eshik joyiga o‘rnatiladi.', 'Eshik oraliqqa qo‘yilib, tekislanadi va sozlanadi — yopiladi ham, ochiladi ham silliq.', ['Tekislash', 'Sozlash', 'Yakuniy tekshiruv']]
+  ];
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+  const SCENE = `<svg class="proc__svg" viewBox="-322 0 1245 700" role="img" aria-label="MDF eshikning tayyorlanish bosqichlari" preserveAspectRatio="xMidYMid meet"><defs>
+    <linearGradient id="scW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wall-a)"/><stop offset="1" style="stop-color:var(--wall-b)"/></linearGradient>
+    <linearGradient id="scF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--floor-a)"/><stop offset="1" style="stop-color:var(--floor-b)"/></linearGradient>
+    <radialGradient id="scL"><stop offset="0" stop-color="#ffc98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffc98a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="scB" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd9a3" stop-opacity=".95"/><stop offset="1" stop-color="#ffb866" stop-opacity=".55"/></linearGradient>
+    <pattern id="scG" width="9" height="60" patternUnits="userSpaceOnUse"><path d="M2 0v60M6 0v60" stroke="#000" stroke-opacity=".07"/></pattern></defs>
+    <rect class="sc-wall" x="-2000" y="-900" width="5000" height="1420" fill="url(#scW)"/><rect class="sc-floor" x="-2000" y="520" width="5000" height="1400" fill="url(#scF)"/><rect class="sc-base" x="-2000" y="506" width="5000" height="14"/>
+    <polygon class="sc-spill" points="640,520 940,520 1000,700 560,700"/><circle class="sc-lamp" cx="800" cy="170" r="300" fill="url(#scL)"/>
+    <rect class="sc-hole" x="380" y="120" width="240" height="400"/><rect class="sc-behind" x="380" y="120" width="240" height="400" fill="url(#scB)"/>
+    <rect class="sc-casing" x="368" y="108" width="264" height="412"/>
+    <g class="sc-dims"><path pathLength="1" d="M380 88H620M380 76v24M620 76v24"/><path pathLength="1" d="M338 120V520M326 120h24M326 520h24"/><text x="500" y="70" text-anchor="middle">Kenglik</text><text x="318" y="330" text-anchor="middle" transform="rotate(-90 318 330)">Balandlik</text></g>
+    <ellipse class="sc-shadow" cx="500" cy="528" rx="150" ry="10"/>
+    <g class="sc-door"><g class="sc-slab"><rect x="392" y="132" width="216" height="388" fill="var(--mdf)"/><rect x="392" y="132" width="216" height="388" fill="url(#scG)"/></g>
+      <rect class="sc-paint" x="392" y="132" width="216" height="388"/>
+      <g class="sc-grooves"><path pathLength="1" d="M412 152H588V298H412ZM412 320H588V500H412Z"/><path pathLength="1" d="M500 152V298M500 320V500"/></g>
+      <g class="sc-hw"><rect x="388" y="168" width="8" height="34" rx="2"/><rect x="388" y="330" width="8" height="34" rx="2"/><rect x="388" y="450" width="8" height="34" rx="2"/><rect class="sc-hd1" x="556" y="318" width="40" height="9" rx="4.5"/><circle class="sc-hd2" cx="590" cy="322.5" r="11"/></g>
+      <g class="sc-scan"><rect x="392" y="132" width="3" height="388"/></g></g>
+    <g class="sc-ok"><circle cx="640" cy="150" r="26"/><path d="M628 150l9 9 16-18"/></g>
+    <g class="sc-sw"></g></svg>`;
+  function initProcess() {
+    const sec = $('#process'); if (!sec) return;
+    const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const lum = h => { const n = parseInt(String(h).replace('#', ''), 16) || 0; return ((n >> 16) & 255) * .3 + ((n >> 8) & 255) * .59 + (n & 255) * .11; };
+    const cols = [...new Map(PRODUCTS.map(p => [p.color, p.hex])).values()].sort((x, y) => lum(y) - lum(x)); if (!cols.length) cols.push('#e8e4da', '#6b4a33', '#232323'); // och → to‘q: oxirgi rang to‘q bo‘ladi
+    $('#procScene').innerHTML = SCENE; translateDom($('#procScene')); const svg = $('.proc__svg', sec), sw = $('.sc-sw', svg);
+    const setVB = () => svg.setAttribute('viewBox', innerWidth <= 900 ? '262 24 476 600' : '-322 0 1245 700'); // eshik kompyuterda o‘ngda, telefonda markazda
+    setVB(); addEventListener('resize', setVB);
+    sw.innerHTML = cols.slice(0, 5).map((c, i) => `<circle cx="${500 + (i - (Math.min(cols.length, 5) - 1) / 2) * 44}" cy="600" r="14" fill="${esc(c)}"/>`).join('');
+    $('#procList').innerHTML = STAGES.map(([lb, h, p, ch], i) => `<li><span>${String(i + 1).padStart(2, '0')} / 07 · ${t(lb)}</span><h3>${t(h)}</h3><p>${t(p)}</p></li>`).join('');
+    const txt = $('#procTxt'); let cur = -1, color = -1;
+    const setText = i => {
+      const [lb, h, p, ch] = STAGES[i];
+      txt.innerHTML = `<p class="proc__no">${String(i + 1).padStart(2, '0')} / 07</p><p class="proc__lb">${t(lb)} — ${String(i + 1).padStart(2, '0')} / 07</p><h2>${t(h)}</h2><p class="proc__p">${t(p)}</p><ul class="proc__chips">${ch.map(c => `<li>${t(c)}</li>`).join('')}</ul>`;
+      txt.classList.remove('in'); void txt.offsetWidth; txt.classList.add('in');
+      $('#procCount').textContent = `${ROMAN[i]} / VII`; sec.dataset.stage = i + 1;
+      $$('.proc__dots i', sec).forEach((d, k) => d.classList.toggle('on', k <= i));
+    };
+    $('#procDots').innerHTML = STAGES.map(() => '<i></i>').join('');
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const tick = () => {
+      const r = sec.getBoundingClientRect(), total = sec.offsetHeight - innerHeight;
+      const p = calm ? 1 : clamp(-r.top / Math.max(total, 1)), x = p * 7, i = Math.min(6, Math.floor(x));
+      for (let k = 1; k <= 7; k++) svg.style.setProperty('--a' + k, calm ? 1 : clamp(x - (k - 1)).toFixed(3));
+      const ci = Math.min(cols.length - 1, Math.floor(clamp(x - 3) * 0.999 * cols.length)); // 4-bosqichda ranglar almashadi
+      if (ci !== color) { color = ci; svg.style.setProperty('--door', cols[ci]); $$('.sc-sw circle', svg).forEach((c, k) => c.classList.toggle('on', k === ci)); }
+      if (i !== cur) { cur = i; setText(i); }
+    };
+    addEventListener('scroll', tick, { passive: true }); addEventListener('resize', tick); tick();
+    $$('.proc__time button', sec).forEach(b => b.addEventListener('click', () => { sec.dataset.time = b.dataset.time; $$('.proc__time button', sec).forEach(x => x.setAttribute('aria-pressed', x === b)); }));
+  }
+  function initStatement() { // so‘zlar scroll bilan birin-ketin yorishadi
+    const sec = $('#statement'), box = $('#stmText'); if (!sec || !box) return;
+    const words = t(box.textContent.trim()).split(/\s+/); box.innerHTML = words.map(w => `<span class="w">${esc(w)}</span>`).join(' ');
+    const ws = $$('.w', box), calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const tick = () => {
+      const r = sec.getBoundingClientRect(), p = calm ? 1 : Math.min(1, Math.max(0, -r.top / Math.max(sec.offsetHeight - innerHeight, 1) * 1.15 + .05));
+      const n = Math.round(p * ws.length); ws.forEach((w, i) => w.classList.toggle('on', i < n));
+    };
+    addEventListener('scroll', tick, { passive: true }); tick();
+  }
+  function initSpy() { // bosh sahifada navbar bo‘limga qarab yoritiladi
+    if (page !== 'home') return;
+    const items = $$('#nav a[data-k]'), map = { top: 'home', process: 'process', collection: 'doors', config: 'config' };
+    const set = k => items.forEach(a => { const on = a.dataset.k === k; a.classList.toggle('active', on); if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+    const tick = () => {
+      let k = 'home'; const line = innerHeight * .4;
+      Object.keys(map).forEach(id => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= line && !el.hidden) k = map[id]; });
+      const st = document.getElementById('statement'); if (st && st.getBoundingClientRect().top <= line && k === 'process') k = 'home';
+      set(k);
+    };
+    addEventListener('scroll', tick, { passive: true }); tick();
+  }
+
   /* ---------- 13. Ishga tushirish ---------- */
   renderLayout();
   applyTheme(root.dataset.theme || 'light');
@@ -754,6 +856,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   $$('[data-door]').forEach(el => { const p = find(el.dataset.door) || PRODUCTS[0]; if (p) el.src = doorImg(p); });
   const safe = f => { try { f(); } catch (e) { console.error(e); } };
   if (page === 'doors') safe(initDoors);
+  if (page === 'home') { safe(initProcess); safe(initStatement); safe(initSpy); }
   if (page === 'contact') { safe(initContact); safe(initStatus); }
 
   /* ---------- 14. Yengil effektlar: sarlavha, hero ---------- */
