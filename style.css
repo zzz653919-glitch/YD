@@ -484,3 +484,16 @@ html:not(.theming)::view-transition-new(root){animation:.5s cubic-bezier(.2,.7,.
 /* tipografika: muvozanatli sarlavhalar, yetim so'zsiz abzaslar, bir tekis qator oralig'i */
 h1,h2,h3,.hero h1{text-wrap:balance}p,li,.lead{text-wrap:pretty}
 h2{line-height:1.08}.eyebrow{margin-bottom:18px}
+/* footer yozuvi: konteyner kengligiga moslanadi (katta ekranda o'ngdan kesilmaydi) */
+.footer .container{container-type:inline-size}
+.footer__word{font-size:clamp(34px,12vw,200px);font-size:clamp(34px,15cqw,270px);max-width:100%;overflow:hidden}
+/* katalog filtrlari: bitta setka, teng ustunlar, barcha boshqaruvlar 52px */
+.tools{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:12px;align-items:end;margin-bottom:14px}
+.tools .search{max-width:none;min-width:0}.tools .sort{min-width:0}.tools .sort .select{width:100%}
+.frow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:12px;align-items:end;margin-bottom:18px}
+.frow label{display:grid;gap:8px;min-width:0;font-size:11px;letter-spacing:.2em}
+.frow .select,.frow .field,.frow .field[type=number]{width:100%;min-width:0;height:52px}
+.frow .btn{height:52px;min-height:52px;padding-inline:26px}
+.field::placeholder{color:var(--tx2);opacity:.75}
+@media(max-width:900px){.frow{grid-template-columns:repeat(2,minmax(0,1fr))}.frow .btn{grid-column:1/-1;width:100%}}
+@media(max-width:600px){.tools{grid-template-columns:1fr}}
