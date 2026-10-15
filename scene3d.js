@@ -118,12 +118,13 @@
   const DOWN = V(0, -1, 0), L1 = .29, L2 = .31;
   function person(o) {
     const g = new T.Group(), sg = LOW ? 8 : 14;
-    const skin = M(o.skin || 0xd9a982, .55, 0, { envMapIntensity: .35 }), shirt = M(o.shirt || 0x2b3a55, .9, 0, { bumpMap: tex.fabric(), bumpScale: 0.06 }), pants = M(o.pants || 0x23262e, .9, 0, { bumpMap: tex.fabric(), bumpScale: 0.06 }), boot = M(0x2a211b, .55, 0, { envMapIntensity: .7 }), glove = M(o.glove || o.skin || 0xd9a982, o.glove ? .85 : .55);
+    const skin = M(o.skin || 0xd9a982, .55, 0, { envMapIntensity: .35 }), shirt = M(o.shirt || 0x2b3a55, .9, 0, { bumpMap: tex.fabric(), bumpScale: 0.012 }), pants = M(o.pants || 0x23262e, .9, 0, { bumpMap: tex.fabric(), bumpScale: 0.012 }), boot = M(0x2a211b, .55, 0, { envMapIntensity: .7 }), glove = M(o.glove || o.skin || 0xd9a982, o.glove ? .85 : .55);
     const hips = grp(g, 0, .92, 0), torso = grp(hips, 0, 0, 0);
     // tana
-    const pel = add(hips, capGeo(.14, .06, sg), pants, 0, .0, 0); pel.scale.set(1.2, 1, .82);
-    const chest = add(torso, capGeo(.16, .3, sg), shirt, 0, .33, 0); chest.scale.set(1.22, 1, .82);
-    add(torso, capGeo(.14, .1, sg), shirt, 0, .12, 0).scale.set(1.2, 1, .82);
+    const lathe = (pts, n) => { const k = 'lathe' + pts.join(); return GEO[k] || (GEO[k] = new T.LatheGeometry(pts.map(p => new T.Vector2(p[0], p[1])), n)); };
+    add(hips, lathe([[.001, -.17], [.08, -.16], [.135, -.1], [.15, -.03], [.145, .06], [.001, .075]], sg + 4), pants, 0, 0, 0).scale.set(1.12, 1, .8);
+    add(torso, lathe([[.001, -.03], [.125, -.02], [.138, .08], [.132, .2], [.15, .36], [.172, .5], [.165, .58], [.1, .65], [.05, .685], [.001, .69]], sg + 4), shirt, 0, 0, 0).scale.set(1.18, 1, .76);
+    if (o.inner) { const im = M(o.inner, .7), tri = (pts, mat, z) => { const sh = new T.Shape(); pts.forEach((q, i) => i ? sh.lineTo(q[0], q[1]) : sh.moveTo(q[0], q[1])); const m = new T.Mesh(new T.ShapeGeometry(sh), mat); m.position.z = z; torso.add(m); return m; }; im.side = T.DoubleSide; if (o.innerWide) tri([[-.075, .66], [.075, .66], [.07, .12], [-.07, .12]], im, .127); else tri([[-.06, .655], [.06, .655], [0, .43]], im, .128); [-1, 1].forEach(sd => { const cl = box(torso, .05, .03, .02, im, sd * .035, .665, .1, false); cl.rotation.z = -sd * .5; }); if (o.tie) tri([[-.014, .6], [.014, .6], [.024, .4], [0, .36], [-.024, .4]], M(o.tie, .5), .131); }
     add(torso, new T.CylinderGeometry(.052, .06, .1, 10), skin, 0, .66, 0, false);
     if (o.vest) { // yorqin jilet + yorug‘lik qaytaruvchi chiziqlar
       const vm = M(o.vest, .75, 0, { bumpMap: tex.fabric(), bumpScale: 0.05, side: T.DoubleSide }), rf = M(0xe4e8ea, .35, .2, { emissive: 0x555a5c, emissiveIntensity: .35 }), cg = (r, h, a, l) => new T.CylinderGeometry(r, r, h, 20, 1, true, a, l);
@@ -131,14 +132,27 @@
       [.2, .42].forEach(y => { const b = add(torso, cg(1, .045, 0, Math.PI * 2), rf, 0, y, 0, false); b.scale.set(.209, 1, .142); });
       [-.55, .55, Math.PI - .55, Math.PI + .55].forEach(an => { const s2 = add(torso, cg(1, .5, an - .08, .16), rf, 0, .34, 0, false); s2.scale.set(.209, 1, .142); });
     }
+    if (o.strips) { // yorug‘lik qaytaruvchi chiziq va cho‘ntak qopqoqlari (ish kiyimi)
+      const rf2 = M(0xb9bec4, .35, .25, { emissive: 0x3c4046, emissiveIntensity: .3 }), band = add(torso, new T.CylinderGeometry(1, 1, .04, 20, 1, true, -1.15, 2.3), rf2, 0, .43, 0, false); band.scale.set(.1925, 1, .1255); band.material = rf2;
+      [-1, 1].forEach(sd => { rb(torso, .095, .075, .014, shirt, sd * .075, .36, .113, .005, false); box(torso, .095, .012, .016, M(0x0f1624, .7), sd * .075, .393, .116, false); box(torso, .012, .012, .016, M(0xc9c2b4, .35, .7), sd * .075, .335, .118, false); });
+    }
+    if (o.belt) { const bt = add(torso, new T.CylinderGeometry(1, 1, .04, 20, 1, true), M(o.belt, .55), 0, .04, 0, false); bt.scale.set(.145 * 1.18 + .004, 1, .145 * .76 + .004); bt.material = M(o.belt, .55, 0, { side: T.DoubleSide }); box(torso, .035, .03, .01, M(0xc8c2b8, .3, .9), 0, .04, .112, false); }
     // bosh
     const head = grp(torso, 0, .72, 0), hd = add(head, new T.SphereGeometry(.1, sg + 4, sg), skin, 0, .1, 0); hd.scale.set(.88, 1.12, .98);
     const jaw = add(head, new T.SphereGeometry(.08, sg, 10), skin, 0, .035, .018, false); jaw.scale.set(1.0, .75, .92);
     add(head, new T.ConeGeometry(.02, .045, 6), skin, 0, .085, .105, false).rotation.x = Math.PI / 2 - .25;
-    const eyeW = M(0xf4f1ea, .3), eyeD = M(0x1d1712, .2);
-    [-1, 1].forEach(s => { add(head, new T.SphereGeometry(.014, 8, 6), eyeW, s * .036, .115, .088, false).scale.set(1, .7, .6); add(head, new T.SphereGeometry(.007, 6, 6), eyeD, s * .036, .115, .097, false); box(head, .04, .008, .012, M(o.hair || 0x2a1d14, .9), s * .036, .14, .092, false); const ear = add(head, new T.SphereGeometry(.02, 8, 6), skin, s * .088, .095, -.005, false); ear.scale.set(.5, 1, .8); });
-    box(head, .04, .006, .01, M(0x8a4a42, .5), 0, .045, .092, false);
+    const eyeW = M(0xf4f1ea, .3), eyeD = M(o.iris || 0x3a2a1e, .2), hairM = M(o.hair || 0x2a1d14, .85), lipM = M(o.lip || 0xb3615a, .45), pupM = M(0x0c0a08, .2);
+    [-1, 1].forEach(s => {
+      add(head, new T.SphereGeometry(.014, 8, 6), eyeW, s * .036, .115, .088, false).scale.set(1.3, .95, .6); add(head, new T.SphereGeometry(.007, 6, 6), eyeD, s * .036, .115, .0975, false).scale.setScalar(1.25); add(head, new T.SphereGeometry(.0035, 5, 5), pupM, s * .036, .115, .1015, false).scale.setScalar(1.3); add(head, new T.SphereGeometry(.0018, 4, 4), M(0xffffff, .1, 0, { emissive: 0xffffff, emissiveIntensity: .8 }), s * .036 + .004, .12, .1035, false);
+      const lid = add(head, new T.SphereGeometry(.0165, 8, 6, 0, Math.PI * 2, 0, Math.PI * .42), skin, s * .036, .1155, .0885, false); lid.scale.set(1, .8, .7); lid.rotation.x = .25;
+      const br = box(head, .042, .0085, .012, hairM, s * .037, .139, .092, false); br.rotation.z = -s * .12; br.rotation.y = -s * .25;
+      const ear = add(head, new T.SphereGeometry(.02, 8, 6), skin, s * .088, .095, -.005, false); ear.scale.set(.5, 1, .8); add(head, new T.SphereGeometry(.011, 6, 6), skin, s * .062, .06, .075, false);
+    });
+    const nb = add(head, capGeo(.007, .03, 5), skin, 0, .104, .1, false); nb.rotation.x = -.1; add(head, new T.SphereGeometry(.013, 8, 6), skin, 0, .082, .109, false).scale.set(1.2, .8, 1);
+    const ul = add(head, new T.SphereGeometry(.016, 8, 6), lipM, 0, .054, .1, false); ul.scale.set(1.6, .38, .6); const ll = add(head, new T.SphereGeometry(.0165, 8, 6), lipM, 0, .044, .099, false); ll.scale.set(1.45, .42, .6);
     if (!o.hat || o.showHair) { const hm = M(o.hair || 0x2a1d14, .8), h2 = add(head, new T.SphereGeometry(.106, sg + 2, 10, 0, Math.PI * 2, 0, Math.PI * .52), hm, 0, .105, -.006, false); h2.scale.set(.9, 1.08, 1.0); }
+    if (o.hairLong) { const hm2 = M(o.hair || 0x2a1d14, .55, 0, { envMapIntensity: .8 }), bk = add(head, new T.SphereGeometry(.112, 12, 10), hm2, 0, -.02, -.04, false); bk.scale.set(.98, 2.0, .88); [-1, 1].forEach(sd => { for (let k = 0; k < 4; k++) { const lk = add(head, new T.SphereGeometry(.04, 8, 8), hm2, sd * (.088 + (k % 2) * .008), .04 - k * .09, .005 - k * .004, false); lk.scale.set(.7, 1.9, .8); } const fr = add(head, new T.SphereGeometry(.06, 8, 8), hm2, sd * .03, .17, .06, false); fr.scale.set(1.1, .6, .6); fr.rotation.z = sd * .5; }); }
+    if (o.quiff) { const hm3 = M(o.hair || 0x2a1d14, .6), q = add(head, new T.SphereGeometry(.07, 10, 8), hm3, 0, .205, .045, false); q.scale.set(1.4, .75, 1.1); q.rotation.x = -.3; const q2 = add(head, new T.SphereGeometry(.05, 8, 8), hm3, .045, .17, .075, false); q2.scale.set(1.3, .6, .6); }
     if (o.beard) { const bd = add(head, new T.SphereGeometry(.088, 12, 8, 0, Math.PI * 2, Math.PI * .45, Math.PI * .45), M(o.hair || 0x2a1d14, .9), 0, .055, .018, false); bd.scale.set(1.02, .92, .98); }
     if (o.hat) { // himoya kaskasi
       const hm = M(o.hat, .28, 0, { envMapIntensity: 1.2 }), dome = add(head, new T.SphereGeometry(.118, sg + 4, 10, 0, Math.PI * 2, 0, Math.PI * .5), hm, 0, .13, -.004); dome.scale.set(.95, .95, 1.1);
@@ -150,16 +164,18 @@
     if (o.mask) { const mk2 = add(head, new T.SphereGeometry(.066, 12, 8, 0, Math.PI * 2, Math.PI * .45, Math.PI * .35), M(0xf2f2f0, .8), 0, .06, .03, false); mk2.scale.set(1.1, 1, 1.15); }
     // qo‘llar: yelka → tirsak → bilak → kaft
     const mkArm = side => {
-      const a = grp(torso, side * .235, .57, 0), sleeve = o.short ? skin : shirt;
-      add(a, new T.SphereGeometry(.058, 10, 8), shirt, 0, 0, 0, false); add(a, capGeo(.05, L1 - .1 - .02, 8), shirt, 0, -L1 / 2 + .01, 0);
-      const el = grp(a, 0, -L1, 0); add(el, new T.SphereGeometry(.046, 8, 6), sleeve, 0, 0, 0, false); add(el, capGeo(.04, L2 - .1 - .08, 8), sleeve, 0, -.13, 0);
-      const hd2 = grp(el, 0, -L2 + .03, 0); rb(hd2, .088, .1, .034, glove, 0, -.04, 0, .014); const fg = rb(hd2, .084, .07, .028, glove, 0, -.11, .008, .011); fg.rotation.x = -.22; const th = add(hd2, capGeo(.014, .045, 6), glove, -side * .05, -.06, .02, false); th.rotation.z = side * .5; th.rotation.x = -.3;
+      const a = grp(torso, side * .235, .57, 0), sleeve = (o.short || o.rolled) ? skin : shirt;
+      add(a, new T.SphereGeometry(.058, 10, 8), shirt, 0, 0, 0, false); add(a, new T.CylinderGeometry(.053, .044, L1 - .02, sg), shirt, 0, -L1 / 2, 0);
+      const el = grp(a, 0, -L1, 0); add(el, new T.SphereGeometry(.046, 8, 6), sleeve, 0, 0, 0, false); add(el, new T.CylinderGeometry(.043, .033, L2 - .09, sg), sleeve, 0, -(L2 - .09) / 2 - .01, 0); if (o.rolled) add(el, new T.CylinderGeometry(.05, .048, .075, sg), M(o.cuff || 0x9aa0a8, .7), 0, -.055, 0, false); else add(el, new T.CylinderGeometry(.036, .036, .03, sg), shirt, 0, -L2 + .1, 0, false);
+      const hd2 = grp(el, 0, -L2 + .03, 0); rb(hd2, .078, .09, .03, glove, 0, -.045, 0, .012);
+      for (let f = 0; f < 4; f++) { const fg = add(hd2, capGeo(.0105, .048 - Math.abs(f - 1.5) * .004, 5), glove, -.027 + f * .018, -.115, .008, false); fg.rotation.x = -.28; }
+      const th = add(hd2, capGeo(.013, .04, 6), glove, -side * .046, -.06, .016, false); th.rotation.z = side * .55; th.rotation.x = -.3;
       return { a, el, hd2 };
     };
     const aL = mkArm(-1), aR = mkArm(1);
     // oyoqlar: son → tizza → boldir → poyabzal
     const mkLeg = side => {
-      const l = grp(hips, side * .095, 0, 0); add(l, capGeo(.075, .23, sg), pants, 0, -.2, 0); const kn = grp(l, 0, -.43, 0); add(kn, new T.SphereGeometry(.062, 8, 6), pants, 0, 0, 0, false); add(kn, capGeo(.056, .3, sg), pants, 0, -.215, 0);
+      const l = grp(hips, side * .095, 0, 0); add(l, new T.CylinderGeometry(.086, .064, .43, sg), pants, 0, -.215, 0); const kn = grp(l, 0, -.43, 0); add(kn, new T.SphereGeometry(.064, 8, 6), pants, 0, 0, 0, false); add(kn, new T.CylinderGeometry(.06, .044, .43, sg), pants, 0, -.225, 0);
       const ank = grp(kn, 0, -.45, 0); rb(ank, .1, .085, .27, boot, 0, .0, .055, .03); rb(ank, .108, .026, .285, M(0x16120f, .85), 0, -.034, .055, .01); box(ank, .09, .04, .06, M(0x9aa2a8, .35, .8), 0, .0, .15, false); return { l, kn, ank };
     };
     const lL = mkLeg(-1), lR = mkLeg(1);
@@ -173,7 +189,7 @@
     const arm = side < 0 ? P.armL : P.armR, el = side < 0 ? P.elL : P.elR; P.ik[side < 0 ? 0 : 1] = true;
     const sh = arm.position, tl = P.torso.worldToLocal(_a.copy(target)), d = _b.copy(tl).sub(sh); let dist = d.length(); const u = d.clone().divideScalar(dist || 1); dist = clamp(dist, .1, L1 + L2 - .004);
     const a = (L1 * L1 - L2 * L2 + dist * dist) / (2 * dist), h = Math.sqrt(Math.max(0, L1 * L1 - a * a));
-    const pole = (bias || V(side * .5, -.9, -.45)).clone().normalize(); const perp = pole.sub(u.clone().multiplyScalar(pole.dot(u))).normalize();
+    const pole = (bias || V(side * .7, -.6, -.5)).clone().normalize(); const perp = pole.sub(u.clone().multiplyScalar(pole.dot(u))).normalize();
     const elb = sh.clone().addScaledVector(u, a).addScaledVector(perp, h), tip = sh.clone().addScaledVector(u, dist);
     arm.quaternion.setFromUnitVectors(DOWN, elb.clone().sub(sh).divideScalar(L1));
     const f = tip.sub(elb).divideScalar(L2).applyQuaternion(_q.copy(arm.quaternion).invert()); el.quaternion.setFromUnitVectors(DOWN, f.normalize());
@@ -322,5 +338,5 @@
     };
     api.resize(); return api;
   }
-  window.YDScene = { BEATS, ACTS, init, bp, _room: room, _lib: { clamp, lerp, sm, seg, V, K, KV } };
+  window.YDScene = { BEATS, ACTS, init, bp, _room: room, _lib: { clamp, lerp, sm, seg, V, K, KV }, _kit: { person, idle, settle, reach, handPos, makeEnv, M, rb, grp, box, add, tex, withTex, setLow(v) { LOW = !!v; SHADOWS = !v; }, shadows(v) { SHADOWS = !!v; } } };
 })();
