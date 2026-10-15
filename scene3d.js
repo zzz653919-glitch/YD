@@ -180,7 +180,7 @@
     };
     const lL = mkLeg(-1), lR = mkLeg(1);
     blob(g, .75, .55, .85);
-    const P = { g, hips, torso, head, armL: aL.a, armR: aR.a, elL: aL.el, elR: aR.el, hdL: aL.hd2, hdR: aR.hd2, legL: lL.l, legR: lR.l, knL: lL.kn, knR: lR.kn, ik: [false, false], k: 0, ph: 0, lp: null, yaw: 0, face: null, sit: false, lean: 0, kind: o.kind || '' };
+    const P = { g, hips, torso, head, armL: aL.a, armR: aR.a, elL: aL.el, elR: aR.el, hdL: aL.hd2, hdR: aR.hd2, legL: lL.l, legR: lR.l, knL: lL.kn, knR: lR.kn, ankL: lL.ank, ankR: lR.ank, ik: [false, false], k: 0, ph: 0, lp: null, yaw: 0, face: null, sit: false, lean: 0, kind: o.kind || '' };
     g.userData = P; g.scale.setScalar(o.s || 1); return P;
   }
   const _a = V(0, 0, 0), _b = V(0, 0, 0), _q = new T.Quaternion();
@@ -212,7 +212,11 @@
     P.g.rotation.y = P.yaw; idle(P, t, ph0 || 0); if (P.k > .01) gait(P, P.k); ground(P);
   };
   // oyoq-polga mosligi: eng pastki oyoq poldan o‘tmaydi va havoda turmaydi
-  const ground = P => { if (P.sit) return; const drop = (leg, kn) => .43 * Math.cos(leg.rotation.x) + .45 * Math.cos(leg.rotation.x + kn.rotation.x) + .04; P.hips.position.y = Math.max(drop(P.legL, P.knL), drop(P.legR, P.knR)); };
+  const ground = P => { // oyoq kafti yerga yotadi (to‘piq tekislanadi); eng pastki nuqta (barmoq yoki tovon) poldan o‘tmaydi va havoda turmaydi
+    if (P.sit) return;
+    const lowest = (leg, kn, ank) => { const a = leg.rotation.x, k = kn.rotation.x; ank.rotation.x = -(a + k) * .9; const f = a + k + ank.rotation.x; return .43 * Math.cos(a) + .45 * Math.cos(a + k) + .047 * Math.cos(f) + Math.max(.19 * Math.sin(f), -.085 * Math.sin(f)); };
+    P.hips.position.y = Math.max(lowest(P.legL, P.knL, P.ankL), lowest(P.legR, P.knR, P.ankR));
+  };
   const crouch = (P, c) => { P.legL.rotation.x = P.legR.rotation.x = -.85 * c; P.knL.rotation.x = P.knR.rotation.x = 1.7 * c; P.torso.rotation.x += .35 * c; ground(P); };
   // tirsaklar yumshoq buklanadi (IK bo‘lmagan qo‘llar)
   const settle = P => {
@@ -257,7 +261,7 @@
     box(R, .07, 2.06, .26, jm, -.465, 1.03, -3.6, false); box(R, .07, 2.06, .26, jm, .465, 1.03, -3.6, false); box(R, 1.0, .07, .26, jm, 0, 2.085, -3.6, false); box(R, .96, .012, .26, M(0xb8b3a8, .4, .9), 0, .006, -3.6, false); // ostona
     const out = { R, floor, opening: V(x0, 0, -3.6) };
     if (withShell) { // tashqaridan ko‘rinadigan uy: qanotlar, tom, kirish zinapoyasi, ayvon
-      const sh2 = M(0xdcd5c8, .9, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.03 }), dark = M(0x2b2f35, .6, .3), stone = M(0xcfc9bd, .9, 0, { map: withTex(tex.concrete(), 2, 1).map });
+      const sh2 = M(0xdcd5c8, .9, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.03 }), stone = M(0xcfc9bd, .9, 0, { map: withTex(tex.concrete(), 2, 1).map });
       box(R, 9.6, .4, 9.6, stone, 0, -.26, 1.2, false);
       rb(R, 13, .38, 11.6, M(0xe4dfd4, .8), 0, 3.3, .6, .05); rb(R, 13.2, .08, 11.8, M(0xe3ddd0, .7), 0, 3.52, .6, .02); box(R, 13, .5, .1, trim, 0, 3.0, 6.3, false);
       box(R, 6, 3.4, 5, sh2, -9.2, 1.7, -2.5); box(R, 6, 3.4, 5, sh2, 9.2, 1.7, -2.5);
@@ -322,19 +326,19 @@
       state.raf = requestAnimationFrame(frame); const dt = Math.min(.05, (now - state.last) / 1000 || .016); state.last = now; state.time += dt;
       const lag = opts.reduced ? 1 : 1 - Math.pow(.0015, dt); state.shown += (state.target - state.shown) * lag; if (Math.abs(state.target - state.shown) < 1e-5) state.shown = state.target;
       step(dt); renderer.render(scene, cam);
-      // FPS nazorati: sekin qurilmada piksel zichligini kamaytiramiz
-      if (++state.frames > 20 && state.frames < 140) { if (dt > .034) state.slow++; if (state.frames === 139 && state.slow > 60 && state.q > .6) { state.q -= .25; api.resize(); state.frames = 20; state.slow = 0; } }
+      // FPS nazorati: har 90 kadrda tekshiriladi; sekin bo‘lsa avval piksel zichligi, so‘ng soyalar kamaytiriladi
+      if (++state.frames >= 20) { if (dt > .034) state.slow++; if (state.frames >= 110) { if (state.slow > 45) { if (state.q > .6) { state.q -= .2; api.resize(); } else if (renderer.shadowMap.enabled) { renderer.shadowMap.enabled = false; sun.castShadow = false; scene.traverse(o => { if (o.material) [].concat(o.material).forEach(m => { m.needsUpdate = true; }); }); } } state.frames = 20; state.slow = 0; } }
       if (opts.onFrame) opts.onFrame(state.shown);
     };
     const api = {
       setProgress(p) { state.target = clamp(p); if (!state.running) { state.shown = state.target; } },
-      resize() { const w = canvas.clientWidth || 800, h = canvas.clientHeight || 600; const pr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.75) * state.q; renderer.setPixelRatio(pr); renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w / h < .8 ? 56 : 40; /* matn chapda/pastda turadi: sahna markazi o‘ngga/yuqoriga siljitiladi */ if (opts.offset !== false) { if (w / h >= 1) cam.setViewOffset(w, h, -w * .15, 0, w, h); else cam.setViewOffset(w, h, 0, h * .14, w, h); } cam.updateProjectionMatrix(); },
+      resize() { const w = canvas.clientWidth || 800, h = canvas.clientHeight || 600; const pr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.75) * state.q; if (state.sz === w + 'x' + h + '@' + pr) return; state.sz = w + 'x' + h + '@' + pr; /* o‘lcham o‘zgarmasa (mobil brauzer paneli) canvas qayta tozalanmaydi */ renderer.setPixelRatio(pr); renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w / h < .8 ? 56 : 40; /* matn chapda/pastda turadi: sahna markazi o‘ngga/yuqoriga siljitiladi */ if (opts.offset !== false) { if (w / h >= 1) cam.setViewOffset(w, h, -w * .15, 0, w, h); else cam.setViewOffset(w, h, 0, h * .14, w, h); } cam.updateProjectionMatrix(); },
       start() { if (state.running) return; state.running = true; state.last = performance.now(); state.raf = requestAnimationFrame(frame); },
       stop() { state.running = false; cancelAnimationFrame(state.raf); },
       renderOnce() { step(.016); renderer.render(scene, cam); },
       jump(p) { state.target = state.shown = clamp(p); },
       dispose() { api.stop(); renderer.dispose(); },
-      get progress() { return state.shown; }, THREE: T, _renderer: renderer, _scene: scene, _override(f) { state.override = f; }
+      get progress() { return state.shown; }, _target() { return state.target; }, THREE: T, _renderer: renderer, _scene: scene, _override(f) { state.override = f; }
     };
     api.resize(); return api;
   }

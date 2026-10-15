@@ -5,13 +5,13 @@
   const T = window.THREE, L = Y._lib, { clamp, lerp, sm, seg } = L;
 
   Y._build = function (c) {
-    const { world, actors, M, GL, EMI, box, rb, cyl, add, grp, person, idle, walker, settle, crouch, reach, handPos, blob, tex, withTex, woodMat, K, V, bp, mobile } = c;
+    const { world, actors, M, GL, box, rb, cyl, add, grp, person, walker, settle, crouch, reach, handPos, blob, tex, withTex, woodMat, K, V, bp, mobile } = c;
     const SH = c.SHADOWS, B = i => Y.BEATS[i];
     const FX0 = 34, FX1 = 92, LINE_Y = .95, LT = .045;
     const steel = M(0x8a929a, .32, .9), steelD = M(0x4b525a, .4, .8), dark = M(0x2a2e33, .55, .35), black = M(0x15171a, .5, .2), chrome = M(0xd5d9dd, .12, 1, { envMapIntensity: 1.4 });
-    const blue = M(0x2f5f95, .38, .35, { envMapIntensity: .9 }), orange = M(0xe8742a, .45, .2), yellow = M(0xe8b520, .45, .15), white = M(0xeeede8, .45, .05), red = M(0xc9362b, .45, .2), green = M(0x35a36a, .4, .1);
+    const blue = M(0x2f5f95, .38, .35, { envMapIntensity: .9 }), orange = M(0xe8742a, .45, .2), yellow = M(0xe8b520, .45, .15), white = M(0xeeede8, .45, .05), red = M(0xc9362b, .45, .2);
     const cf = withTex(tex.concrete(), 15, 7), conc = M(0xffffff, .5, 0, { map: cf.map, bumpMap: cf.bump, bumpScale: 0.12, envMapIntensity: .8 });
-    const MDF = 0xd8b88a, WALNUT = 0x5c3c28;
+    const WALNUT = 0x5c3c28;
     const screenCv = (txt, col) => { const cv = document.createElement('canvas'); cv.width = 128; cv.height = 80; const g = cv.getContext('2d'); g.fillStyle = '#0c1118'; g.fillRect(0, 0, 128, 80); g.fillStyle = col; g.font = '700 14px sans-serif'; g.fillText(txt, 8, 22); g.fillStyle = col + '88'; for (let i = 0; i < 6; i++) g.fillRect(8, 34 + i * 7, 20 + ((i * 37) % 80), 3); const t = new T.CanvasTexture(cv); if (T.sRGBEncoding) t.encoding = T.sRGBEncoding; return t; };
     const screen = (parent, w, h, x, y, z, txt, col, rx = 0) => { const m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ map: screenCv(txt, col), toneMapped: false })); m.position.set(x, y, z); m.rotation.x = rx; parent.add(m); return m; };
     const console_ = (parent, x, z, ry, txt, col) => { const g = grp(parent, x, 0, z); g.rotation.y = ry; rb(g, .5, .9, .4, steelD, 0, .45, 0, .02); rb(g, .62, .06, .5, black, 0, .93, 0, .015); const sc = grp(g, 0, 1.05, -.1); sc.rotation.x = -.3; rb(sc, .46, .3, .04, black, 0, 0, 0, .012); screen(sc, .4, .24, 0, 0, .025, txt, col); box(g, .08, .05, .08, red, .2, .97, .1, false); cyl(g, .04, .04, .03, red, -.2, .96, .12, 10, false); return g; };
@@ -22,7 +22,11 @@
     const F = grp(world, 0, 0, 0);
     const fl = add(F, new T.PlaneGeometry(FX1 - FX0 + 6, 30), conc, (FX0 + FX1) / 2 + 1, 0, 6, false); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = SH;
     const pw = withTex(tex.plaster(), 18, 3), wallM = M(0xdadde0, .8, 0, { map: pw.map, bumpMap: pw.bump, bumpScale: 0.05 }), wallDk = M(0x8c959d, .7);
-    box(F, FX1 - FX0, 10, .3, wallM, (FX0 + FX1) / 2, 5, -9.2); box(F, .3, 10, 18, wallM, FX0, 5, 0);
+    box(F, FX1 - FX0, 10, .3, wallM, (FX0 + FX1) / 2, 5, -9.2);
+    box(F, .3, 10, 10.5, wallM, FX0, 5, -3.75); box(F, .3, 10, 2, wallM, FX0, 5, 8); box(F, .3, 5, 5.5, wallM, FX0, 7.5, 4.25); // chap devor: yuk ko‘targich kiradigan darvoza (5.5 × 5 m)
+    [1.5, 7].forEach(z => box(F, .5, 5.2, .5, yellow, FX0, 2.6, z, false)); box(F, .45, .6, 5.9, hazardM, FX0, 5.3, 4.25, false);
+    { const sg = document.createElement('canvas'); sg.width = 1024; sg.height = 200; const g = sg.getContext('2d'); g.fillStyle = '#16181b'; g.fillRect(0, 0, 1024, 200); g.fillStyle = '#e9a45e'; g.beginPath(); g.arc(90, 100, 34, 0, 7); g.fill(); g.fillStyle = '#f4efe4'; g.font = '700 96px sans-serif'; g.textBaseline = 'middle'; g.fillText('YASINDOORS', 150, 104); g.font = '600 34px sans-serif'; g.fillStyle = '#b9b2a4'; g.fillText('MDF ESHIKLAR · ZAVOD', 560, 150); const st = new T.CanvasTexture(sg); if (T.sRGBEncoding) st.encoding = T.sRGBEncoding; const sp = new T.Mesh(new T.PlaneGeometry(9, 1.76), new T.MeshBasicMaterial({ map: st, toneMapped: false })); sp.rotation.y = -Math.PI / 2; sp.position.set(FX0 - .17, 7.6, -3.8); F.add(sp); }
+    for (let i = 0; i < 3; i++) { box(F, .08, 1.4, 2.6, GL(0xbcdcf8, .45), FX0 - .17, 3.2, -7.3 + i * 3.4, false); box(F, .1, .08, 2.8, steelD, FX0 - .18, 3.95, -7.3 + i * 3.4, false); box(F, .1, .08, 2.8, steelD, FX0 - .18, 2.5, -7.3 + i * 3.4, false); }
     box(F, .3, 3, 18, wallM, FX1, 8.5, 0); box(F, .3, 10, 6.2, wallM, FX1, 5, 6.1); box(F, .3, 10, 6.2, wallM, FX1, 5, -6.1);
     box(F, FX1 - FX0, 1.1, .34, wallDk, (FX0 + FX1) / 2, .55, -9.0, false);
     for (let i = 0; i < 9; i++) { const x = FX0 + 6 + i * 6.2; box(F, 3.4, 1.3, .08, GL(0xbcdcf8, .45), x, 7.6, -9.0, false); box(F, 3.5, .08, .12, steelD, x, 8.3, -9.0, false); box(F, 3.5, .08, .12, steelD, x, 6.9, -9.0, false); box(F, .06, 1.3, .12, steelD, x, 7.6, -9.0, false); }
@@ -70,7 +74,7 @@
     const saw = grp(F, SX.saw, 0, 0); stationBase(saw, 4.2, 3.8);
     rb(saw, 4.0, .2, 1.5, steelD, 0, LINE_Y - .15, 0, .02); rb(saw, 3.6, .04, 1.3, M(0x707880, .25, .9), 0, LINE_Y - .03, 0, .01, false);
     [-1.6, 1.6].forEach(z => { rb(saw, .4, 2.7, .4, blue, .3, 1.5, z, .04); rb(saw, .5, .12, .5, steelD, .3, .1, z, .01, false); }); rb(saw, .55, .5, 3.9, blue, .3, 3.0, 0, .05);
-    const sawCar = grp(saw, .3, 2.5, 0); rb(sawCar, .7, .7, .65, steel, 0, 0, 0, .05); rb(sawCar, .5, .9, .45, blue, 0, .2, 0, .05); const hood = rb(sawCar, .75, .5, .08, GL(0xcfe6ff, .35), 0, -.55, .0, .01, false);
+    const sawCar = grp(saw, .3, 2.5, 0); rb(sawCar, .7, .7, .65, steel, 0, 0, 0, .05); rb(sawCar, .5, .9, .45, blue, 0, .2, 0, .05); rb(sawCar, .75, .5, .08, GL(0xcfe6ff, .35), 0, -.55, .0, .01, false);
     const blade = cyl(sawCar, .46, .46, .025, M(0xc9cdd1, .2, 1, { envMapIntensity: 1.4 }), 0, -.6, 0, 40); blade.rotation.x = Math.PI / 2; for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; const tooth = box(blade, .05, .03, .05, M(0x9aa0a6, .2, 1), Math.cos(a) * .46, 0, Math.sin(a) * .46, false); tooth.rotation.y = -a; }
     const bladeAx = blade; box(sawCar, .5, .28, .5, orange, 0, -.35, -.35);
     pipe(saw, [[.3, 3.0, -1.8], [.3, 4.8, -2.4], [.3, 6.8, -2.4]], .1, M(0x3a3f45, .8, .2)); rb(saw, .4, 1.2, .5, black, 1.9, .6, -1.3, .02); screen(saw, .3, .22, 1.9, 1.15, -1.04, 'SAW 2040', '#43d08f', 0);
@@ -147,7 +151,7 @@
     truck.position.set(101, 0, 0); const trkP = V(0, 0, 0), trkT = V(0, 0, 1);
 
     /* ---------- Ishlov beriladigan eshik: 800×2000 mm panelli tabaqa ---------- */
-    const LW = 2.0, LH = .8; // x — bo‘yi, z — eni, y — qalinlik (LT)
+    const LW = 2.0; // x — bo‘yi, z — eni, y — qalinlik (LT)
     const leaf = grp(world, 0, 0, 0), raw = M(0xffffff, .9, 0, { map: tex.mdf().map, bumpMap: tex.mdf().bump, bumpScale: 0.03 });
     const finT = tex.wood('walnut'), fin = new T.MeshPhysicalMaterial({ color: WALNUT, map: finT.map, bumpMap: finT.bump, bumpScale: 0.05, roughness: .45, clearcoat: .55, clearcoatRoughness: .2, envMapIntensity: .55, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
     const parts = []; const pl = (w, h, d, x, z, ex, ey, ez, r) => { const m = rb(leaf, w, h, d, raw, x, 0, z, r || .006); m.userData = { x, z, ex, ey, ez }; const cm = new T.Mesh(m.geometry, fin); cm.scale.setScalar(1.003); m.add(cm); m.userData.coat = cm; parts.push(m); return m; };
@@ -169,7 +173,7 @@
     rb(pack, 2.12, .03, .92, cardM, 0, -.04, 0, .006); [-.46, .46].forEach(z => rb(pack, 2.12, .1, .03, cardM, 0, -.02, z, .006)); [-1.06, 1.06].forEach(x => rb(pack, .03, .1, .92, cardM, x, -.02, 0, .006));
     for (let i = 0; i < 4; i++) rb(pack, .09, .03, .14, M(0xe9e2d3, .9), -.8 + i * .53, .0, 0, .008, false);
     const lid = grp(pack, 0, .5, 0); rb(lid, 2.16, .035, .96, cardM, 0, 0, 0, .008); const lbl = new T.Mesh(new T.PlaneGeometry(.9, .3), new T.MeshBasicMaterial({ map: (function () { const cv = document.createElement('canvas'); cv.width = 360; cv.height = 120; const g = cv.getContext('2d'); g.fillStyle = '#f4efe4'; g.fillRect(0, 0, 360, 120); g.fillStyle = '#16181b'; g.font = '700 40px sans-serif'; g.textBaseline = 'middle'; g.fillText('YASINDOORS', 26, 44); g.fillStyle = '#c4602a'; g.font = '600 22px sans-serif'; g.fillText('MDF ESHIK · MAHSULOT', 26, 90); const t = new T.CanvasTexture(cv); if (T.sRGBEncoding) t.encoding = T.sRGBEncoding; return t; })() })); lbl.rotation.x = -Math.PI / 2; lbl.position.set(.5, .019, 0); lid.add(lbl); box(lid, .1, .004, .96, M(0x6b4f2e, .9), -.4, .019, 0, false);
-    const film = rb(pack, 2.2, .14, 1.0, GL(0xe6f0fa, .26), 0, .02, 0, .03, false); const filmShine = rb(film, 2.2, .14, 1.0, M(0xffffff, .05, 0, { transparent: true, opacity: .08, envMapIntensity: 2.2, depthWrite: false }), 0, 0, 0, .03, false);
+    const film = rb(pack, 2.2, .14, 1.0, GL(0xe6f0fa, .26), 0, .02, 0, .03, false); rb(film, 2.2, .14, 1.0, M(0xffffff, .05, 0, { transparent: true, opacity: .08, envMapIntensity: 2.2, depthWrite: false }), 0, 0, 0, .03, false);
     const checkM = new T.Mesh(new T.CircleGeometry(.3, 28), new T.MeshBasicMaterial({ color: 0x43d08f, transparent: true, opacity: 0, toneMapped: false })); checkM.position.set(SX.qc, 2.5, 1.0); F.add(checkM);
 
     /* ---------- Uy B (o‘rnatish) ---------- */
@@ -309,7 +313,7 @@
       truck.updateMatrixWorld(true);
       /* ======== tabaqa / quti dunyo holati ======== */
       const lx = K(p, LEAF_X); let lyaw = 0;
-      leafP.set(lx, LINE_Y + .0525 + .0, 0); leafP.y = lx > 83 ? LINE_Y + .0525 + K(p, [[bp(10, .1), 0], [bp(10, .5), .028]]) : LINE_Y + .0525; leafQ.identity(); packP.copy(leafP); packQ.identity();
+      leafP.set(lx, LINE_Y + .0625 + .0, 0); leafP.y = lx > 83 ? LINE_Y + .0625 + K(p, [[bp(10, .1), 0], [bp(10, .5), .028]]) : LINE_Y + .0625; leafQ.identity(); packP.copy(leafP); packQ.identity();
       const cp = V(0, 0, 0);
       if (p >= bp(11, .05) && p < bp(11, .86)) { // ishchilar ko‘tarib darvoza orqali olib chiqadi
         leafP.set(K(p, [[bp(11, .05), 86], [bp(11, .22), 87.6], [bp(11, .5), 92.5], [bp(11, .75), 94.6], [bp(11, .86), 94.6]]), K(p, [[bp(11, .05), LEAF_Y0()], [bp(11, .22), 1.02], [bp(11, .86), 1.12]]), 0); packP.copy(leafP);
@@ -422,7 +426,7 @@
       /* ======== quti tugmalari (qadoq ichidagi plyonka 14-bosqichda olinadi) ======== */
       if (p >= bp(14, 0)) film.visible = false;
     });
-    function LEAF_Y0() { return LINE_Y + .0525 + .028; }
+    function LEAF_Y0() { return LINE_Y + .0625 + .028; }
     c.leaf = leaf; c.truck = truck; c.route = route; c.HB_X = HB_X;
     // atmosfera: zonaga qarab osmon/tuman/yorug‘lik
     const sky = [[0, [.81, .89, 1]], [bp(2, .9), [.81, .89, 1]], [bp(3, .2), [.72, .76, .82]], [bp(10, 1), [.72, .76, .82]], [bp(11, .5), [.78, .8, .84]], [bp(12, .5), [.95, .84, .66]], [bp(13, 0), [.86, .9, .96]], [1, [.88, .93, 1]]];
@@ -440,9 +444,9 @@
     add(0, [3.4, 1.9, 10.5], [0, 1.4, 0]); add(bp(0, .55), [2.6, 1.75, 6.2], [0, 1.2, -1.2]);
     add(bp(1, 0), [-3.4, 1.55, 2.2], [-.1, 1.2, -2.1]); add(bp(1, .45), [-3.2, 1.45, 1.6], [-.1, 1.2, -2.6]); add(bp(1, .8), [2.9, 1.5, 2.2], [0, 1.2, -2.4]);
     add(bp(2, .1), [-3.9, 1.5, .5], [-.25, 1.3, -.8]); add(bp(2, .6), [-3.7, 1.45, .2], [-.25, 1.3, -.8]);
-    add(bp(2, .8), [-2.4, 2.4, 5.0], [6, 1.6, 0]); add(bp(2, .95), [8, 5.2, 15], [22, 2.2, 0]); add(bp(3, 0), [20, 7, 20], [40, 1.5, 3]);
+    add(bp(2, .76), [-2.4, 2.4, 5.0], [6, 1.6, 0]); add(bp(2, .9), [7, 4.8, 13], [20, 2.2, 0]); add(bp(3, .1), [18, 6.2, 18.5], [38, 1.5, 3]);
     // 2-akt: zavod — kamera konveyer bo‘ylab, eshik tabaqasiga yaqin va past burchakdan
-    add(bp(3, .3), [34, 3.4, 12.5], [41, 1.2, 3.8]); add(bp(3, .75), [40, 3.0, 9.5], [43.5, 1.1, 2]);
+    add(bp(3, .42), [34, 3.4, 12.5], [41, 1.2, 3.8]); add(bp(3, .75), [40, 3.0, 9.5], [43.5, 1.1, 2]);
     add(bp(4, .1), [44.4, 2.2, 4.0], [47.4, 1.3, 0]); add(bp(4, .8), [51.2, 2.2, 3.8], [50, 1.2, 0]);
     add(bp(5, .1), [51.8, 2.2, 3.8], [54, 1.2, 0]); add(bp(5, .9), [56.0, 2.2, 3.6], [54, 1.2, 0]);
     add(bp(6, .15), [57.4, 3.0, 6.4], [59.8, 1.3, 0]); add(bp(6, .85), [62.4, 3.0, 6.0], [61.4, 1.2, 0]);

@@ -931,7 +931,12 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
         B.forEach((b, k) => { if (k === 0 || b.act !== B[k - 1].act) { const ai = b.act, bs = B.filter(x => x.act === ai), a0 = bs[0].a, a1 = bs[bs.length - 1].b; fills[ai].style.width = (clamp((p - a0) / (a1 - a0)) * 100).toFixed(1) + '%'; } });
         sec.classList.toggle('proc--end', p > .94);
       };
-      const first = () => { sec.classList.add('proc--3d'); sceneApi.resize(); tick(); requestAnimationFrame(() => canvas.classList.add('on')); };
+      const first = () => { // 3D rejimga o‘tishda bo‘lim balandligi o‘zgaradi: foydalanuvchi turgan joy sakramasligi uchun scroll tuzatiladi
+        const de = document.documentElement, r0 = sec.getBoundingClientRect(), h0 = sec.offsetHeight; de.style.overflowAnchor = 'none'; sec.classList.add('proc--3d'); const h1 = sec.offsetHeight;
+        if (h1 !== h0) { if (r0.bottom <= 0) scrollTo({ top: scrollY + (h1 - h0), behavior: 'instant' }); else if (r0.top < 0) scrollTo({ top: scrollY + (-r0.top / Math.max(h0 - innerHeight, 1)) * (h1 - innerHeight) + r0.top, behavior: 'instant' }); }
+        requestAnimationFrame(() => requestAnimationFrame(() => { de.style.overflowAnchor = ''; }));
+        sec.yd3d = sceneApi; sceneApi.resize(); tick(); requestAnimationFrame(() => canvas.classList.add('on'));
+      };
       first();
       addEventListener('scroll', tick, { passive: true }); addEventListener('resize', () => { sceneApi.resize(); tick(); }); document.addEventListener('visibilitychange', tick);
     };
