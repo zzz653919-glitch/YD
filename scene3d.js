@@ -75,7 +75,11 @@
   const EMI = (color, int = 1) => M(0x111111, .6, 0, { emissive: color, emissiveIntensity: int });
   const mark = (m, shadow) => { if (SHADOWS && shadow !== false) { const g = m.geometry; if (!g.boundingSphere) g.computeBoundingSphere(); m.castShadow = g.boundingSphere.radius > .14; m.receiveShadow = true; } else m.receiveShadow = SHADOWS; return m; };
   const add = (parent, geo, mat, x = 0, y = 0, z = 0, shadow = true) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); mark(m, shadow); parent.add(m); return m; };
-  const box = (parent, w, h, d, mat, x, y, z, shadow) => add(parent, new T.BoxGeometry(w, h, d), mat, x, y, z, shadow);
+  const bgeo = (w, h, d) => { // UV metrda: tekstura katta-kichik qutilarda cho‘zilmaydi
+    const k = 'box' + w + '|' + h + '|' + d; if (GEO[k]) return GEO[k]; const g = new T.BoxGeometry(w, h, d), uv = g.attributes.uv, dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+    for (let f = 0; f < 6; f++) for (let i = 0; i < 4; i++) { const n = f * 4 + i; uv.setXY(n, uv.getX(n) * dims[f][0], uv.getY(n) * dims[f][1]); } return GEO[k] = g;
+  };
+  const box = (parent, w, h, d, mat, x, y, z, shadow) => add(parent, bgeo(w, h, d), mat, x, y, z, shadow);
   const cyl = (parent, rt, rb, h, mat, x, y, z, seg = 16, shadow) => add(parent, new T.CylinderGeometry(rt, rb, h, LOW ? Math.min(seg, 10) : seg), mat, x, y, z, shadow);
   const grp = (parent, x = 0, y = 0, z = 0) => { const g = new T.Group(); g.position.set(x, y, z); parent && parent.add(g); return g; };
   // yumaloqlangan qirrali quti (fazali bevel): w×h×d, r — qirra radiusi; UV — haqiqiy o‘lchamda (tekstura masshtabi to‘g‘ri)
@@ -139,9 +143,12 @@
     const hips = grp(g, 0, .92, 0), torso = grp(hips, 0, 0, 0);
     // tana
     const lathe = (pts, n) => { const k = 'lathe' + pts.join(); return GEO[k] || (GEO[k] = new T.LatheGeometry(pts.map(p => new T.Vector2(p[0], p[1])), n)); };
-    add(hips, lathe([[.001, -.17], [.08, -.16], [.135, -.1], [.15, -.03], [.145, .06], [.001, .075]], sg + 4), pants, 0, 0, 0).scale.set(1.12, 1, .8);
+    add(hips, lathe([[.001, -.15], [.09, -.14], [.135, -.09], [.148, -.02], [.142, .06], [.001, .075]], sg + 4), pants, 0, 0, 0).scale.set(1.04, 1, .78);
     add(torso, lathe([[.001, -.03], [.125, -.02], [.138, .08], [.132, .2], [.15, .36], [.172, .5], [.165, .58], [.1, .65], [.05, .685], [.001, .69]], sg + 4), shirt, 0, 0, 0).scale.set(1.18, 1, .76);
-    if (o.inner) { const im = M(o.inner, .7), tri = (pts, mat, z) => { const sh = new T.Shape(); pts.forEach((q, i) => i ? sh.lineTo(q[0], q[1]) : sh.moveTo(q[0], q[1])); const m = new T.Mesh(new T.ShapeGeometry(sh), mat); m.position.z = z; torso.add(m); return m; }; im.side = T.DoubleSide; if (o.innerWide) tri([[-.075, .66], [.075, .66], [.07, .12], [-.07, .12]], im, .127); else tri([[-.06, .655], [.06, .655], [0, .43]], im, .128); [-1, 1].forEach(sd => { const cl = box(torso, .05, .03, .02, im, sd * .035, .665, .1, false); cl.rotation.z = -sd * .5; }); if (o.tie) tri([[-.014, .6], [.014, .6], [.024, .4], [0, .36], [-.024, .4]], M(o.tie, .5), .131); }
+    if (o.inner) { // ichki ko‘ylak/futbolka: tana shakliga mos egilgan bo‘lak (yassi plastinka emas)
+      const prof = (y0, y1) => [[.001, -.03], [.125, -.02], [.138, .08], [.132, .2], [.15, .36], [.172, .5], [.165, .58], [.1, .65], [.05, .685], [.001, .69]].filter(q => q[1] >= y0 && q[1] <= y1), slice = (y0, y1, ph, mat, k) => { const m = add(torso, new T.LatheGeometry(prof(y0, y1).map(q => new T.Vector2(q[0] * k, q[1])), 10, -ph, ph * 2), mat, 0, 0, 0, false); m.scale.set(1.18, 1, .76); return m; };
+      const im = M(o.inner, .8, 0, { bumpMap: tex.fabric(), bumpScale: 0.01 }); if (o.innerWide) slice(.08, .65, .34, im, 1.015); else slice(.36, .65, .24, im, 1.015); if (o.tie) slice(.2, .58, .05, M(o.tie, .5), 1.03);
+    }
     add(torso, new T.CylinderGeometry(.052, .06, .1, 10), skin, 0, .66, 0, false);
     if (o.vest) { // yorqin jilet + yorug‘lik qaytaruvchi chiziqlar
       const vm = M(o.vest, .75, 0, { bumpMap: tex.fabric(), bumpScale: 0.05, side: T.DoubleSide }), rf = M(0xe4e8ea, .35, .2, { emissive: 0x555a5c, emissiveIntensity: .35 }), cg = (r, h, a, l) => new T.CylinderGeometry(r, r, h, 20, 1, true, a, l);
@@ -156,20 +163,20 @@
     if (o.belt) { const bt = add(torso, new T.CylinderGeometry(1, 1, .04, 20, 1, true), M(o.belt, .55), 0, .04, 0, false); bt.scale.set(.145 * 1.18 + .004, 1, .145 * .76 + .004); bt.material = M(o.belt, .55, 0, { side: T.DoubleSide }); box(torso, .035, .03, .01, M(0xc8c2b8, .3, .9), 0, .04, .112, false); }
     // bosh
     const head = grp(torso, 0, .72, 0), hd = add(head, new T.SphereGeometry(.1, sg + 4, sg), skin, 0, .1, 0); hd.scale.set(.88, 1.12, .98);
-    const jaw = add(head, new T.SphereGeometry(.08, sg, 10), skin, 0, .035, .018, false); jaw.scale.set(1.0, .75, .92);
+    const jaw = add(head, new T.SphereGeometry(.07, sg, 10), skin, 0, .045, .012, false); jaw.scale.set(1.0, .8, .95); add(head, new T.SphereGeometry(.03, 8, 6), skin, 0, .025, .068, false).scale.set(1.1, .8, .8);
     add(head, new T.ConeGeometry(.02, .045, 6), skin, 0, .085, .105, false).rotation.x = Math.PI / 2 - .25;
-    const eyeW = M(0xf4f1ea, .3), eyeD = M(o.iris || 0x3a2a1e, .2), hairM = M(o.hair || 0x2a1d14, .85), lipM = M(o.lip || 0xb3615a, .45), pupM = M(0x0c0a08, .2);
+    const eyeW = M(0xf4f1ea, .3), eyeD = M(o.iris || 0x3a2a1e, .2), hairM = M(o.hair || 0x2a1d14, .85), lipM = M(o.lip || 0xa65c55, .5), pupM = M(0x0c0a08, .2);
     [-1, 1].forEach(s => {
       add(head, new T.SphereGeometry(.014, 8, 6), eyeW, s * .036, .115, .088, false).scale.set(1.3, .95, .6); add(head, new T.SphereGeometry(.007, 6, 6), eyeD, s * .036, .115, .0975, false).scale.setScalar(1.25); add(head, new T.SphereGeometry(.0035, 5, 5), pupM, s * .036, .115, .1015, false).scale.setScalar(1.3); add(head, new T.SphereGeometry(.0018, 4, 4), M(0xffffff, .1, 0, { emissive: 0xffffff, emissiveIntensity: .8 }), s * .036 + .004, .12, .1035, false);
       const lid = add(head, new T.SphereGeometry(.0165, 8, 6, 0, Math.PI * 2, 0, Math.PI * .42), skin, s * .036, .1155, .0885, false); lid.scale.set(1, .8, .7); lid.rotation.x = .25;
       const br = box(head, .042, .0085, .012, hairM, s * .037, .139, .092, false); br.rotation.z = -s * .12; br.rotation.y = -s * .25;
-      const ear = add(head, new T.SphereGeometry(.02, 8, 6), skin, s * .088, .095, -.005, false); ear.scale.set(.5, 1, .8); add(head, new T.SphereGeometry(.011, 6, 6), skin, s * .062, .06, .075, false);
+      const ear = add(head, new T.SphereGeometry(.02, 8, 6), skin, s * .088, .095, -.005, false); ear.scale.set(.5, 1, .8);
     });
     const nb = add(head, capGeo(.007, .03, 5), skin, 0, .104, .1, false); nb.rotation.x = -.1; add(head, new T.SphereGeometry(.013, 8, 6), skin, 0, .082, .109, false).scale.set(1.2, .8, 1);
-    const ul = add(head, new T.SphereGeometry(.016, 8, 6), lipM, 0, .054, .1, false); ul.scale.set(1.6, .38, .6); const ll = add(head, new T.SphereGeometry(.0165, 8, 6), lipM, 0, .044, .099, false); ll.scale.set(1.45, .42, .6);
+    const ul = add(head, new T.SphereGeometry(.016, 8, 6), lipM, 0, .054, .1, false); ul.scale.set(1.25, .3, .5); const ll = add(head, new T.SphereGeometry(.0165, 8, 6), lipM, 0, .044, .099, false); ll.scale.set(1.15, .34, .5);
     if ((!o.hat && !o.cap) || o.showHair) { const hm = M(o.hair || 0x2a1d14, .8), h2 = add(head, new T.SphereGeometry(.106, sg + 2, 10, 0, Math.PI * 2, 0, Math.PI * .52), hm, 0, .105, -.006, false); h2.scale.set(.9, 1.08, 1.0); }
-    if (o.hairLong) { const hm2 = M(o.hair || 0x2a1d14, .55, 0, { envMapIntensity: .8 }), bk = add(head, new T.SphereGeometry(.112, 12, 10), hm2, 0, -.02, -.04, false); bk.scale.set(.98, 2.0, .88); [-1, 1].forEach(sd => { for (let k = 0; k < 4; k++) { const lk = add(head, new T.SphereGeometry(.04, 8, 8), hm2, sd * (.088 + (k % 2) * .008), .04 - k * .09, .005 - k * .004, false); lk.scale.set(.7, 1.9, .8); } const fr = add(head, new T.SphereGeometry(.06, 8, 8), hm2, sd * .03, .17, .06, false); fr.scale.set(1.1, .6, .6); fr.rotation.z = sd * .5; }); }
-    if (o.quiff) { const hm3 = M(o.hair || 0x2a1d14, .6), q = add(head, new T.SphereGeometry(.07, 10, 8), hm3, 0, .205, .045, false); q.scale.set(1.4, .75, 1.1); q.rotation.x = -.3; const q2 = add(head, new T.SphereGeometry(.05, 8, 8), hm3, .045, .17, .075, false); q2.scale.set(1.3, .6, .6); }
+    if (o.hairLong) { const hm2 = M(o.hair || 0x2a1d14, .55, 0, { envMapIntensity: .8 }), bk = add(head, new T.SphereGeometry(.112, 12, 10), hm2, 0, -.02, -.04, false); bk.scale.set(.98, 2.0, .88); [-1, 1].forEach(sd => { for (let k = 0; k < 4; k++) { const lk = add(head, new T.SphereGeometry(.04, 8, 8), hm2, sd * (.084 + (k % 2) * .006), .03 - k * .085, -.035 - k * .006, false); lk.scale.set(.62, 1.8, .75); } const fr = add(head, new T.SphereGeometry(.06, 8, 8), hm2, sd * .035, .182, .045, false); fr.scale.set(1.0, .42, .55); fr.rotation.z = sd * .45; }); }
+    if (o.quiff) { const hm3 = M(o.hair || 0x2a1d14, .6), q = add(head, new T.SphereGeometry(.07, 10, 8), hm3, 0, .19, .05, false); q.scale.set(1.35, .5, 1.0); q.rotation.x = -.35; const q2 = add(head, new T.SphereGeometry(.045, 8, 8), hm3, .04, .175, .078, false); q2.scale.set(1.2, .42, .5); }
     if (o.beard) { const bd = add(head, new T.SphereGeometry(.088, 12, 8, 0, Math.PI * 2, Math.PI * .45, Math.PI * .45), M(o.hair || 0x2a1d14, .9), 0, .055, .018, false); bd.scale.set(1.02, .92, .98); }
     if (o.cap) { // qalpoq (brend formasi): gumbaz, soyabon, logotip
       const cm = M(o.cap, .75, 0, { bumpMap: tex.fabric(), bumpScale: 0.01 }), dm = add(head, new T.SphereGeometry(.112, sg + 4, 10, 0, Math.PI * 2, 0, Math.PI * .52), cm, 0, .125, -.004); dm.scale.set(.98, .85, 1.12);
@@ -186,17 +193,17 @@
     // qo‘llar: yelka → tirsak → bilak → kaft
     const mkArm = side => {
       const a = grp(torso, side * .235, .57, 0), sleeve = (o.short || o.rolled) ? skin : shirt;
-      add(a, new T.SphereGeometry(.058, 10, 8), shirt, 0, 0, 0, false); add(a, new T.CylinderGeometry(.053, .044, L1 - .02, sg), shirt, 0, -L1 / 2, 0);
+      add(a, new T.SphereGeometry(.052, 10, 8), shirt, 0, -.008, 0, false); add(a, new T.CylinderGeometry(.053, .044, L1 - .02, sg), shirt, 0, -L1 / 2, 0);
       const el = grp(a, 0, -L1, 0); add(el, new T.SphereGeometry(.046, 8, 6), sleeve, 0, 0, 0, false); add(el, new T.CylinderGeometry(.043, .033, L2 - .09, sg), sleeve, 0, -(L2 - .09) / 2 - .01, 0); if (o.rolled) add(el, new T.CylinderGeometry(.05, .048, .075, sg), M(o.cuff || 0x9aa0a8, .7), 0, -.055, 0, false); else add(el, new T.CylinderGeometry(.036, .036, .03, sg), shirt, 0, -L2 + .1, 0, false);
-      const hd2 = grp(el, 0, -L2 + .03, 0); rb(hd2, .078, .09, .03, glove, 0, -.045, 0, .012);
-      for (let f = 0; f < 4; f++) { const fg = add(hd2, capGeo(.0105, .048 - Math.abs(f - 1.5) * .004, 5), glove, -.027 + f * .018, -.115, .008, false); fg.rotation.x = -.28; }
-      const th = add(hd2, capGeo(.013, .04, 6), glove, -side * .046, -.06, .016, false); th.rotation.z = side * .55; th.rotation.x = -.3;
+      const hd2 = grp(el, 0, -L2 + .03, 0); rb(hd2, .068, .08, .027, glove, 0, -.042, 0, .011);
+      for (let f = 0; f < 4; f++) { const fg = add(hd2, capGeo(.009, .044 - Math.abs(f - 1.5) * .005, 5), glove, -.024 + f * .016, -.105, .007, false); fg.rotation.x = -.28; }
+      const th = add(hd2, capGeo(.011, .036, 6), glove, -side * .04, -.055, .014, false); th.rotation.z = side * .55; th.rotation.x = -.3;
       return { a, el, hd2 };
     };
     const aL = mkArm(-1), aR = mkArm(1);
     // oyoqlar: son → tizza → boldir → poyabzal
     const mkLeg = side => {
-      const l = grp(hips, side * .095, 0, 0); add(l, new T.CylinderGeometry(.086, .064, .43, sg), pants, 0, -.215, 0); const kn = grp(l, 0, -.43, 0); add(kn, new T.SphereGeometry(.064, 8, 6), pants, 0, 0, 0, false); add(kn, new T.CylinderGeometry(.06, .044, .43, sg), pants, 0, -.225, 0);
+      const l = grp(hips, side * .095, 0, 0); add(l, new T.CylinderGeometry(.09, .07, .44, sg), pants, 0, -.215, 0); const kn = grp(l, 0, -.43, 0); add(kn, new T.SphereGeometry(.069, 8, 6), pants, 0, 0, 0, false); add(kn, new T.CylinderGeometry(.066, .056, .42, sg), pants, 0, -.22, 0);
       const ank = grp(kn, 0, -.45, 0); rb(ank, .1, .085, .27, boot, 0, .0, .055, .03); rb(ank, .108, .026, .285, M(0x16120f, .85), 0, -.034, .055, .01); box(ank, .09, .04, .06, M(0x9aa2a8, .35, .8), 0, .0, .15, false); return { l, kn, ank };
     };
     const lL = mkLeg(-1), lR = mkLeg(1);
@@ -248,7 +255,7 @@
 
   /* ---------- 5. Xona (uy ichi) ---------- */
   function room(parent, x0, withShell) {
-    const R = grp(parent, x0, 0, 0), pl = withTex(tex.plaster(), 3, 2), wall = M(0xefe9de, .92, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.025 }), wallB = M(0xe6dfd0, .92, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.025 });
+    const R = grp(parent, x0, 0, 0), pl = withTex(tex.plaster(), .45, .45), wall = M(0xefe9de, .92, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.025 }), wallB = M(0xe6dfd0, .92, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.025 });
     const pq = withTex(tex.parquet(), 8, 7.5), floorM = M(0xffffff, .42, 0, { map: pq.map, bumpMap: pq.bump, bumpScale: 0.11, envMapIntensity: .9 });
     const floor = add(R, new T.PlaneGeometry(9.6, 9, 1, 1), floorM, 0, 0, .8, false); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = SHADOWS;
     const trim = M(0xf5f1e8, .5), brass = M(0xc8a86a, .3, .9), dk = M(0x23262b, .5, .2);
@@ -282,7 +289,7 @@
     box(R, .07, 2.06, .26, jm, -.465, 1.03, -3.6, false); box(R, .07, 2.06, .26, jm, .465, 1.03, -3.6, false); box(R, 1.0, .07, .26, jm, 0, 2.085, -3.6, false); box(R, .96, .012, .26, M(0xb8b3a8, .4, .9), 0, .006, -3.6, false); // ostona
     const out = { R, floor, opening: V(x0, 0, -3.6) };
     if (withShell) { // tashqaridan ko‘rinadigan uy: qanotlar, tom, kirish zinapoyasi, ayvon
-      const sh2 = M(0xdcd5c8, .9, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.03 }), stone = M(0xcfc9bd, .9, 0, { map: withTex(tex.concrete(), 2, 1).map });
+      const sh2 = M(0xdcd5c8, .9, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.03 }), stone = M(0xe6e1d7, .85, 0, { map: withTex(tex.concrete(), .5, .5).map });
       box(R, 9.6, .4, 9.6, stone, 0, -.26, 1.2, false);
       rb(R, 13, .38, 11.6, M(0xe4dfd4, .8), 0, 3.3, .6, .05); rb(R, 13.2, .08, 11.8, M(0xe3ddd0, .7), 0, 3.52, .6, .02); box(R, 13, .5, .1, trim, 0, 3.0, 6.3, false);
       box(R, 6, 3.4, 5, sh2, -9.2, 1.7, -2.5); box(R, 6, 3.4, 5, sh2, 9.2, 1.7, -2.5);
@@ -307,12 +314,12 @@
     opts = opts || {}; const canvas = opts.canvas, mobile = !!opts.mobile; SHADOWS = !mobile; LOW = mobile;
     let renderer; try { renderer = new T.WebGLRenderer({ canvas, antialias: !mobile, alpha: false, powerPreference: 'high-performance' }); } catch (e) { return null; }
     if (!renderer.getContext()) return null;
-    if (T.sRGBEncoding) renderer.outputEncoding = T.sRGBEncoding; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = .85;
+    if (T.sRGBEncoding) renderer.outputEncoding = T.sRGBEncoding; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = .8;
     renderer.shadowMap.enabled = SHADOWS; renderer.shadowMap.type = T.PCFSoftShadowMap;
     const scene = new T.Scene(), cam = new T.PerspectiveCamera(40, 1, .1, 500);
     scene.background = new T.Color(0xcfe3ff); scene.fog = new T.Fog(0xcfe3ff, 40, 200);
     try { scene.environment = makeEnv(renderer); } catch (e) { /* env xaritasi bo‘lmasa ham sahna ishlaydi */ }
-    const hemi = new T.HemisphereLight(0xeaf2ff, 0x7a7266, .34), sun = new T.DirectionalLight(0xfff0dd, 2.4), amb = new T.AmbientLight(0xffffff, .04), fill = new T.PointLight(0xfff1dc, 0, 22, 1.6);
+    const hemi = new T.HemisphereLight(0xeaf2ff, 0x7a7266, .34), sun = new T.DirectionalLight(0xffe9d0, 2.4), amb = new T.AmbientLight(0xffffff, .04), fill = new T.PointLight(0xfff1dc, 0, 22, 1.6);
     scene.add(hemi, sun, amb, sun.target, fill);
     if (SHADOWS) { sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); const sc = sun.shadow.camera; sc.left = -17; sc.right = 17; sc.top = 17; sc.bottom = -17; sc.near = 1; sc.far = 90; sun.shadow.bias = -.0003; sun.shadow.normalBias = .025; sun.shadow.radius = 4; }
     const world = grp(scene), actors = [];
