@@ -875,25 +875,19 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     init3D(sec);
   }
   /* ---------- 13b. 3D ishlab chiqarish sahnasi (Three.js) — faqat kerak bo‘lganda yuklanadi; yo‘q bo‘lsa 2D chizma qoladi ---------- */
-  const RU_BEATS = [
-    ['Инженер приходит в дом', 'Инженер вместе с клиентом входит в дом и осматривает место для двери.', ['Осмотр места', 'Согласование с клиентом']],
-    ['Замер лазером', 'Лазерный дальномер точно измеряет ширину и высоту проёма.', ['Ширина', 'Высота', 'Лазерный дальномер']],
-    ['Данные вводятся в планшет', 'Размеры записываются в планшет и вместе с заказом отправляются на завод.', ['Цифровой заказ', 'Передача на завод']],
-    ['Привозят материалы', 'Плиты MDF доставляют в производственную зону погрузчиком.', ['Плита MDF', 'Погрузчик']],
-    ['Раскрой по размеру', 'Плита точно раскраивается по размеру заказа на специальном станке.', ['Станок раскроя', 'Точный размер']],
-    ['Формируются детали', 'Детали собираются в единое дверное полотно.', ['Каркас', 'Панели']],
-    ['Шлифовка поверхности', 'Шлифовальный станок выравнивает поверхность и готовит её к покраске.', ['Шлифовка', 'Ровная поверхность']],
-    ['Фрезеровка и узор', 'ЧПУ-фреза вырезает панели и узор выбранной модели.', ['ЧПУ-фреза', 'Узор']],
-    ['Краска или покрытие', 'В покрасочной камере на поверхность наносят выбранный цвет и покрытие.', ['Покрасочная камера', 'Цвет']],
-    ['Сушка и контроль', 'Дверь сушат, затем контролёр качества проверяет каждую деталь.', ['Сушка', 'Контроль качества']],
-    ['Упаковка', 'Готовая дверь упаковывается в защитную плёнку и коробку.', ['Плёнка', 'Коробка']],
-    ['Погрузка в машину', 'Упакованную дверь бережно грузят в грузовик.', ['Бережная погрузка']],
-    ['Дорога к дому клиента', 'Машина выезжает с завода и направляется к дому клиента.', ['Доставка']],
-    ['Проверка коробки', 'Монтажники приезжают, проверяют дверную коробку по уровню и размеру.', ['Уровень', 'Размер']],
-    ['Установка на место', 'Дверь достают из упаковки и аккуратно устанавливают в коробку.', ['Установка']],
-    ['Выравнивание и крепление', 'Дверь выравнивают по уровню и закрепляют на петлях.', ['Выравнивание', 'Петли']],
-    ['Установка ручки', 'Устанавливаются ручка и замок.', ['Ручка', 'Замок']],
-    ['Открывание и закрывание', 'Проверяется ход двери — результат готов.', ['Плавный ход', 'Готовый результат']]
+  const RU_STAGES = [
+    ['Замер', 'Наши специалисты приедут к вам домой и точно измерят размеры дверного проёма.'],
+    ['Подготовка материалов MDF', 'Высококачественные плиты MDF готовятся с помощью специальных технологий.'],
+    ['Раскрой и формирование', 'Материалы раскраиваются нужного размера, и дверь приобретает форму.'],
+    ['Шлифовка', 'Поверхность двери подготавливается до идеальной гладкости.'],
+    ['Узоры и фрезеровка', 'Применяются современные дизайны и эксклюзивные узоры.'],
+    ['Покраска и покрытие', 'Дверь обрабатывается качественной краской и покрытием.'],
+    ['Контроль качества', 'Каждая дверь проходит специальную проверку и получает гарантию качества.'],
+    ['Упаковка', 'Безопасная и надёжная упаковка защищает дверь от повреждений.'],
+    ['Доставка', 'Готовые двери доставляются по адресу клиента вовремя.'],
+    ['Установка', 'Квалифицированные специалисты профессионально устанавливают дверь.'],
+    ['Финальная проверка', 'Проверяются открывание и закрывание, ручка и все детали.'],
+    ['Готовый результат', 'В вашем доме — современная, качественная и красивая дверь MDF!']
   ];
   const RU_ACTS = ['Замер', 'Производство', 'Доставка', 'Установка'];
   function init3D(sec) {
@@ -909,17 +903,17 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       const canvas = document.createElement('canvas'); canvas.className = 'proc__canvas'; canvas.setAttribute('aria-hidden', 'true'); wrap.appendChild(canvas);
       const hud = $('#procHud'); const sceneApi = YDScene.init({ canvas, mobile, onHud: (txt) => { if (!hud) return; hud.hidden = !txt; if (txt) hud.textContent = txt; } });
       if (!sceneApi) { canvas.remove(); return; }
-      const B = YDScene.BEATS, ACTS = YDScene.ACTS, txt = $('#procTxt'), count = $('#procCount'), acts = $('#procDots'), fin = $('#procFinal');
+      const B = YDScene.BEATS, ACTS = YDScene.ACTS, SG = YDScene.STAGES, txt = $('#procTxt'), count = $('#procCount'), acts = $('#procDots'), fin = $('#procFinal');
       const pad = n => String(n).padStart(2, '0'), clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-      acts.className = 'proc__acts'; acts.innerHTML = ACTS.map((n, ai) => { const bs = B.filter(b => b.act === ai); return `<div class="act" data-a="${ai}" style="flex:${(bs[bs.length - 1].b - bs[0].a).toFixed(4)}"><span>${esc(LANG === 'ru' ? RU_ACTS[ai] : n)}</span><i><b></b></i></div>`; }).join('');
-      const fills = $$('.act b', acts), actEls = $$('.act', acts);
+      acts.className = 'proc__acts'; acts.innerHTML = SG.map((s, i) => `<div class="act" data-i="${i}" style="flex:${(s.b - s.a).toFixed(4)}" title="${esc(LANG === 'ru' ? RU_STAGES[i][0] : s.t)}"><span>${pad(i + 1)}</span><i><b></b></i></div>`).join('');
+      const fills = $$('.act b', acts), actEls = $$('.act', acts), endAt = B[B.length - 1].a + (B[B.length - 1].b - B[B.length - 1].a) * .55;
       if (fin) fin.innerHTML = `<p class="eyebrow">YasinDoors</p><h2>${LANG === 'ru' ? 'От замера до идеального результата — <em>YasinDoors</em>' : 'O‘lchovdan mukammal natijagacha — <em>YasinDoors</em>'}</h2><a class="btn btn--p" href="doors.html">${t('Eshik tanlash')}</a>`;
       let cur = -1;
-      const setBeat = i => {
-        const b = B[i], r = LANG === 'ru' ? RU_BEATS[i] : null;
-        txt.innerHTML = `<p class="proc__no">${pad(i + 1)} / ${pad(B.length)}</p><p class="proc__lb">${esc(LANG === 'ru' ? RU_ACTS[b.act] : ACTS[b.act])}</p><h2>${esc(r ? r[0] : b.t)}</h2><p class="proc__p">${esc(r ? r[1] : b.d)}</p><ul class="proc__chips">${(r ? r[2] : b.c).map(c => `<li>${esc(c)}</li>`).join('')}</ul>`;
-        txt.classList.remove('in'); void txt.offsetWidth; txt.classList.add('in'); count.textContent = `${pad(i + 1)} / ${pad(B.length)}`;
-        actEls.forEach((a, k) => a.classList.toggle('on', k === b.act));
+      const setStage = i => {
+        const s = SG[i], r = LANG === 'ru' ? RU_STAGES[i] : null;
+        txt.innerHTML = `<p class="proc__lb">${esc(LANG === 'ru' ? RU_ACTS[s.act] : ACTS[s.act])}</p><div class="proc__head"><span class="proc__ring">${pad(i + 1)}</span><h2>${esc(r ? r[0] : s.t)}</h2></div><p class="proc__p">${esc(r ? r[1] : s.d)}</p>`;
+        txt.classList.remove('in'); void txt.offsetWidth; txt.classList.add('in'); count.textContent = `${pad(i + 1)} / ${pad(SG.length)}`;
+        actEls.forEach((a, k) => a.classList.toggle('on', k === i));
       };
       let visible = false;
       const tick = () => {
@@ -927,9 +921,9 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
         const inView = r.bottom > 0 && r.top < innerHeight;
         if (inView && !visible && !document.hidden) { visible = true; sceneApi.start(); } else if ((!inView || document.hidden) && visible) { visible = false; sceneApi.stop(); }
         sceneApi.setProgress(p);
-        let i = B.findIndex(b => p < b.b); if (i < 0) i = B.length - 1; if (i !== cur) { cur = i; setBeat(i); }
-        B.forEach((b, k) => { if (k === 0 || b.act !== B[k - 1].act) { const ai = b.act, bs = B.filter(x => x.act === ai), a0 = bs[0].a, a1 = bs[bs.length - 1].b; fills[ai].style.width = (clamp((p - a0) / (a1 - a0)) * 100).toFixed(1) + '%'; } });
-        sec.classList.toggle('proc--end', p > .94);
+        let i = SG.findIndex(s => p < s.b); if (i < 0) i = SG.length - 1; if (i !== cur) { cur = i; setStage(i); }
+        SG.forEach((s, k) => { fills[k].style.width = (clamp((p - s.a) / (s.b - s.a)) * 100).toFixed(1) + '%'; });
+        sec.classList.toggle('proc--end', p > endAt);
       };
       const first = () => { // 3D rejimga o‘tishda bo‘lim balandligi o‘zgaradi: foydalanuvchi turgan joy sakramasligi uchun scroll tuzatiladi
         const de = document.documentElement, r0 = sec.getBoundingClientRect(), h0 = sec.offsetHeight; de.style.overflowAnchor = 'none'; sec.classList.add('proc--3d'); const h1 = sec.offsetHeight;

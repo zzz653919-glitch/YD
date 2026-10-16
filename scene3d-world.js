@@ -136,11 +136,11 @@
     // zavod oldi: devor belgisi, to‘siq ustunlari
     for (let i = 0; i < 6; i++) cyl(EX, .09, .09, .9, M(0xe8b520, .5), 94.5, .45, -7 + i * 2.4 + (i > 2 ? 1.8 : 0), 10, false);
     /* ---------- Yuk mashinasi (korpusli furgon) ---------- */
-    const truck = grp(world, 100, 0, 0), tb = grp(truck), cargoM = M(0xf1efe9, .38, .15, { envMapIntensity: .9 }), cabM = M(0x2b3f66, .3, .35, { envMapIntensity: 1 });
+    const truck = grp(world, 100, 0, 0), tb = grp(truck), cargoM = M(0x30353d, .38, .35, { envMapIntensity: .9 }), cabM = M(0x3b4552, .3, .4, { envMapIntensity: 1 });
     rb(tb, 7.2, .16, 2.6, cargoM, -1.2, .92, 0, .02); rb(tb, 7.2, .1, 2.6, cargoM, -1.2, 3.85, 0, .04); [-1.26, 1.26].forEach(z => rb(tb, 7.2, 2.9, .08, cargoM, -1.2, 2.4, z, .03)); rb(tb, .1, 2.9, 2.6, cargoM, 2.35, 2.4, 0, .03);
-    rb(tb, 7.0, .02, 2.4, woodMat('oak', 0x8a6a45, .7), -1.2, 1.005, 0, .005, false); box(tb, 5, .03, .3, M(0x111, .5, 0, { emissive: 0xffffff, emissiveIntensity: 2.2 }), -1.2, 3.78, 0, false); rb(tb, 7.25, .16, 2.64, orange, -1.2, 3.93, 0, .02, false); rb(tb, 7.25, .3, 2.64, M(0x2b3f66, .4, .2), -1.2, .75, 0, .03, false);
-    for (let i = 0; i < 8; i++) box(tb, .05, 3.0, .04, M(0xdcd9d1, .4, .3), -4.4 + i * .95, 2.35, 1.32, false), box(tb, .05, 3.0, .04, M(0xdcd9d1, .4, .3), -4.4 + i * .95, 2.35, -1.32, false);
-    const logoC = document.createElement('canvas'); logoC.width = 512; logoC.height = 128; const lg = logoC.getContext('2d'); lg.fillStyle = '#e9a45e'; lg.beginPath(); lg.arc(52, 64, 22, 0, 7); lg.fill(); lg.fillStyle = '#16181b'; lg.font = '700 58px sans-serif'; lg.textBaseline = 'middle'; lg.fillText('YASINDOORS', 96, 66); const lgT = new T.CanvasTexture(logoC); if (T.sRGBEncoding) lgT.encoding = T.sRGBEncoding;
+    rb(tb, 7.0, .02, 2.4, woodMat('oak', 0x8a6a45, .7), -1.2, 1.005, 0, .005, false); box(tb, 5, .03, .3, M(0x111, .5, 0, { emissive: 0xffffff, emissiveIntensity: 2.2 }), -1.2, 3.78, 0, false); rb(tb, 7.25, .16, 2.64, orange, -1.2, 3.93, 0, .02, false); rb(tb, 7.25, .3, 2.64, M(0x20242a, .4, .2), -1.2, .75, 0, .03, false);
+    for (let i = 0; i < 8; i++) box(tb, .05, 3.0, .04, M(0x3c424b, .4, .3), -4.4 + i * .95, 2.35, 1.32, false), box(tb, .05, 3.0, .04, M(0x3c424b, .4, .3), -4.4 + i * .95, 2.35, -1.32, false);
+    const logoC = document.createElement('canvas'); logoC.width = 512; logoC.height = 128; const lg = logoC.getContext('2d'); lg.fillStyle = '#e9a45e'; lg.beginPath(); lg.arc(52, 64, 22, 0, 7); lg.fill(); lg.fillStyle = '#f4efe4'; lg.font = '700 58px sans-serif'; lg.textBaseline = 'middle'; lg.fillText('YASINDOORS', 96, 66); const lgT = new T.CanvasTexture(logoC); if (T.sRGBEncoding) lgT.encoding = T.sRGBEncoding;
     [1, -1].forEach(s => { const m = new T.Mesh(new T.PlaneGeometry(3.4, .85), new T.MeshBasicMaterial({ map: lgT, transparent: true, toneMapped: false })); m.position.set(-1.0, 2.5, s * 1.342); if (s < 0) m.rotation.y = Math.PI; tb.add(m); });
     const cab = grp(tb, 3.2, 0, 0); rb(cab, 2.0, 1.7, 2.5, cabM, 0, 1.7, 0, .12); rb(cab, 1.1, 1.0, 2.46, cabM, -.45, 2.95, 0, .14); rb(cab, .08, .95, 2.1, GL(0x9fc4e0, .55), .62, 2.95, 0, .02, false); rb(cab, .5, .8, .08, GL(0x9fc4e0, .55), .0, 2.95, 1.25, .02, false); rb(cab, .5, .8, .08, GL(0x9fc4e0, .55), .0, 2.95, -1.25, .02, false);
     rb(cab, .3, .6, 2.64, black, 1.0, .75, 0, .05); [-.9, .9].forEach(z => { box(cab, .06, .3, .4, M(0x111, .4, 0, { emissive: 0xfff3d0, emissiveIntensity: 2.6 }), 1.04, 1.1, z, false); rb(cab, .1, .5, .18, black, .55, 2.9, z * 1.45, .02, false); });
@@ -190,17 +190,17 @@
     /* ---------- Odamlar ---------- */
     const crowd = [], mk = (o) => { const P = person(o); P.g.visible = false; world.add(P.g); crowd.push(P); return P; };
     const WK = (o) => Object.assign({ shirt: 0x1f2e4a, pants: 0x1f232b, hat: 0xf3f1ea, strips: true, rolled: true, belt: 0x2a211b, hair: 0x2a1d14, glove: 0x2a2f38 }, o);
-    const engA = mk(WK({ skin: 0xd9a982, s: 1.03, showHair: true, glove: null }));
+    const CAPC = 0x1f2e4a, engA = mk(WK({ hat: null, cap: CAPC, skin: 0xd9a982, s: 1.03, glove: null }));
     const mkMan = () => mk({ shirt: 0x5b4a43, inner: 0xcfd2d6, innerWide: true, pants: 0x34445c, belt: 0x4a3626, hair: 0x2b1e16, quiff: true, skin: 0xe3b78f, s: 1.0 }), mkWoman = () => mk({ shirt: 0xd4bc9c, inner: 0xf3efe8, pants: 0x3a465c, belt: 0x5a3f2a, hair: 0x5a3322, hairLong: true, skin: 0xf0cfb0, s: .94, lip: 0xc0706a });
     const cliA = mkMan(), cliA2 = mkWoman();
     const W = {
       saw: mk(WK({ shirt: 0x24354f, hat: 0xf3f1ea, ears: true, skin: 0xdfb08c, s: 1.0 })), a1: mk(WK({ shirt: 0x1f2e4a, hat: 0xf3f1ea, skin: 0xc99069, s: 1.03 })), a2: mk(WK({ shirt: 0x2a3a52, hat: 0xf3f1ea, skin: 0xe8c4a0, s: .98 })),
       sand: mk(WK({ shirt: 0x22314a, hat: 0xf3f1ea, mask: true, skin: 0xd9a982, s: 1.0 })), cnc: mk(WK({ shirt: 0x26395a, hat: 0xf3f1ea, skin: 0xc99069, s: 1.04, beard: true })), paint: mk(WK({ shirt: 0xe7e7e2, hat: 0xf3f1ea, mask: true, glove: 0x2d6fb7, skin: 0xe2b995, s: .99 })),
-      qc: mk(WK({ shirt: 0x2a3a52, hat: 0xf3f1ea, skin: 0xc99069, s: 1.0 })), p1: mk(WK({ shirt: 0x1f2e4a, hat: 0xf3f1ea, skin: 0xdfb08c })), p2: mk(WK({ shirt: 0x2a3a52, hat: 0xf3f1ea, skin: 0xc99069, s: 1.03 })),
-      c1: mk(WK({ shirt: 0x26395a, hat: 0xf3f1ea, skin: 0xd9a982, s: 1.02 })), c2: mk(WK({ shirt: 0x22314a, hat: 0xf3f1ea, skin: 0xe2b995, s: .98 })), sup: mk(WK({ shirt: 0xf2f1ed, hat: 0xf3f1ea, glove: null, skin: 0xd2a07a, s: 1.03 })), drv: mk(WK({ shirt: 0x26395a, hat: 0xf3f1ea, skin: 0xdfb08c }))
+      qc: mk(WK({ shirt: 0x2a3a52, hat: null, cap: CAPC, skin: 0xc99069, s: 1.0 })), p1: mk(WK({ shirt: 0x1f2e4a, hat: null, cap: CAPC, skin: 0xdfb08c })), p2: mk(WK({ shirt: 0x2a3a52, hat: null, cap: CAPC, skin: 0xc99069, s: 1.03 })),
+      c1: mk(WK({ shirt: 0x26395a, hat: null, cap: CAPC, skin: 0xd9a982, s: 1.02 })), c2: mk(WK({ shirt: 0x22314a, hat: null, cap: CAPC, skin: 0xe2b995, s: .98 })), sup: mk(WK({ shirt: 0xf2f1ed, hat: 0xf3f1ea, glove: null, skin: 0xd2a07a, s: 1.03 })), drv: mk(WK({ shirt: 0x26395a, hat: 0xf3f1ea, skin: 0xdfb08c }))
     };
     W.sup.realDir = true; W.drv.sit = true; fkb.add(W.drv.g);
-    const inst1 = mk(WK({ shirt: 0x1f2e4a, hat: 0xf3f1ea, skin: 0xdfb08c, s: 1.02 })), inst2 = mk(WK({ shirt: 0x24354f, hat: 0xf3f1ea, skin: 0xc99069, s: 1.0, beard: true })), cliB = mkMan(), cliB2 = mkWoman();
+    const inst1 = mk(WK({ shirt: 0x1f2e4a, hat: null, cap: CAPC, skin: 0xdfb08c, s: 1.02 })), inst2 = mk(WK({ shirt: 0x24354f, hat: null, cap: CAPC, skin: 0xc99069, s: 1.0, beard: true })), cliB = mkMan(), cliB2 = mkWoman();
     // kichik buyumlar: planshet, qog‘oz taxta
     const tcv = document.createElement('canvas'); tcv.width = 256; tcv.height = 170; const tg = tcv.getContext('2d'), ttx = new T.CanvasTexture(tcv); if (T.sRGBEncoding) ttx.encoding = T.sRGBEncoding;
     const tmesh = grp(world); rb(tmesh, .3, .02, .21, black, 0, 0, 0, .008, false); const tsc = new T.Mesh(new T.PlaneGeometry(.27, .18), new T.MeshBasicMaterial({ map: ttx, toneMapped: false })); tsc.rotation.x = -Math.PI / 2; tsc.position.y = .0105; tmesh.add(tsc); tmesh.visible = false;
@@ -338,7 +338,7 @@
         leafP.set(lerp(ly.x, mid.x, u1), lerp(ly.y, mid.y, u1) + Math.sin(u1 * Math.PI) * .25, lerp(ly.z, mid.z, u1)); leafQ.copy(qY(Math.PI / 2)).slerp(qUp, u1);
         if (s2 > 0) leafP.set(HB_X, 1.02 + (1 - sm(s2)) * .03, lerp(-2.35, -3.58, sm(s2)));
         // petlada ochilish/yopilish
-        const ang = K(p, [[bp(17, .08), 0], [bp(17, .3), -1.2], [bp(17, .5), -1.2], [bp(17, .72), 0], [bp(17, .9), -.45], [1, -.45]]);
+        const ang = K(p, [[bp(17, .08), 0], [bp(17, .3), -1.2], [bp(17, .5), -1.2], [bp(17, .8), 0], [1, 0]]);
         if (p >= bp(17, 0) || ang !== 0) { const rel = V(upPos.x - hingeW.x, 0, 0).applyAxisAngle(UP, ang); leafP.set(hingeW.x + rel.x, 1.02, hingeW.z + rel.z); leafQ.copy(qUp).premultiply(qa.setFromAxisAngle(UP, ang)); leaf.userData.openAng = ang; }
       }
       leaf.position.copy(leafP); leaf.quaternion.copy(leafQ); pack.position.copy(packP); pack.quaternion.copy(packQ); leaf.visible = p > bp(4, .9);
@@ -410,15 +410,16 @@
               if (hOn) { crouchTo(inst2, 1.0); inst2.g.updateMatrixWorld(true); const hp = surf(handle, 0, .03, 0, t1).clone(); reach(inst2, 1, hp.add(V(0, 0, .05))); reach(inst2, -1, V(HB_X + .3, 1.0, -3.35)); look(inst2, hp, .8); }
             } else { // 17: sinov — petla atrofida ochish/yopish
               const hp = surf(handle, 0, .06, -.04, t1).clone(), d = V(.35, 0, .95).normalize();
-              const wb17 = sm(seg(p, bp(17, 0), bp(17, .14))); inst1.g.position.set(lerp(HB_X - .72, hp.x + d.x * .55, wb17), 0, lerp(-3.0, hp.z + d.z * .55, wb17)); inst1.face = Math.atan2(-d.x, -d.z); inst1.lean = .22; inst1.crouch = 0; walker(inst1, dt, t, 0); inst1.g.updateMatrixWorld(true); reach(inst1, 1, hp); reach(inst1, -1, torsoPt(inst1, -.12, .3, .2, t2)); look(inst1, hp, .6);
-              stand(inst2, lerp(HB_X + .72, HB_X + 1.4, sm(seg(p, bp(17, 0), bp(17, .14)))), lerp(-3.0, -1.7, sm(seg(p, bp(17, 0), bp(17, .14)))), Math.PI - .5 * sm(seg(p, bp(17, 0), bp(17, .14))), 0); inst2.crouch = 0; walker(inst2, dt, t, 1); look(inst2, V(HB_X, 1.2, -3.2), .6); inst2.g.updateMatrixWorld(true); reach(inst2, 1, torsoPt(inst2, .1, .3, .22, t2)); reach(inst2, -1, torsoPt(inst2, -.1, .27, .22, t3));
+              const wb17 = sm(seg(p, bp(17, 0), bp(17, .14))); inst1.g.position.set(lerp(HB_X - .72, hp.x + d.x * .55, wb17), 0, lerp(-3.0, hp.z + d.z * .55, wb17)); inst1.face = Math.atan2(-d.x, -d.z); inst1.lean = .22; inst1.crouch = 0; walker(inst1, dt, t, 0); inst1.g.updateMatrixWorld(true); const wf = sm(seg(p, bp(18, 0), bp(18, .5))); if (wf > 0) { inst1.g.position.set(lerp(inst1.g.position.x, HB_X + 1.45, wf), 0, lerp(inst1.g.position.z, -1.7, wf)); inst1.face = lerp(inst1.face, Math.atan2(-1.45, -1.8), wf); inst1.lean = lerp(.22, 0, wf); walker(inst1, dt, t, 0); inst1.g.updateMatrixWorld(true); }
+              reach(inst1, 1, wf > 0 ? hp.lerp(torsoPt(inst1, .15, -.05, .06, t3), wf) : hp); reach(inst1, -1, wf > 0 ? torsoPt(inst1, -.12, .3, .2, t2).lerp(torsoPt(inst1, -.15, -.05, .06, t4), wf) : torsoPt(inst1, -.12, .3, .2, t2)); look(inst1, hp, .6);
+              { const wf2 = sm(seg(p, bp(18, 0), bp(18, .5))); stand(inst2, lerp(lerp(HB_X + .72, HB_X + 1.4, sm(seg(p, bp(17, 0), bp(17, .14)))), HB_X + 2.2, wf2), lerp(lerp(-3.0, -1.7, sm(seg(p, bp(17, 0), bp(17, .14)))), -1.2, wf2), Math.PI - .5 * sm(seg(p, bp(17, 0), bp(17, .14))) - .1 * wf2, 0); } inst2.crouch = 0; walker(inst2, dt, t, 1); look(inst2, V(HB_X, 1.2, -3.2), .6); inst2.g.updateMatrixWorld(true); reach(inst2, 1, torsoPt(inst2, .1, .3, .22, t2)); reach(inst2, -1, torsoPt(inst2, -.1, .27, .22, t3));
             }
           }
           settle(inst1); settle(inst2);
         }
         if (p < bp(13, 0) || carryU) { settle(inst1); settle(inst2); }
         // mijoz B
-        if (cliB.g.visible) { c.KV(p, [[bp(12, .9), [HB_X - 3.5, 0, 12]], [bp(13, .1), [HB_X - 3.2, 0, 7]], [bp(13, .55), [HB_X - 2.0, 0, 3.4]], [1, [HB_X - 2.2, 0, 2.6]]], cliB.g.position); cliB.face = null; if (p > bp(13, .6)) cliB.face = Math.atan2(2.0, -6.0); cliB.lean = 0; walker(cliB, dt, t, 2); cliB.g.updateMatrixWorld(true); if (p > bp(13, .6)) { reach(cliB, 1, torsoPt(cliB, -.08, .3, .2, t1)); reach(cliB, -1, torsoPt(cliB, .1, .27, .21, t2)); look(cliB, V(HB_X, 1.3, -3.2), .6); } settle(cliB); } if (cliB2.g.visible) { c.KV(p, [[bp(12, .9), [HB_X - 4.1, 0, 12]], [bp(13, .1), [HB_X - 3.9, 0, 7.6]], [bp(13, .55), [HB_X - 3.0, 0, 3.8]], [1, [HB_X - 3.3, 0, 2.8]]], cliB2.g.position); cliB2.face = null; if (p > bp(13, .6)) cliB2.face = Math.atan2(2.0, -6.0); cliB2.lean = 0; walker(cliB2, dt, t, 3); cliB2.g.updateMatrixWorld(true); if (p > bp(13, .6)) { reach(cliB2, 1, torsoPt(cliB2, -.08, .3, .2, t1)); reach(cliB2, -1, torsoPt(cliB2, .1, .27, .21, t2)); look(cliB2, V(HB_X, 1.3, -3.2), .6); } settle(cliB2); }
+        if (cliB.g.visible) { c.KV(p, [[bp(12, .9), [HB_X - 3.5, 0, 12]], [bp(13, .1), [HB_X - 3.2, 0, 7]], [bp(13, .55), [HB_X - 2.0, 0, 3.4]], [bp(17, .9), [HB_X - 2.2, 0, 2.6]], [bp(18, .6), [HB_X - 1.4, 0, -.7]], [1, [HB_X - 1.4, 0, -.7]]], cliB.g.position); cliB.face = null; if (p > bp(13, .6)) cliB.face = p > bp(18, .2) ? Math.atan2(1.4, -2.7) : Math.atan2(2.0, -6.0); cliB.lean = 0; walker(cliB, dt, t, 2); cliB.g.updateMatrixWorld(true); if (p > bp(13, .6)) { reach(cliB, 1, torsoPt(cliB, -.08, .3, .2, t1)); reach(cliB, -1, torsoPt(cliB, .1, .27, .21, t2)); look(cliB, V(HB_X, 1.3, -3.2), .6); } settle(cliB); } if (cliB2.g.visible) { c.KV(p, [[bp(12, .9), [HB_X - 4.1, 0, 12]], [bp(13, .1), [HB_X - 3.9, 0, 7.6]], [bp(13, .55), [HB_X - 3.0, 0, 3.8]], [bp(17, .9), [HB_X - 3.3, 0, 2.8]], [bp(18, .6), [HB_X - 2.3, 0, -.3]], [1, [HB_X - 2.3, 0, -.3]]], cliB2.g.position); cliB2.face = null; if (p > bp(13, .6)) cliB2.face = p > bp(18, .2) ? Math.atan2(2.3, -3.1) : Math.atan2(2.0, -6.0); cliB2.lean = 0; walker(cliB2, dt, t, 3); cliB2.g.updateMatrixWorld(true); if (p > bp(13, .6)) { reach(cliB2, 1, torsoPt(cliB2, -.08, .3, .2, t1)); reach(cliB2, -1, torsoPt(cliB2, .1, .27, .21, t2)); look(cliB2, V(HB_X, 1.3, -3.2), .6); } settle(cliB2); }
       }
       // tabaqa 4-aktda ko‘rinadi, uy A odamlarining qo‘llari
       if (actA) { settle(engA); settle(cliA); settle(cliA2); }
@@ -464,7 +465,7 @@
     add(bp(15, .5), [HB - 2.4, 1.5, 1.2], [HB - .3, 1.05, -3.4]);
     add(bp(16, .5), [HB + 2.1, 1.35, 1.1], [HB + .15, 1.05, -3.4]);
     add(bp(17, .2), [HB + .6, 1.4, 2.0], [HB, 1.1, -3.3]); add(bp(17, .6), [HB - .6, 1.5, 3.4], [HB, 1.2, -3.4]);
-    add(1, [HB, 1.55, 5.6], [HB, 1.2, -3.6]);
+    add(bp(18, .5), [HB + .2, 1.5, 4.9], [HB - .2, 1.2, -3.4]); add(1, [HB, 1.5, 6.3], [HB, 1.2, -3.6]);
     return k;
   };
 })();

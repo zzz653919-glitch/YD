@@ -650,4 +650,9 @@ h1,h2{letter-spacing:-.018em}.hero h1{letter-spacing:-.022em}.proc__txt h2{lette
   .proc--3d{height:1300vh}.proc--3d .proc__sticky::after{background:linear-gradient(0deg,rgba(10,10,9,.92) 0,rgba(10,10,9,.7) 34%,transparent 60%)}
   .proc__acts{bottom:84px;gap:8px}.proc__acts .act span{font-size:9.5px;letter-spacing:.08em}.proc--3d .proc__txt{bottom:128px}.proc--3d .proc__count{display:none}.proc__hud{top:76px;font-size:12.5px;padding:8px 14px}.proc__final{bottom:19vh}
 }
+/* 12 bosqichli ko‘rsatkich va raqamli sarlavha */
+.proc__acts{gap:6px}.proc__acts .act span{font-size:11px;letter-spacing:.1em;text-align:left}
+.proc--3d .proc__head{display:flex;align-items:center;gap:18px;margin:6px 0 10px}.proc--3d .proc__head h2{margin:0;font-size:clamp(28px,3.3vw,54px);line-height:1.05}
+.proc__ring{flex:none;display:grid;place-items:center;width:58px;height:58px;border-radius:50%;border:1.5px solid var(--acc2);color:var(--acc2);font:700 20px/1 "Inter Tight",system-ui,sans-serif;letter-spacing:.02em;background:rgba(233,164,94,.08)}
+@media(max-width:900px){.proc__acts{gap:3px}.proc__acts .act span{font-size:9px;letter-spacing:0}.proc__ring{width:44px;height:44px;font-size:16px}.proc--3d .proc__head{gap:12px}}
 @media(prefers-reduced-motion:reduce){.proc__canvas,.proc__hud,.proc__final,.proc__acts{display:none}}

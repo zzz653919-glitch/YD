@@ -26,11 +26,28 @@
     { act: 3, w: 1.1, t: 'Joyiga qo‘yiladi', d: 'Eshik qadoqdan chiqarilib, romga ehtiyotkorlik bilan joylanadi.', c: ['Joylash'] },
     { act: 3, w: 1.1, t: 'Tekislash va mahkamlash', d: 'Eshik sath bo‘yicha tekislanadi va petlalardan mahkamlanadi.', c: ['Tekislash', 'Petlalar'] },
     { act: 3, w: 1.0, t: 'Dastak o‘rnatiladi', d: 'Dastak va qulf o‘rnatiladi.', c: ['Dastak', 'Qulf'] },
-    { act: 3, w: 1.6, t: 'Ochilish va yopilish', d: 'Eshikning ochilib-yopilishi tekshiriladi — natija tayyor.', c: ['Silliq yurish', 'Tayyor natija'] }
+    { act: 3, w: 1.3, t: 'Ochilish va yopilish', d: 'Eshikning ochilib-yopilishi tekshiriladi — dastak va barcha detallar sinaladi.', c: ['Silliq yurish', 'Dastak'] },
+    { act: 3, w: 1.3, t: 'Tayyor natija', d: 'Sizning uyingizda zamonaviy, sifatli va chiroyli MDF eshik!', c: [] }
+  ];
+  // Foydalanuvchiga ko‘rinadigan 12 bosqich (har biri bir yoki bir nechta ichki sahnani birlashtiradi)
+  const STAGES = [
+    { t: 'O‘lchov olish', d: 'Mutaxassislarimiz sizning uyingizga kelib, eshik o‘lchamlarini aniq o‘lchab oladi.', k: [0, 2] },
+    { t: 'MDF materiallarni tayyorlash', d: 'Yuqori sifatli MDF plitalar maxsus texnologiyalar yordamida tayyorlanadi.', k: [3, 3] },
+    { t: 'Kesish va shakllantirish', d: 'Materiallar kerakli o‘lchamda kesiladi va eshik shakli beriladi.', k: [4, 5] },
+    { t: 'Silliqlash', d: 'Eshik yuzasi ideal silliqlikda tayyorlanadi.', k: [6, 6] },
+    { t: 'Naqsh va frezer ishlari', d: 'Zamonaviy dizaynlar va o‘ziga xos naqshlar qo‘llanadi.', k: [7, 7] },
+    { t: 'Bo‘yash va qoplama', d: 'Eshik sifatli bo‘yoq va qoplama bilan ishlov beriladi.', k: [8, 8] },
+    { t: 'Sifat nazorati', d: 'Har bir eshik maxsus tekshiruvdan o‘tib, sifat kafolati bilan ta’minlanadi.', k: [9, 9] },
+    { t: 'Qadoqlash', d: 'Xavfsiz va ishonchli qadoqlash orqali shikastlanishning oldi olinadi.', k: [10, 10] },
+    { t: 'Yetkazib berish', d: 'Tayyor eshiklar mijoz manzilga o‘z vaqtida yetkazib beriladi.', k: [11, 12] },
+    { t: 'O‘rnatish', d: 'Malakali mutaxassislar eshikni professional tarzda o‘rnatadi.', k: [13, 16] },
+    { t: 'So‘nggi tekshiruv', d: 'Eshikning ochilib-yopilishi, dastak va barcha detallar tekshiriladi.', k: [17, 17] },
+    { t: 'Tayyor natija', d: 'Sizning uyingizda zamonaviy, sifatli va chiroyli MDF eshik!', k: [18, 18] }
   ];
   const WSUM = BEATS.reduce((a, b) => a + b.w, 0); let acc = 0;
   BEATS.forEach(b => { b.a = acc / WSUM; acc += b.w; b.b = acc / WSUM; });
   const bp = (i, f) => BEATS[i].a + (BEATS[i].b - BEATS[i].a) * f; // i-bosqichning f-ulushi → umumiy progress
+  STAGES.forEach(st => { st.a = BEATS[st.k[0]].a; st.b = BEATS[st.k[1]].b; st.act = BEATS[st.k[0]].act; });
 
   /* ---------- 2. Yordamchilar ---------- */
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -150,10 +167,14 @@
     });
     const nb = add(head, capGeo(.007, .03, 5), skin, 0, .104, .1, false); nb.rotation.x = -.1; add(head, new T.SphereGeometry(.013, 8, 6), skin, 0, .082, .109, false).scale.set(1.2, .8, 1);
     const ul = add(head, new T.SphereGeometry(.016, 8, 6), lipM, 0, .054, .1, false); ul.scale.set(1.6, .38, .6); const ll = add(head, new T.SphereGeometry(.0165, 8, 6), lipM, 0, .044, .099, false); ll.scale.set(1.45, .42, .6);
-    if (!o.hat || o.showHair) { const hm = M(o.hair || 0x2a1d14, .8), h2 = add(head, new T.SphereGeometry(.106, sg + 2, 10, 0, Math.PI * 2, 0, Math.PI * .52), hm, 0, .105, -.006, false); h2.scale.set(.9, 1.08, 1.0); }
+    if ((!o.hat && !o.cap) || o.showHair) { const hm = M(o.hair || 0x2a1d14, .8), h2 = add(head, new T.SphereGeometry(.106, sg + 2, 10, 0, Math.PI * 2, 0, Math.PI * .52), hm, 0, .105, -.006, false); h2.scale.set(.9, 1.08, 1.0); }
     if (o.hairLong) { const hm2 = M(o.hair || 0x2a1d14, .55, 0, { envMapIntensity: .8 }), bk = add(head, new T.SphereGeometry(.112, 12, 10), hm2, 0, -.02, -.04, false); bk.scale.set(.98, 2.0, .88); [-1, 1].forEach(sd => { for (let k = 0; k < 4; k++) { const lk = add(head, new T.SphereGeometry(.04, 8, 8), hm2, sd * (.088 + (k % 2) * .008), .04 - k * .09, .005 - k * .004, false); lk.scale.set(.7, 1.9, .8); } const fr = add(head, new T.SphereGeometry(.06, 8, 8), hm2, sd * .03, .17, .06, false); fr.scale.set(1.1, .6, .6); fr.rotation.z = sd * .5; }); }
     if (o.quiff) { const hm3 = M(o.hair || 0x2a1d14, .6), q = add(head, new T.SphereGeometry(.07, 10, 8), hm3, 0, .205, .045, false); q.scale.set(1.4, .75, 1.1); q.rotation.x = -.3; const q2 = add(head, new T.SphereGeometry(.05, 8, 8), hm3, .045, .17, .075, false); q2.scale.set(1.3, .6, .6); }
     if (o.beard) { const bd = add(head, new T.SphereGeometry(.088, 12, 8, 0, Math.PI * 2, Math.PI * .45, Math.PI * .45), M(o.hair || 0x2a1d14, .9), 0, .055, .018, false); bd.scale.set(1.02, .92, .98); }
+    if (o.cap) { // qalpoq (brend formasi): gumbaz, soyabon, logotip
+      const cm = M(o.cap, .75, 0, { bumpMap: tex.fabric(), bumpScale: 0.01 }), dm = add(head, new T.SphereGeometry(.112, sg + 4, 10, 0, Math.PI * 2, 0, Math.PI * .52), cm, 0, .125, -.004); dm.scale.set(.98, .85, 1.12);
+      const br = rb(head, .15, .01, .085, cm, 0, .123, .122, .004, false); br.rotation.x = .18; add(head, new T.SphereGeometry(.008, 6, 6), M(0x1a2233, .7), 0, .224, -.004, false); box(head, .034, .018, .004, M(0xe9a45e, .45, .3), 0, .165, .108, false).rotation.x = -.2;
+    }
     if (o.hat) { // himoya kaskasi
       const hm = M(o.hat, .28, 0, { envMapIntensity: 1.2 }), dome = add(head, new T.SphereGeometry(.118, sg + 4, 10, 0, Math.PI * 2, 0, Math.PI * .5), hm, 0, .13, -.004); dome.scale.set(.95, .95, 1.1);
       cyl(head, .124, .13, .016, hm, 0, .128, 0, 20, false).scale.set(.95, 1, 1.12); box(head, .17, .012, .075, hm, 0, .126, .125, false).rotation.x = .1; box(head, .026, .02, .21, hm, 0, .248, -.003, false);
@@ -342,5 +363,5 @@
     };
     api.resize(); return api;
   }
-  window.YDScene = { BEATS, ACTS, init, bp, _room: room, _lib: { clamp, lerp, sm, seg, V, K, KV }, _kit: { person, idle, settle, reach, handPos, makeEnv, M, rb, grp, box, add, tex, withTex, setLow(v) { LOW = !!v; SHADOWS = !v; }, shadows(v) { SHADOWS = !!v; } } };
+  window.YDScene = { BEATS, ACTS, STAGES, init, bp, _room: room, _lib: { clamp, lerp, sm, seg, V, K, KV }, _kit: { person, idle, settle, reach, handPos, makeEnv, M, rb, grp, box, add, tex, withTex, setLow(v) { LOW = !!v; SHADOWS = !v; }, shadows(v) { SHADOWS = !!v; } } };
 })();
