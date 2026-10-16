@@ -116,7 +116,7 @@
     'Tekislash': 'Выравнивание', 'Sozlash': 'Регулировка', 'Yakuniy tekshiruv': 'Финальная проверка',
     'Ba’zi eshiklar shunchaki o‘rnatiladi va unutiladi. Bu eshik esa uyingizning birinchi taassuroti bo‘ladi — har kuni, har kirishda.': 'Некоторые двери просто устанавливают и забывают. А эта дверь становится первым впечатлением о вашем доме — каждый день, при каждом входе.',
     'Rang va uslubni tanlang — har bir eshik alohida sahifa, tezkor ko‘rish va konstruktor bilan.': 'Выберите цвет и стиль — у каждой двери своя страница, быстрый просмотр и конструктор.',
-    'Eshik tanlash': 'Выбрать дверь', 'Kunduzi': 'День', 'Kechqurun': 'Вечер', 'Jarayon': 'Процесс', 'Konstruktor': 'Конструктор', 'MDF Eshiklar': 'MDF двери',
+    'Eshik tanlash': 'Выбрать дверь', 'Jarayon': 'Процесс', 'Konstruktor': 'Конструктор', 'MDF Eshiklar': 'MDF двери',
     'Sizga yoqishi mumkin': 'Вам может понравиться', 'Zakazni tasdiqlash': 'Подтвердить заказ', 'Yetkazib berish': 'Доставка', 'Zakaz holatini tekshirish': 'Проверить статус заказа', 'Kenglik (mm)': 'Ширина (мм)', 'Balandlik (mm)': 'Высота (мм)', 'Eshiklar shu o‘lchamlarda tayyorlanadi': 'Двери изготавливаются в размерах',
     'Nom, rang yoki uslub bo‘yicha qidiring…': 'Поиск по названию, цвету или стилю…',
     'Filtrlarni tozalash': 'Сбросить фильтры', 'Katalogdagi narxlar': 'Цены в каталоге', '(narxlar almashtirildi)': '(значения поменяны местами)', 'Narx dan (so‘m)': 'Цена от (сум)', 'Narx gacha (so‘m)': 'Цена до (сум)',
@@ -777,30 +777,77 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
   ];
   const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
   const SCENE = `<svg class="proc__svg" viewBox="-322 0 1245 700" role="img" aria-label="MDF eshikning tayyorlanish bosqichlari" preserveAspectRatio="xMidYMid meet"><defs>
-    <linearGradient id="scW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wall-a)"/><stop offset="1" style="stop-color:var(--wall-b)"/></linearGradient>
-    <linearGradient id="scF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--floor-a)"/><stop offset="1" style="stop-color:var(--floor-b)"/></linearGradient>
-    <radialGradient id="scL"><stop offset="0" stop-color="#ffc98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffc98a" stop-opacity="0"/></radialGradient>
-    <linearGradient id="scB" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd9a3" stop-opacity=".95"/><stop offset="1" stop-color="#ffb866" stop-opacity=".55"/></linearGradient>
-    <pattern id="scG" width="9" height="60" patternUnits="userSpaceOnUse"><path d="M2 0v60M6 0v60" stroke="#000" stroke-opacity=".07"/></pattern></defs>
-    <rect class="sc-wall" x="-2000" y="-900" width="5000" height="1420" fill="url(#scW)"/><rect class="sc-floor" x="-2000" y="520" width="5000" height="1400" fill="url(#scF)"/><rect class="sc-base" x="-2000" y="506" width="5000" height="14"/>
-    <polygon class="sc-spill" points="640,520 940,520 1000,700 560,700"/><circle class="sc-lamp" cx="800" cy="170" r="300" fill="url(#scL)"/>
-    <rect class="sc-hole" x="380" y="120" width="240" height="400"/><rect class="sc-behind" x="380" y="120" width="240" height="400" fill="url(#scB)"/>
-    <rect class="sc-casing" x="368" y="108" width="264" height="412"/>
+    <linearGradient id="scW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:#e3dacb"/><stop offset="1" style="stop-color:#c9bfae"/></linearGradient>
+    <linearGradient id="scWL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#fff6e0" stop-opacity=".28"/></linearGradient>
+    <radialGradient id="scVg" cx=".5" cy=".42" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient>
+    <linearGradient id="scF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#77726a"/><stop offset=".35" stop-color="#5a564f"/><stop offset="1" stop-color="#2f2d29"/></linearGradient>
+    <linearGradient id="scFL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".3"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+    <linearGradient id="scCs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf8f1"/><stop offset=".5" stop-color="#ece5d6"/><stop offset="1" stop-color="#cfc6b3"/></linearGradient>
+    <linearGradient id="scHl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe2b0"/><stop offset=".55" stop-color="#d9a566"/><stop offset="1" stop-color="#8d6338"/></linearGradient>
+    <linearGradient id="scHw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a2a1c"/><stop offset=".6" stop-color="#7b5a38"/><stop offset="1" stop-color="#b78b57"/></linearGradient>
+    <linearGradient id="scJ" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <linearGradient id="scJt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <linearGradient id="scSh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".26"/><stop offset=".42" stop-color="#fff" stop-opacity=".04"/><stop offset=".43" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+    <linearGradient id="scEg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e6cfa4"/><stop offset="1" stop-color="#9c7a49"/></linearGradient>
+    <linearGradient id="scMt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfbfb"/><stop offset=".5" stop-color="#9a9a9a"/><stop offset="1" stop-color="#dcdcdc"/></linearGradient>
+    <linearGradient id="scRf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <mask id="scRm" maskUnits="userSpaceOnUse" x="300" y="520" width="400" height="190"><rect x="300" y="520" width="400" height="190" fill="url(#scRf)"/></mask>
+    <filter id="scBl" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="scBs" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2"/></filter>
+    <pattern id="scFiber" width="128" height="256" patternUnits="userSpaceOnUse"><image width="128" height="256"/></pattern>
+    <pattern id="scGrain" width="160" height="256" patternUnits="userSpaceOnUse"><image width="160" height="256"/></pattern>
+    <clipPath id="scOp"><rect x="380" y="120" width="240" height="400"/></clipPath></defs>
+    <rect x="-2000" y="-900" width="5000" height="1420" fill="url(#scW)"/><rect x="-2000" y="-900" width="5000" height="1420" fill="url(#scWL)"/>
+    <rect x="-2000" y="520" width="5000" height="1400" fill="url(#scF)"/><rect x="-2000" y="520" width="5000" height="1400" fill="url(#scFL)"/>
+    <rect x="-2000" y="505" width="5000" height="16" fill="#f1ebdd"/><rect x="-2000" y="505" width="5000" height="3" fill="#fff" opacity=".7"/><rect x="-2000" y="520" width="5000" height="6" fill="#000" opacity=".28"/>
+    <polygon points="650,522 960,522 1060,700 540,700" fill="#fff" opacity=".1"/>
+    <rect x="352" y="96" width="296" height="440" rx="6" fill="#000" opacity=".28" filter="url(#scBl)"/>
+    <g class="sc-case"><rect x="364" y="106" width="272" height="416" fill="url(#scCs)"/><rect x="364" y="106" width="272" height="416" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.5"/>
+      <rect x="372" y="114" width="256" height="408" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="1.5"/><rect x="374" y="116" width="252" height="404" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1"/></g>
+    <g clip-path="url(#scOp)"><rect x="380" y="120" width="240" height="400" fill="#2a2420"/>
+      <rect class="sc-hall" x="380" y="120" width="240" height="400" fill="url(#scHl)"/><rect x="380" y="448" width="240" height="72" fill="url(#scHw)"/><rect x="380" y="444" width="240" height="5" fill="#f3e3c5" opacity=".8"/>
+      <rect x="470" y="150" width="90" height="170" fill="#fff4dc" opacity=".35"/>
+      <rect class="sc-dim" x="380" y="120" width="240" height="400" fill="#0a0908"/>
+      <rect x="380" y="120" width="22" height="400" fill="url(#scJ)"/><rect x="380" y="120" width="240" height="22" fill="url(#scJt)"/></g>
     <g class="sc-dims"><path pathLength="1" d="M380 88H620M380 76v24M620 76v24"/><path pathLength="1" d="M338 120V520M326 120h24M326 520h24"/><text x="500" y="70" text-anchor="middle">Kenglik</text><text x="318" y="330" text-anchor="middle" transform="rotate(-90 318 330)">Balandlik</text></g>
-    <ellipse class="sc-shadow" cx="500" cy="528" rx="150" ry="10"/>
-    <g class="sc-door"><g class="sc-slab"><rect x="392" y="132" width="216" height="388" fill="var(--mdf)"/><rect x="392" y="132" width="216" height="388" fill="url(#scG)"/></g>
-      <rect class="sc-paint" x="392" y="132" width="216" height="388"/>
-      <g class="sc-grooves"><path pathLength="1" d="M412 152H588V298H412ZM412 320H588V500H412Z"/><path pathLength="1" d="M500 152V298M500 320V500"/></g>
-      <g class="sc-hw"><rect x="388" y="168" width="8" height="34" rx="2"/><rect x="388" y="330" width="8" height="34" rx="2"/><rect x="388" y="450" width="8" height="34" rx="2"/><rect class="sc-hd1" x="556" y="318" width="40" height="9" rx="4.5"/><circle class="sc-hd2" cx="590" cy="322.5" r="11"/></g>
-      <g class="sc-scan"><rect x="392" y="132" width="3" height="388"/></g></g>
+    <ellipse class="sc-shadow" cx="500" cy="526" rx="150" ry="11" filter="url(#scBl)"/>
+    <g id="scDoor" class="sc-door">
+      <g class="sc-slab"><polygon points="615,125 631,119 631,511 615,517" fill="#8e6b3c"/><polygon points="385,125 615,125 631,119 401,119" fill="#e1c595"/>
+        <rect x="385" y="125" width="230" height="392" fill="#c8a574"/><rect x="385" y="125" width="230" height="392" fill="url(#scFiber)"/><rect x="385" y="125" width="230" height="392" fill="url(#scSh)" opacity=".7"/>
+        <rect x="385.75" y="125.75" width="228.5" height="390.5" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/></g>
+      <g class="sc-paint"><polygon class="sc-th" points="615,125 631,119 631,511 615,517" fill="var(--door)"/><polygon class="sc-th" points="615,125 631,119 631,511 615,517" fill="#000" opacity=".38"/><polygon class="sc-th" points="385,125 615,125 631,119 401,119" fill="var(--door)"/><polygon class="sc-th" points="385,125 615,125 631,119 401,119" fill="#fff" opacity=".28"/><rect x="385" y="125" width="230" height="392" fill="var(--door)"/><rect x="385" y="125" width="230" height="392" fill="url(#scGrain)" opacity=".22"/><rect x="385" y="125" width="230" height="392" fill="url(#scFiber)" opacity=".14"/></g>
+      <g class="sc-grooves"><path class="sc-gd" pathLength="1" d="M409 149H591V298H409ZM409 322H591V493H409Z"/><path class="sc-gl" d="M410.6 150.6H592.6V299.6H410.6ZM410.6 323.6H592.6V494.6H410.6Z"/><path class="sc-gm" pathLength="1" d="M500 149V298M500 322V493"/></g>
+      <g class="sc-gloss"><rect x="385" y="125" width="230" height="392" fill="url(#scSh)"/><rect x="385" y="125" width="5" height="392" fill="#000" opacity=".16"/></g>
+      <g class="sc-hw"><g class="sc-hinge"><rect x="382" y="162" width="9" height="36" rx="2" fill="url(#scMt)"/><rect x="382" y="322" width="9" height="36" rx="2" fill="url(#scMt)"/><rect x="382" y="448" width="9" height="36" rx="2" fill="url(#scMt)"/></g>
+        <ellipse cx="584" cy="335" rx="13" ry="13" fill="#000" opacity=".3" filter="url(#scBs)"/><rect x="545" y="332" width="42" height="11" rx="5.5" fill="#000" opacity=".28" filter="url(#scBs)"/>
+        <circle cx="584" cy="326" r="14" fill="url(#scMt)" stroke="#6e6e6e" stroke-width="1"/><circle cx="584" cy="326" r="7" fill="#8a8a8a" opacity=".5"/><rect x="540" y="320" width="46" height="11" rx="5.5" fill="url(#scMt)" stroke="#6e6e6e" stroke-width="1"/><rect x="544" y="322" width="38" height="2.5" rx="1.2" fill="#fff" opacity=".75"/></g>
+      <g class="sc-scan"><rect x="385" y="125" width="3" height="392"/></g>
+      <rect class="sc-shade" x="385" y="125" width="230" height="392" fill="#000"/>
+      <polygon class="sc-edge" points="615,125 626,121 626,513 615,517" fill="url(#scEg)"/></g>
+    <g class="sc-refl" mask="url(#scRm)"><use href="#scDoor" transform="translate(0,1043) scale(1,-1)"/></g>
     <g class="sc-ok"><circle cx="640" cy="150" r="26"/><path d="M628 150l9 9 16-18"/></g>
+    <rect x="-2000" y="-900" width="5000" height="1800" fill="url(#scVg)" pointer-events="none"/>
     <g class="sc-sw"></g></svg>`;
+  const grainTex = kind => { // canvas bilan bir martalik tekstura: yog‘och tolalari va MDF tolasi (tarmoqdan rasm yuklanmaydi)
+    try {
+      const w = kind === 'wood' ? 160 : 128, h = 256, c = document.createElement('canvas'); c.width = w; c.height = h;
+      const g = c.getContext('2d'), im = g.createImageData(w, h), d = im.data; let sd = kind === 'wood' ? 11 : 29; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4; let a, dark = 1;
+        if (kind === 'wood') { const s = Math.sin(x * 2 * Math.PI * 23 / w + Math.sin(y * 2 * Math.PI * 2 / h) * 2.4 + Math.sin(x * 2 * Math.PI * 5 / w) * 3), st = s * .5 + .5; a = st * st * .3 + rnd() * .08; }
+        else { a = rnd() * rnd() * .5; dark = rnd() < .62 ? 1 : 0; }
+        d[i] = d[i + 1] = d[i + 2] = dark ? 0 : 255; d[i + 3] = Math.round(a * 255);
+      }
+      g.putImageData(im, 0, 0); return c.toDataURL('image/png');
+    } catch { return ''; }
+  };
   function initProcess() {
     const sec = $('#process'); if (!sec) return;
     const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
     const lum = h => { const n = parseInt(String(h).replace('#', ''), 16) || 0; return ((n >> 16) & 255) * .3 + ((n >> 8) & 255) * .59 + (n & 255) * .11; };
     const cols = [...new Map(PRODUCTS.map(p => [p.color, p.hex])).values()].sort((x, y) => lum(y) - lum(x)); if (!cols.length) cols.push('#e8e4da', '#6b4a33', '#232323'); // och → to‘q: oxirgi rang to‘q bo‘ladi
     $('#procScene').innerHTML = SCENE; translateDom($('#procScene')); const svg = $('.proc__svg', sec), sw = $('.sc-sw', svg);
+    [['scFiber', 'fiber'], ['scGrain', 'wood']].forEach(([id, k]) => { const u = grainTex(k), im = svg.querySelector(`#${id} image`); if (im && u) im.setAttribute('href', u); });
     const setVB = () => svg.setAttribute('viewBox', innerWidth <= 900 ? '262 24 476 600' : '-322 0 1245 700'); // eshik kompyuterda o‘ngda, telefonda markazda
     setVB(); addEventListener('resize', setVB);
     sw.innerHTML = cols.slice(0, 5).map((c, i) => `<circle cx="${500 + (i - (Math.min(cols.length, 5) - 1) / 2) * 44}" cy="600" r="14" fill="${esc(c)}"/>`).join('');
@@ -816,6 +863,7 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
     $('#procDots').innerHTML = STAGES.map(() => '<i></i>').join('');
     const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
     const tick = () => {
+      if (sec.classList.contains('proc--3d')) return; // 3D sahna ishga tushgan bo‘lsa, 2D chizma o‘chadi
       const r = sec.getBoundingClientRect(), total = sec.offsetHeight - innerHeight;
       const p = calm ? 1 : clamp(-r.top / Math.max(total, 1)), x = p * 7, i = Math.min(6, Math.floor(x));
       for (let k = 1; k <= 7; k++) svg.style.setProperty('--a' + k, calm ? 1 : clamp(x - (k - 1)).toFixed(3));
@@ -824,7 +872,71 @@ ${detail}<rect x="116" y="56" width="168" height="324" fill="url(#s)"/>
       if (i !== cur) { cur = i; setText(i); }
     };
     addEventListener('scroll', tick, { passive: true }); addEventListener('resize', tick); tick();
-    $$('.proc__time button', sec).forEach(b => b.addEventListener('click', () => { sec.dataset.time = b.dataset.time; $$('.proc__time button', sec).forEach(x => x.setAttribute('aria-pressed', x === b)); }));
+    init3D(sec);
+  }
+  /* ---------- 13b. 3D ishlab chiqarish sahnasi (Three.js) — faqat kerak bo‘lganda yuklanadi; yo‘q bo‘lsa 2D chizma qoladi ---------- */
+  const RU_STAGES = [
+    ['Замер', 'Наши специалисты приедут к вам домой и точно измерят размеры дверного проёма.'],
+    ['Подготовка материалов MDF', 'Высококачественные плиты MDF готовятся с помощью специальных технологий.'],
+    ['Раскрой и формирование', 'Материалы раскраиваются нужного размера, и дверь приобретает форму.'],
+    ['Шлифовка', 'Поверхность двери подготавливается до идеальной гладкости.'],
+    ['Узоры и фрезеровка', 'Применяются современные дизайны и эксклюзивные узоры.'],
+    ['Покраска и покрытие', 'Дверь обрабатывается качественной краской и покрытием.'],
+    ['Контроль качества', 'Каждая дверь проходит специальную проверку и получает гарантию качества.'],
+    ['Упаковка', 'Безопасная и надёжная упаковка защищает дверь от повреждений.'],
+    ['Доставка', 'Готовые двери доставляются по адресу клиента вовремя.'],
+    ['Установка', 'Квалифицированные специалисты профессионально устанавливают дверь.'],
+    ['Финальная проверка', 'Проверяются открывание и закрывание, ручка и все детали.'],
+    ['Готовый результат', 'В вашем доме — современная, качественная и красивая дверь MDF!']
+  ];
+  const RU_ACTS = ['Замер', 'Производство', 'Доставка', 'Установка'];
+  function init3D(sec) {
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches || (navigator.connection && navigator.connection.saveData)) return; // zaxira: 2D chizma + ro‘yxat
+    const wrap = $('#procScene'); if (!wrap) return;
+    try { const cv = document.createElement('canvas'); if (!(cv.getContext('webgl2') || cv.getContext('webgl'))) return; } catch { return; }
+    const load = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = rej; document.head.appendChild(el); });
+    let started = false;
+    const boot = async () => {
+      try { await load('vendor/three.min.js'); await load('scene3d.js'); await load('scene3d-world.js'); } catch { return; }
+      if (!window.YDScene) return;
+      const mobile = matchMedia('(max-width:900px)').matches || matchMedia('(pointer:coarse)').matches;
+      const canvas = document.createElement('canvas'); canvas.className = 'proc__canvas'; canvas.setAttribute('aria-hidden', 'true'); wrap.appendChild(canvas);
+      const hud = $('#procHud'); const sceneApi = YDScene.init({ canvas, mobile, onHud: (txt) => { if (!hud) return; hud.hidden = !txt; if (txt) hud.textContent = txt; } });
+      if (!sceneApi) { canvas.remove(); return; }
+      const B = YDScene.BEATS, ACTS = YDScene.ACTS, SG = YDScene.STAGES, txt = $('#procTxt'), count = $('#procCount'), acts = $('#procDots'), fin = $('#procFinal');
+      const pad = n => String(n).padStart(2, '0'), clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+      acts.className = 'proc__acts'; acts.innerHTML = SG.map((s, i) => `<div class="act" data-i="${i}" style="flex:${(s.b - s.a).toFixed(4)}" title="${esc(LANG === 'ru' ? RU_STAGES[i][0] : s.t)}"><span>${pad(i + 1)}</span><i><b></b></i></div>`).join('');
+      const fills = $$('.act b', acts), actEls = $$('.act', acts), endAt = B[B.length - 1].a + (B[B.length - 1].b - B[B.length - 1].a) * .55;
+      if (fin) fin.innerHTML = `<p class="eyebrow">YasinDoors</p><h2>${LANG === 'ru' ? 'От замера до идеального результата — <em>YasinDoors</em>' : 'O‘lchovdan mukammal natijagacha — <em>YasinDoors</em>'}</h2><a class="btn btn--p" href="doors.html">${t('Eshik tanlash')}</a>`;
+      let cur = -1;
+      const setStage = i => {
+        const s = SG[i], r = LANG === 'ru' ? RU_STAGES[i] : null;
+        txt.innerHTML = `<p class="proc__lb">${esc(LANG === 'ru' ? RU_ACTS[s.act] : ACTS[s.act])}</p><div class="proc__head"><span class="proc__ring">${pad(i + 1)}</span><h2>${esc(r ? r[0] : s.t)}</h2></div><p class="proc__p">${esc(r ? r[1] : s.d)}</p>`;
+        txt.classList.remove('in'); void txt.offsetWidth; txt.classList.add('in'); count.textContent = `${pad(i + 1)} / ${pad(SG.length)}`;
+        actEls.forEach((a, k) => a.classList.toggle('on', k === i));
+      };
+      let visible = false;
+      const tick = () => {
+        const r = sec.getBoundingClientRect(), total = sec.offsetHeight - innerHeight, p = clamp(-r.top / Math.max(total, 1));
+        const inView = r.bottom > 0 && r.top < innerHeight;
+        if (inView && !visible && !document.hidden) { visible = true; sceneApi.start(); } else if ((!inView || document.hidden) && visible) { visible = false; sceneApi.stop(); }
+        sceneApi.setProgress(p);
+        let i = SG.findIndex(s => p < s.b); if (i < 0) i = SG.length - 1; if (i !== cur) { cur = i; setStage(i); }
+        SG.forEach((s, k) => { fills[k].style.width = (clamp((p - s.a) / (s.b - s.a)) * 100).toFixed(1) + '%'; });
+        sec.classList.toggle('proc--end', p > endAt);
+      };
+      const first = () => { // 3D rejimga o‘tishda bo‘lim balandligi o‘zgaradi: foydalanuvchi turgan joy sakramasligi uchun scroll tuzatiladi
+        const de = document.documentElement, r0 = sec.getBoundingClientRect(), h0 = sec.offsetHeight; de.style.overflowAnchor = 'none'; sec.classList.add('proc--3d'); const h1 = sec.offsetHeight;
+        if (h1 !== h0) { if (r0.bottom <= 0) scrollTo({ top: scrollY + (h1 - h0), behavior: 'instant' }); else if (r0.top < 0) scrollTo({ top: scrollY + (-r0.top / Math.max(h0 - innerHeight, 1)) * (h1 - innerHeight) + r0.top, behavior: 'instant' }); }
+        requestAnimationFrame(() => requestAnimationFrame(() => { de.style.overflowAnchor = ''; }));
+        sec.yd3d = sceneApi; sceneApi.resize(); tick(); requestAnimationFrame(() => canvas.classList.add('on'));
+      };
+      first();
+      addEventListener('scroll', tick, { passive: true }); addEventListener('resize', () => { sceneApi.resize(); tick(); }); document.addEventListener('visibilitychange', tick);
+    };
+    // sahifa tez ochilishi uchun: birinchi scrolldan keyin (yoki 3.5 soniya jim turilsa) yuklanadi
+    const kick = () => { if (started) return; started = true; removeEventListener('scroll', kick); boot(); };
+    addEventListener('scroll', kick, { passive: true }); setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(kick, { timeout: 2000 }) : kick()), 3500);
   }
   function initStatement() { // so‘zlar scroll bilan birin-ketin yorishadi
     const sec = $('#statement'), box = $('#stmText'); if (!sec || !box) return;
