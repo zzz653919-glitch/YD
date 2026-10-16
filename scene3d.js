@@ -66,6 +66,8 @@
   };
   let SHADOWS = true, LOW = false;
   const mats = {};
+  const PM = {}; // teri va mato: sheen (yumshoq chekka yorug‘lik) bilan — plastik ko‘rinmaydi
+  const MP = (color, rough, sheen, sheenColor, extra) => { const k = [color, rough, sheen, sheenColor].join('|') + (extra ? JSON.stringify(extra, (kk, v) => (v && v.isTexture) ? v.uuid : v) : ''); return PM[k] || (PM[k] = new T.MeshPhysicalMaterial(Object.assign({ color, roughness: rough, metalness: 0, sheen: sheen * .15, sheenRoughness: .85, sheenColor: new T.Color(color).lerp(new T.Color(sheenColor), .2), envMapIntensity: .35 }, extra || {}))); };
   // PBR material (keshlanadi): rangi, g‘adir-budirligi, metallik, qo‘shimcha parametrlar
   const M = (color, rough = .85, metal = 0, extra) => {
     const k = color + '|' + rough + '|' + metal + (extra ? JSON.stringify(extra, (kk, v) => (v && v.isTexture) ? v.uuid : v) : '');
@@ -128,6 +130,7 @@
     plaster: () => TEX.plaster || (TEX.plaster = (() => { const n = 256, cv = mkCv(n, n), bc = mkCv(n, n), id = cv.getContext('2d').createImageData(n, n), bi = bc.getContext('2d').createImageData(n, n); for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const a = fbm(x / 20, y / 20, 13, 13, 6, 3), b = hash(x, y, 4), t = .94 + (a - .5) * .1 + (b - .5) * .03, i = (y * n + x) * 4; id.data[i] = 238 * t; id.data[i + 1] = 231 * t; id.data[i + 2] = 218 * t; id.data[i + 3] = 255; const h = 128 + (a - .5) * 90 + (b - .5) * 60; bi.data[i] = bi.data[i + 1] = bi.data[i + 2] = h; bi.data[i + 3] = 255; } cv.getContext('2d').putImageData(id, 0, 0); bc.getContext('2d').putImageData(bi, 0, 0); return { map: mkTex(cv, 1, 1), bump: mkTex(bc, 1, 1, false) }; })()),
     fabric: () => TEX.fabric || (TEX.fabric = (() => { const n = 128, bc = mkCv(n, n), bi = bc.getContext('2d').createImageData(n, n); for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const w = ((x % 4 < 2) ^ (y % 4 < 2)) ? 150 : 100, i = (y * n + x) * 4; bi.data[i] = bi.data[i + 1] = bi.data[i + 2] = w + hash(x, y, 2) * 40; bi.data[i + 3] = 255; } bc.getContext('2d').putImageData(bi, 0, 0); return mkTex(bc, 6, 6, false); })()),
     hazard: () => TEX.hazard || (TEX.hazard = (() => { const cv = mkCv(128, 128), g = cv.getContext('2d'); g.fillStyle = '#e8b520'; g.fillRect(0, 0, 128, 128); g.fillStyle = '#1b1d20'; for (let i = -2; i < 6; i++) { g.beginPath(); g.moveTo(i * 32, 128); g.lineTo(i * 32 + 16, 128); g.lineTo(i * 32 + 144, 0); g.lineTo(i * 32 + 128, 0); g.fill(); } return mkTex(cv, 4, 1); })()),
+    ao: () => TEX.ao || (TEX.ao = (() => { const cv = mkCv(8, 64), g = cv.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 64); gr.addColorStop(0, 'rgba(0,0,0,.6)'); gr.addColorStop(.3, 'rgba(0,0,0,.24)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 8, 64); const t = new T.CanvasTexture(cv); return t; })()),
     blob: () => TEX.blob || (TEX.blob = (() => { const cv = mkCv(64, 64), g = cv.getContext('2d'), gr = g.createRadialGradient(32, 32, 2, 32, 32, 31); gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(.6, 'rgba(0,0,0,.18)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return mkTex(cv, 1, 1, false); })())
   };
   const withTex = (t, rx, ry) => { const m = t.map.clone(), b = t.bump.clone(); m.needsUpdate = b.needsUpdate = true; m.repeat.set(rx, ry); b.repeat.set(rx, ry); return { map: m, bump: b }; };
@@ -139,7 +142,7 @@
   const DOWN = V(0, -1, 0), L1 = .29, L2 = .31;
   function person(o) {
     const g = new T.Group(), sg = LOW ? 8 : 14;
-    const skin = M(o.skin || 0xd9a982, .55, 0, { envMapIntensity: .35 }), shirt = M(o.shirt || 0x2b3a55, .9, 0, { bumpMap: tex.fabric(), bumpScale: 0.012 }), pants = M(o.pants || 0x23262e, .9, 0, { bumpMap: tex.fabric(), bumpScale: 0.012 }), boot = M(0x2a211b, .55, 0, { envMapIntensity: .7 }), glove = M(o.glove || o.skin || 0xd9a982, o.glove ? .85 : .55);
+    const skin = MP(o.skin || 0xd9a982, .52, .35, 0xffd2bd), shirt = MP(o.shirt || 0x2b3a55, .88, .6, 0x8c96a8, { bumpMap: tex.fabric(), bumpScale: 0.008 }), pants = MP(o.pants || 0x23262e, .9, .5, 0x7d8494, { bumpMap: tex.fabric(), bumpScale: 0.008 }), boot = M(0x2a211b, .55, 0, { envMapIntensity: .7 }), glove = o.glove ? MP(o.glove, .85, .4, 0x8a8f99) : skin;
     const hips = grp(g, 0, .92, 0), torso = grp(hips, 0, 0, 0);
     // tana
     const lathe = (pts, n) => { const k = 'lathe' + pts.join(); return GEO[k] || (GEO[k] = new T.LatheGeometry(pts.map(p => new T.Vector2(p[0], p[1])), n)); };
@@ -162,8 +165,8 @@
     }
     if (o.belt) { const bt = add(torso, new T.CylinderGeometry(1, 1, .04, 20, 1, true), M(o.belt, .55), 0, .04, 0, false); bt.scale.set(.145 * 1.18 + .004, 1, .145 * .76 + .004); bt.material = M(o.belt, .55, 0, { side: T.DoubleSide }); box(torso, .035, .03, .01, M(0xc8c2b8, .3, .9), 0, .04, .112, false); }
     // bosh
-    const head = grp(torso, 0, .72, 0), hd = add(head, new T.SphereGeometry(.1, sg + 4, sg), skin, 0, .1, 0); hd.scale.set(.88, 1.12, .98);
-    const jaw = add(head, new T.SphereGeometry(.07, sg, 10), skin, 0, .045, .012, false); jaw.scale.set(1.0, .8, .95); add(head, new T.SphereGeometry(.03, 8, 6), skin, 0, .025, .068, false).scale.set(1.1, .8, .8);
+    const head = grp(torso, 0, .72, 0), hd = add(head, GEO.head || (GEO.head = (() => { const g = new T.SphereGeometry(.1, 28, 20), p = g.attributes.position; for (let i = 0; i < p.count; i++) { let x = p.getX(i), y = p.getY(i), z = p.getZ(i); const ny = y / .1; if (ny < 0) { const t = Math.pow(-ny, 1.4); x *= 1 - .3 * t; z *= z > 0 ? 1 + .06 * t : 1 - .25 * t; y *= 1 + .08 * t; } if (z > 0 && ny > -.2 && ny < .35) z *= 1 - .05 * (1 - Math.abs(x) / .1); p.setXYZ(i, x, y, z); } g.computeVertexNormals(); return g; })()), skin, 0, .1, 0); hd.scale.set(.9, 1.1, 1.0); // bosh va jag‘ bitta silliq yuza (chok yo‘q)
+    
     add(head, new T.ConeGeometry(.02, .045, 6), skin, 0, .085, .105, false).rotation.x = Math.PI / 2 - .25;
     const eyeW = M(0xf4f1ea, .3), eyeD = M(o.iris || 0x3a2a1e, .2), hairM = M(o.hair || 0x2a1d14, .85), lipM = M(o.lip || 0xa65c55, .5), pupM = M(0x0c0a08, .2);
     [-1, 1].forEach(s => {
@@ -174,8 +177,8 @@
     });
     const nb = add(head, capGeo(.007, .03, 5), skin, 0, .104, .1, false); nb.rotation.x = -.1; add(head, new T.SphereGeometry(.013, 8, 6), skin, 0, .082, .109, false).scale.set(1.2, .8, 1);
     const ul = add(head, new T.SphereGeometry(.016, 8, 6), lipM, 0, .054, .1, false); ul.scale.set(1.25, .3, .5); const ll = add(head, new T.SphereGeometry(.0165, 8, 6), lipM, 0, .044, .099, false); ll.scale.set(1.15, .34, .5);
-    if ((!o.hat && !o.cap) || o.showHair) { const hm = M(o.hair || 0x2a1d14, .8), h2 = add(head, new T.SphereGeometry(.106, sg + 2, 10, 0, Math.PI * 2, 0, Math.PI * .52), hm, 0, .105, -.006, false); h2.scale.set(.9, 1.08, 1.0); }
-    if (o.hairLong) { const hm2 = M(o.hair || 0x2a1d14, .55, 0, { envMapIntensity: .8 }), bk = add(head, new T.SphereGeometry(.112, 12, 10), hm2, 0, -.02, -.04, false); bk.scale.set(.98, 2.0, .88); [-1, 1].forEach(sd => { for (let k = 0; k < 4; k++) { const lk = add(head, new T.SphereGeometry(.04, 8, 8), hm2, sd * (.084 + (k % 2) * .006), .03 - k * .085, -.035 - k * .006, false); lk.scale.set(.62, 1.8, .75); } const fr = add(head, new T.SphereGeometry(.06, 8, 8), hm2, sd * .035, .182, .045, false); fr.scale.set(1.0, .42, .55); fr.rotation.z = sd * .45; }); }
+    if ((!o.hat && !o.cap) || o.showHair) { const hm = M(o.hair || 0x2a1d14, .8), h2 = add(head, new T.SphereGeometry(.109, sg + 4, 12, 0, Math.PI * 2, 0, Math.PI * .58), hm, 0, .102, -.008, false); h2.scale.set(.95, 1.09, 1.05); h2.rotation.x = -.32; }
+    if (o.hairLong) { const hm2 = M(o.hair || 0x2a1d14, .55, 0, { envMapIntensity: .8 }), bk = add(head, new T.SphereGeometry(.112, 12, 10), hm2, 0, -.02, -.04, false); bk.scale.set(.98, 2.0, .88); [-1, 1].forEach(sd => { for (let k = 0; k < 4; k++) { const lk = add(head, new T.SphereGeometry(.04, 8, 8), hm2, sd * (.084 + (k % 2) * .006), .03 - k * .085, -.035 - k * .006, false); lk.scale.set(.62, 1.8, .75); } }); }
     if (o.quiff) { const hm3 = M(o.hair || 0x2a1d14, .6), q = add(head, new T.SphereGeometry(.07, 10, 8), hm3, 0, .19, .05, false); q.scale.set(1.35, .5, 1.0); q.rotation.x = -.35; const q2 = add(head, new T.SphereGeometry(.045, 8, 8), hm3, .04, .175, .078, false); q2.scale.set(1.2, .42, .5); }
     if (o.beard) { const bd = add(head, new T.SphereGeometry(.088, 12, 8, 0, Math.PI * 2, Math.PI * .45, Math.PI * .45), M(o.hair || 0x2a1d14, .9), 0, .055, .018, false); bd.scale.set(1.02, .92, .98); }
     if (o.cap) { // qalpoq (brend formasi): gumbaz, soyabon, logotip
@@ -193,11 +196,11 @@
     // qo‘llar: yelka → tirsak → bilak → kaft
     const mkArm = side => {
       const a = grp(torso, side * .235, .57, 0), sleeve = (o.short || o.rolled) ? skin : shirt;
-      add(a, new T.SphereGeometry(.052, 10, 8), shirt, 0, -.008, 0, false); add(a, new T.CylinderGeometry(.053, .044, L1 - .02, sg), shirt, 0, -L1 / 2, 0);
-      const el = grp(a, 0, -L1, 0); add(el, new T.SphereGeometry(.046, 8, 6), sleeve, 0, 0, 0, false); add(el, new T.CylinderGeometry(.043, .033, L2 - .09, sg), sleeve, 0, -(L2 - .09) / 2 - .01, 0); if (o.rolled) add(el, new T.CylinderGeometry(.05, .048, .075, sg), M(o.cuff || 0x9aa0a8, .7), 0, -.055, 0, false); else add(el, new T.CylinderGeometry(.036, .036, .03, sg), shirt, 0, -L2 + .1, 0, false);
-      const hd2 = grp(el, 0, -L2 + .03, 0); rb(hd2, .068, .08, .027, glove, 0, -.042, 0, .011);
-      for (let f = 0; f < 4; f++) { const fg = add(hd2, capGeo(.009, .044 - Math.abs(f - 1.5) * .005, 5), glove, -.024 + f * .016, -.105, .007, false); fg.rotation.x = -.28; }
-      const th = add(hd2, capGeo(.011, .036, 6), glove, -side * .04, -.055, .014, false); th.rotation.z = side * .55; th.rotation.x = -.3;
+      add(a, new T.SphereGeometry(.052, 10, 8), shirt, 0, -.008, 0, false); add(a, capGeo(.049, L1 - .1, sg), shirt, 0, -L1 / 2, 0);
+      const el = grp(a, 0, -L1, 0); add(el, new T.SphereGeometry(.046, 8, 6), sleeve, 0, 0, 0, false); const fa = add(el, capGeo(.04, L2 - .13, sg), sleeve, 0, -(L2 - .05) / 2, 0); fa.scale.set(1, 1, .9); add(el, new T.SphereGeometry(.03, 8, 6), sleeve, 0, -L2 + .045, 0, false).scale.set(1.15, 1, .85); if (o.rolled) add(el, new T.CylinderGeometry(.046, .044, .05, sg), shirt, 0, -.05, 0, false); else add(el, new T.CylinderGeometry(.036, .036, .03, sg), shirt, 0, -L2 + .1, 0, false);
+      const hd2 = grp(el, 0, -L2 + .03, 0); rb(hd2, .064, .078, .026, glove, 0, -.042, 0, .012);
+      for (let f = 0; f < 4; f++) { const fg = add(hd2, capGeo(.0075, .042 - Math.abs(f - 1.5) * .006, 5), glove, -.0225 + f * .015, -.102, .009, false); fg.rotation.x = -.38 - Math.abs(f - 1.5) * .05; }
+      const th = add(hd2, capGeo(.0095, .034, 6), glove, -side * .037, -.052, .014, false); th.rotation.z = side * .55; th.rotation.x = -.3;
       return { a, el, hd2 };
     };
     const aL = mkArm(-1), aR = mkArm(1);
@@ -255,7 +258,7 @@
 
   /* ---------- 5. Xona (uy ichi) ---------- */
   function room(parent, x0, withShell) {
-    const R = grp(parent, x0, 0, 0), pl = withTex(tex.plaster(), .45, .45), wall = M(0xefe9de, .92, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.025 }), wallB = M(0xe6dfd0, .92, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.025 });
+    const R = grp(parent, x0, 0, 0), pl = withTex(tex.plaster(), .45, .45), wall = M(0xefe9de, .92, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.01 }), wallB = M(0xe6dfd0, .92, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.01 });
     const pq = withTex(tex.parquet(), 8, 7.5), floorM = M(0xffffff, .42, 0, { map: pq.map, bumpMap: pq.bump, bumpScale: 0.11, envMapIntensity: .9 });
     const floor = add(R, new T.PlaneGeometry(9.6, 9, 1, 1), floorM, 0, 0, .8, false); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = SHADOWS;
     const trim = M(0xf5f1e8, .5), brass = M(0xc8a86a, .3, .9), dk = M(0x23262b, .5, .2);
@@ -270,13 +273,19 @@
     const curt = M(0xd6cdbd, .95, 0, { bumpMap: tex.fabric(), bumpScale: 0.08, side: T.DoubleSide }); [-1.55, 1.55].forEach(z => { for (let k = 0; k < 5; k++) box(win, .06, 2.2, .14, curt, -.15, .02, z + (z > 0 ? .06 : -.06) * k + (z > 0 ? -.2 : .2), false); });
     cyl(win, .015, .015, 3.6, brass, -.18, 1.1, 0, 8, false).rotation.x = Math.PI / 2;
     // mebel: divan (yostiqlar), kofe stoli, gilam, kitob javoni, o‘simlik, torsher, rasmlar
-    const sofaM = M(0x6b7380, .95, 0, { bumpMap: tex.fabric(), bumpScale: 0.1 }), sofaD = M(0x5b626e, .95, 0, { bumpMap: tex.fabric(), bumpScale: 0.1 });
-    const sofa = grp(R, -3.0, 0, 1.4); sofa.rotation.y = Math.PI / 2; rb(sofa, 2.3, .22, 1.0, dk, 0, .13, 0, .02); [-.55, .55].forEach(x => rb(sofa, 1.08, .24, .84, sofaM, x, .36, .05, .08)); rb(sofa, 2.3, .52, .24, sofaD, 0, .72, -.4, .09); [-.55, .55].forEach(x => { const b = rb(sofa, 1.04, .46, .2, sofaM, x, .75, -.28, .08); b.rotation.x = -.14; }); [-1.12, 1.12].forEach(x => rb(sofa, .2, .52, 1.0, sofaD, x, .46, 0, .08)); [-.8, .75].forEach((x, i) => { const p = rb(sofa, .42, .4, .12, i ? M(0xc9a574, .9, 0, { bumpMap: tex.fabric() }) : M(0xa8564a, .9, 0, { bumpMap: tex.fabric() }), x, .62, -.12, .05); p.rotation.set(-.2, i ? .3 : -.2, .1); });
+    const sofaM = MP(0x4f5864, .95, .8, 0xa9b0bb, { bumpMap: tex.fabric(), bumpScale: 0.012 }), sofaD = MP(0x444c57, .95, .8, 0x9aa1ad, { bumpMap: tex.fabric(), bumpScale: 0.012 });
+    const sofa = grp(R, -3.0, 0, 1.4); sofa.rotation.y = Math.PI / 2; rb(sofa, 2.3, .22, 1.0, dk, 0, .13, 0, .02); [-.55, .55].forEach(x => rb(sofa, 1.08, .24, .84, sofaM, x, .36, .05, .08)); rb(sofa, 2.3, .52, .24, sofaD, 0, .72, -.4, .09); [-.55, .55].forEach(x => { const b = rb(sofa, 1.04, .46, .2, sofaM, x, .75, -.28, .08); b.rotation.x = -.14; }); [-1.12, 1.12].forEach(x => rb(sofa, .2, .52, 1.0, sofaD, x, .46, 0, .08)); [-.8, .75].forEach((x, i) => { const p = rb(sofa, .42, .4, .12, i ? MP(0xc9a574, .9, .8, 0xe6d3b4) : MP(0xa8564a, .9, .8, 0xd8a196), x, .62, -.14, .05); p.rotation.set(-.28, i ? .12 : -.1, 0); });
     box(R, 3.6, .02, 2.6, M(0xd5ccb9, 1, 0, { bumpMap: tex.fabric(), bumpScale: 0.15 }), -.6, .012, 1.8, false); box(R, 3.3, .021, .06, M(0x8d7a5a, 1), -.6, .013, 3.05, false); box(R, 3.3, .021, .06, M(0x8d7a5a, 1), -.6, .013, .55, false);
     const tbl = grp(R, -1.5, 0, 1.9); rb(tbl, 1.1, .04, .7, woodMat('walnut', 0x6b4a33, .35, 1, 1, { clearcoat: .6, clearcoatRoughness: .2 }), 0, .4, 0, .01); [[-.5, -.3], [.5, -.3], [-.5, .3], [.5, .3]].forEach(([x, z]) => cyl(tbl, .022, .016, .38, brass, x, .19, z, 8, false)); cyl(tbl, .09, .06, .2, M(0xdcd6c9, .35, 0, { envMapIntensity: 1 }), .2, .52, .05, 14); cyl(tbl, .02, .02, .3, M(0x3d7a47, .8), .2, .78, .05, 6, false); box(tbl, .3, .03, .22, M(0xb8473a, .7), -.25, .44, -.05); box(tbl, .26, .025, .2, M(0x2b3a55, .7), -.24, .47, -.05);
     const shelf = grp(R, 3.3, 0, -3.35), shW = M(0xb48f5e, .55, 0, { envMapIntensity: .5 }); box(shelf, 2.2, 2.2, .03, shW, 0, 1.1, -.135); [-1.09, 1.09].forEach(x => box(shelf, .04, 2.2, .3, shW, x, 1.1, 0)); for (let s = 0; s < 6; s++) box(shelf, 2.14, .035, .3, shW, 0, .02 + s * .436, 0, false); const rr = rngMk(7); for (let s = 0; s < 5; s++) { let bx = -1.0; while (bx < .95) { const w = .03 + rr() * .05, h = .22 + rr() * .14; if (rr() > .18) box(shelf, w, h, .2, M([0x8a3b2e, 0x2f4f6f, 0xc9b27a, 0x3d6a55, 0xe3ddd0, 0x5a4a3a][(rr() * 6) | 0], .8), bx + w / 2, .04 + s * .436 + h / 2 + .02, -.02, false); bx += w + .004; } }
     const plant = grp(R, 3.9, 0, -2.6); cyl(plant, .24, .17, .4, M(0xe1dbcf, .45, 0, { envMapIntensity: .8 }), 0, .2, 0, 18); cyl(plant, .23, .23, .03, M(0x3a2c20, 1), 0, .39, 0, 14, false); for (let i = 0; i < 12; i++) { const a = i * 2.4, l = add(plant, new T.SphereGeometry(.12, 8, 6), M(i % 3 ? 0x3f7d4c : 0x4f9158, .55, 0, { side: T.DoubleSide, envMapIntensity: .6 }), Math.cos(a) * .18, .75 + (i % 4) * .18, Math.sin(a) * .18); l.scale.set(.35, 1.2, .08 + (i % 3) * .02); l.rotation.set(Math.sin(a) * .5, a, Math.cos(a) * .5); cyl(plant, .006, .006, .5 + (i % 4) * .16, M(0x35603c, .8), Math.cos(a) * .09, .62 + (i % 4) * .08, Math.sin(a) * .09, 5, false).rotation.set(Math.sin(a) * .35, 0, -Math.cos(a) * .35); }
     const lamp = grp(R, -3.9, 0, -2.7); cyl(lamp, .16, .16, .03, dk, 0, .015, 0, 16, false); cyl(lamp, .012, .012, 1.55, brass, 0, .8, 0, 8, false); add(lamp, new T.CylinderGeometry(.17, .23, .3, 20, 1, true), M(0xf3e6c8, .9, 0, { emissive: 0xffd9a0, emissiveIntensity: .6, side: T.DoubleSide }), 0, 1.7, 0, false); add(lamp, new T.SphereGeometry(.07, 10, 8), M(0xfff6e0, .3, 0, { emissive: 0xffe2b0, emissiveIntensity: 1.5 }), 0, 1.68, 0, false);
+    // burchaklarda yumshoq soya (ambient occlusion): devor-pol tutashuvi va mebel ostida
+    const aoM = new T.MeshBasicMaterial({ map: tex.ao(), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 });
+    const aoStrip = (len, x, z, ry, onWall) => { const m = new T.Mesh(new T.PlaneGeometry(len, onWall ? .5 : .55), aoM); if (onWall) { m.position.set(x, .25, z); m.rotation.y = ry; m.rotation.z = Math.PI; } else { m.rotation.set(-Math.PI / 2, 0, ry); m.position.set(x, .004, z); } m.renderOrder = 2; R.add(m); return m; };
+    [[-2.45, 3.8], [2.45, 3.8]].forEach(([x, l]) => { const f = aoStrip(l, x, -3.5 + .275, 0, false); f.rotation.z = Math.PI; aoStrip(l, x, -3.49, 0, true); });
+    [[-4.6, 1], [4.6, -1]].forEach(([x, sd]) => { const f = aoStrip(8.6, x + sd * .275, .5, sd * Math.PI / 2, false); aoStrip(8.6, x + sd * .01, .5, sd * Math.PI / 2, true); });
+    [[-3.0, 1.4, 1.3, 2.6], [-1.5, 1.9, 1.4, 1.0], [3.3, -3.25, 2.5, .7], [3.9, -2.6, .7, .7], [-3.9, -2.7, .5, .5]].forEach(([x, z, w2, d2]) => { const b = blob(R, w2, d2, .9); b.position.set(x, .007, z); });
     const fr = (w, h, x, y, art) => { box(R, w + .08, h + .08, .035, M(0x1c1f23, .4, .2), x, y, -3.46, false); box(R, w, h, .02, art, x, y, -3.44, false); };
     fr(1.0, .7, -2.4, 1.85, M(0xd9c9a8, .85)); fr(.6, .42, -2.4, 1.85, M(0x7b9486, .8)); fr(.7, .9, 2.0, 1.75, M(0xc7a07a, .85)); fr(.3, .5, 2.0, 1.75, M(0x2f3e4e, .8));
     // pendant chiroq (shift yo‘q — havoda osilgan, pastdan ko‘rinadi)
@@ -289,7 +298,7 @@
     box(R, .07, 2.06, .26, jm, -.465, 1.03, -3.6, false); box(R, .07, 2.06, .26, jm, .465, 1.03, -3.6, false); box(R, 1.0, .07, .26, jm, 0, 2.085, -3.6, false); box(R, .96, .012, .26, M(0xb8b3a8, .4, .9), 0, .006, -3.6, false); // ostona
     const out = { R, floor, opening: V(x0, 0, -3.6) };
     if (withShell) { // tashqaridan ko‘rinadigan uy: qanotlar, tom, kirish zinapoyasi, ayvon
-      const sh2 = M(0xdcd5c8, .9, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.03 }), stone = M(0xe6e1d7, .85, 0, { map: withTex(tex.concrete(), .5, .5).map });
+      const sh2 = M(0xdcd5c8, .9, 0, { map: pl.map, bumpMap: pl.bump, bumpScale: 0.012 }), stone = M(0xe6e1d7, .85, 0, { map: withTex(tex.concrete(), .5, .5).map });
       box(R, 9.6, .4, 9.6, stone, 0, -.26, 1.2, false);
       rb(R, 13, .38, 11.6, M(0xe4dfd4, .8), 0, 3.3, .6, .05); rb(R, 13.2, .08, 11.8, M(0xe3ddd0, .7), 0, 3.52, .6, .02); box(R, 13, .5, .1, trim, 0, 3.0, 6.3, false);
       box(R, 6, 3.4, 5, sh2, -9.2, 1.7, -2.5); box(R, 6, 3.4, 5, sh2, 9.2, 1.7, -2.5);

@@ -21,7 +21,7 @@
     /* ---------- Zavod binosi ---------- */
     const F = grp(world, 0, 0, 0);
     const fl = add(F, new T.PlaneGeometry(FX1 - FX0 + 6, 30), conc, (FX0 + FX1) / 2 + 1, 0, 6, false); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = SH;
-    const pw = withTex(tex.plaster(), .35, .35), wallM = M(0xdadde0, .8, 0, { map: pw.map, bumpMap: pw.bump, bumpScale: 0.05 }), wallDk = M(0x8c959d, .7);
+    const pw = withTex(tex.plaster(), .35, .35), wallM = M(0xdadde0, .8, 0, { map: pw.map, bumpMap: pw.bump, bumpScale: 0.02 }), wallDk = M(0x8c959d, .7);
     box(F, FX1 - FX0, 10, .3, wallM, (FX0 + FX1) / 2, 5, -9.2);
     box(F, .3, 10, 10.5, wallM, FX0, 5, -3.75); box(F, .3, 10, 2, wallM, FX0, 5, 8); box(F, .3, 5, 5.5, wallM, FX0, 7.5, 4.25); // chap devor: yuk ko‘targich kiradigan darvoza (5.5 × 5 m)
     [1.5, 7].forEach(z => box(F, .5, 5.2, .5, yellow, FX0, 2.6, z, false)); box(F, .45, .6, 5.9, hazardM, FX0, 5.3, 4.25, false);
@@ -156,7 +156,7 @@
     const finT = tex.wood('walnut'), fin = new T.MeshPhysicalMaterial({ color: WALNUT, map: finT.map, bumpMap: finT.bump, bumpScale: 0.05, roughness: .45, clearcoat: .55, clearcoatRoughness: .2, envMapIntensity: .55, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
     const parts = []; const pl = (w, h, d, x, z, ex, ey, ez, r) => { const m = rb(leaf, w, h, d, raw, x, 0, z, r || .006); m.userData = { x, z, ex, ey, ez }; const cm = new T.Mesh(m.geometry, fin); cm.scale.setScalar(1.003); m.add(cm); m.userData.coat = cm; parts.push(m); return m; };
     pl(LW, LT, .115, 0, -.34, -.2, 1.3, -1.8); pl(LW, LT, .115, 0, .34, .2, 1.6, 1.8);                      // tik ustunlar
-    pl(.2, LT, .57, -.9, 0, -2.2, 1.0, 0); pl(.13, LT, .57, .04, 0, 0, 1.9, -.6); pl(.15, LT, .57, .925, 0, 2.2, 1.0, .5); // pastki, o‘rta, yuqori to‘sinlar
+    pl(.2, LT, .57, -.9, 0, -2.2, 1.0, 0); pl(.15, LT, .57, .04, 0, 0, 1.9, -.6); pl(.15, LT, .57, .925, 0, 2.2, 1.0, .5); // pastki, o‘rta, yuqori to‘sinlar
     const panelU = pl(.765, .028, .57, .4775, 0, .6, 2.2, 1.2, .005), panelD = pl(.795, .028, .57, -.4125, 0, -.6, 2.2, -1.2, .005);
     [panelU, panelD].forEach(pn => { const fld = rb(pn, pn === panelU ? .6 : .63, .02, .38, raw, 0, .018, 0, .008); const f2 = new T.Mesh(fld.geometry, fin); f2.scale.setScalar(1.004); fld.add(f2); fld.userData.coat = f2; fld.scale.x = pn === panelU ? 1.0 : 1.0; });
     // panel ichidagi chuqurchalar (frezer izi): yo‘llar — [markaz x, markaz z, o‘lcham x, o‘lcham z]
@@ -165,8 +165,13 @@
     const sheet = box(world, 2.8, LT, 2.07, mdfM, 42, 0, 4.2); const offc = box(world, 1.5, LT, .6, mdfM, 0, -9, 0);
     // furnitura: 3 ta petla, dastak va qulf (eshik yuziga +y)
     const hardware = grp(leaf, 0, 0, 0); hardware.visible = false;
-    const brass = M(0xcfd2d6, .22, 1, { envMapIntensity: 1.5 }), hingeH = [.78, 0, -.78].map(x => { const h = grp(hardware, x, 0, -.4); rb(h, .1, .01, .045, brass, 0, LT / 2, .02, .004, false); cyl(h, .011, .011, .1, brass, 0, LT / 2 + .004, -.004, 10, false).rotation.z = Math.PI / 2; return h; });
-    const handle = grp(hardware, -.04, LT / 2, .33); rb(handle, .06, .008, .2, brass, 0, 0, 0, .004, false); cyl(handle, .024, .024, .012, brass, 0, .008, 0, 18, false); cyl(handle, .009, .009, .04, brass, 0, .028, 0, 10, false); rb(handle, .016, .016, .14, brass, 0, .048, -.06, .006, false); cyl(handle, .004, .004, .016, black, 0, .003, .075, 8, false);
+    const brass = M(0x1f2023, .36, .75, { envMapIntensity: 1.1 }), hingeH = [.78, 0, -.78].map(x => { const h = grp(hardware, x, 0, -.4); rb(h, .1, .01, .045, brass, 0, LT / 2, .02, .004, false); cyl(h, .011, .011, .1, brass, 0, LT / 2 + .004, -.004, 10, false).rotation.z = Math.PI / 2; return h; });
+    const mkHandle = (sideY) => { // dastak: rozetka, bo‘yin, egilgan richag, kalit teshigi (har ikki yuzda)
+      const h = grp(hardware, -.04, sideY * LT / 2, .33); if (sideY < 0) h.rotation.x = Math.PI;
+      cyl(h, .027, .029, .01, brass, 0, .005, 0, 24, false); cyl(h, .01, .011, .045, brass, 0, .03, 0, 12, false);
+      const lv = grp(h, 0, .052, 0); rb(lv, .02, .017, .125, brass, 0, 0, -.055, .007, false); const tip = rb(lv, .022, .019, .03, brass, 0, -.004, -.118, .009, false); tip.rotation.x = .25;
+      cyl(h, .016, .017, .008, brass, -.11, .004, 0, 18, false); box(h, .006, .002, .012, M(0x050505, .6), -.11, .009, 0, false); return h; };
+    const handle = mkHandle(1), handleB = mkHandle(-1);
     leaf.userData.hardware = hardware;
     // qadoq: karton taglik, qopqoq, o‘rovchi plyonka
     const pack = grp(world, 0, 0, 0); pack.visible = false; const cardT = withTex(tex.mdf(), 1, 1), cardM = M(0xb9915f, .95, 0, { bumpMap: cardT.bump, bumpScale: 0.035 });
@@ -343,7 +348,7 @@
       }
       leaf.position.copy(leafP); leaf.quaternion.copy(leafQ); pack.position.copy(packP); pack.quaternion.copy(packQ); leaf.visible = p > bp(4, .9);
       // eshik ichida chiqib turgan hardware
-      hardware.visible = p > bp(15, .3); handle.scale.setScalar(Math.max(.001, sm(e(16, .1, .55)))); handle.visible = p > bp(16, .05); hingeH.forEach(h => { h.visible = p > bp(15, .3); });
+      hardware.visible = p > bp(15, .3); handle.scale.setScalar(Math.max(.001, sm(e(16, .1, .55)))); handleB.scale.copy(handle.scale); handle.visible = handleB.visible = p > bp(16, .05); hingeH.forEach(h => { h.visible = p > bp(15, .3); });
       const door1 = K(p, [[bp(11, .55), 0], [bp(11, .8), 1.75], [bp(12, .12), 1.75], [bp(12, .22), 0], [bp(12, .96), 0], [bp(13, .04), 1.75], [bp(13, .3), 1.75], [bp(13, .45), 1.75]]); cargoDoor.rotation.y = door1; cargoDoor2.rotation.y = -door1;
       truck.updateMatrixWorld(true);
 
