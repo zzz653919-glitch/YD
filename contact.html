@@ -1,51 +1,82 @@
-<!DOCTYPE html>
-<html lang="uz">
+<!doctype html>
+<html lang="uz" class="no-js">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aloqa va buyurtma holati — YasinDoors</title>
-  <meta name="description" content="YasinDoors bilan bog‘laning, savol yuboring va buyurtma holatini tekshiring.">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aloqa — YasinDoors</title>
+  <meta name="description" content="YasinDoors bilan bog‘lanish: MDF eshiklar bo‘yicha savollar, maslahat va buyurtmalar.">
+  <meta name="theme-color" content="#f7f5f1">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="canonical" href="/contact.html">
-  <meta property="og:title" content="Aloqa va buyurtma holati — YasinDoors"><meta property="og:type" content="website"><meta property="og:locale" content="uz_UZ">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
-  <script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/loader.css">
+  <script src="assets/js/theme-init.js"></script>
+  <script src="assets/js/loader.js"></script>
 </head>
 <body data-page="contact">
-  <a class="skip" href="#main">Asosiy kontentga o‘tish</a>
-  <header class="header" id="site-header"></header>
-  <main id="main">
-    <section class="phero"><div class="container reveal"><p class="eyebrow">YasinDoors</p><h1>Eshik tanlashda <em>yordam beramiz</em></h1><p>Savol bering, o‘lcham yoki rang bo‘yicha maslahat oling — tez orada javob beramiz.</p></div></section>
-    <section class="section"><div class="container contact">
-      <div class="reveal"><h2>Bog‘laning</h2>
-        <ul class="info" id="contactInfo"></ul>
-        <p class="note" id="contactNote"></p></div>
-      <form class="form reveal" id="contactForm" novalidate>
-        <h2>Xabar yuborish</h2>
-        <div class="fl"><input class="field" id="name" name="name" placeholder=" " autocomplete="name" maxlength="100"><label for="name">Ism</label><div class="err" id="e-name"></div></div>
-        <div class="fl"><input class="field" id="phone" name="phone" type="tel" placeholder=" " autocomplete="tel" maxlength="30"><label for="phone">Telefon raqam</label><div class="err" id="e-phone"></div></div>
-        <div class="fl"><input class="field" id="email" name="email" type="email" placeholder=" " autocomplete="email" maxlength="80"><label for="email">Email (ixtiyoriy)</label><div class="err" id="e-email"></div></div>
-        <div class="fl"><textarea class="field" id="message" name="message" placeholder=" " rows="5" maxlength="2000"></textarea><label for="message">Xabaringiz</label><div class="err" id="e-message"></div></div>
-        <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp">
-        <div class="notice" id="cErr" role="alert"></div>
-        <button type="submit" class="btn btn--p" id="cBtn">Xabar yuborish</button>
-      </form>
-    </div></section>
-    <section class="section section--alt" id="statusSec"><div class="container contact">
-      <div class="reveal"><p class="eyebrow">Zakaz</p><h2>Buyurtma holatini tekshirish</h2><p>Zakaz raqami (masalan, YD-0001) va buyurtmada ko‘rsatilgan telefon raqamini kiriting.</p></div>
-      <form class="form reveal" id="statusForm" novalidate>
-        <div class="fl"><input class="field" id="stId" name="id" placeholder=" " maxlength="20" autocomplete="off"><label for="stId">Zakaz raqami</label></div>
-        <div class="fl"><input class="field" id="stPhone" name="phone" type="tel" placeholder=" " maxlength="30" autocomplete="tel"><label for="stPhone">Telefon raqam</label></div>
-        <div class="notice" id="stErr" role="alert"></div>
-        <button type="submit" class="btn btn--p" id="stBtn">Tekshirish</button>
-        <div class="stres" id="stRes" aria-live="polite"></div>
-      </form>
-    </div></section>
+  <div data-include="header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Bosh sahifa</a><span>/</span><span aria-current="page">Aloqa</span></nav>
+        <h1 class="title-lg">Biz bilan bog‘laning</h1>
+        <p>Eshik tanlash, o‘lcham yoki buyurtma bo‘yicha savollaringiz bo‘lsa — xabar qoldiring, siz bilan bog‘lanamiz.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container contact-layout">
+        <div>
+          <div class="contact-cards" id="contactCards"></div>
+          <div class="map-box" id="mapBox"></div>
+        </div>
+
+        <form class="card" id="contactForm" novalidate>
+          <h2 class="title-md">Xabar yuborish</h2>
+          <div class="form-grid" style="margin-top:20px">
+            <div class="field">
+              <label for="c-name">Ismingiz <span class="req">*</span></label>
+              <input class="input" id="c-name" name="name" type="text" autocomplete="name" maxlength="80" placeholder="Ismingiz">
+              <span class="error" id="name-error">Iltimos, ismingizni kiriting.</span>
+            </div>
+            <div class="field">
+              <label for="c-phone">Telefon <span class="req">*</span></label>
+              <input class="input" id="c-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="+998 90 123 45 67">
+              <span class="error" id="phone-error">Telefon raqamini to‘g‘ri kiriting.</span>
+            </div>
+            <div class="field full">
+              <label for="c-topic">Mavzu</label>
+              <select class="select" id="c-topic" name="topic">
+                <option>Eshik tanlash bo‘yicha maslahat</option>
+                <option>Nostandart o‘lcham / individual buyurtma</option>
+                <option>Yetkazib berish va o‘rnatish</option>
+                <option>Boshqa savol</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="c-message">Xabar <span class="req">*</span></label>
+              <textarea class="textarea" id="c-message" name="message" maxlength="1500" placeholder="Savolingizni yozing…"></textarea>
+              <span class="error" id="message-error">Xabar kamida 5 ta belgidan iborat bo‘lsin.</span>
+            </div>
+            <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          </div>
+          <div class="form-alert" id="contactAlert" role="alert" style="margin-top:20px"></div>
+          <button class="btn btn--block" type="submit" id="contactSubmit" style="margin-top:22px">Yuborish</button>
+        </form>
+      </div>
+    </section>
   </main>
-  <footer class="footer" id="site-footer"></footer>
-  <script src="script.js"></script>
+
+  <div data-include="footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/scroll.js"></script>
+  <script src="assets/js/form-utils.js"></script>
+  <script src="assets/js/pages/contact.js"></script>
 </body>
 </html>

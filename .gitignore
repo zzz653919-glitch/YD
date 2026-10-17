@@ -1,4 +1,6 @@
 .env
+.env.local
 node_modules/
-data/
-package-lock.json
+.vercel/
+.DS_Store
+Thumbs.db

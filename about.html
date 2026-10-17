@@ -1,54 +1,189 @@
-<!DOCTYPE html>
-<html lang="uz">
+<!doctype html>
+<html lang="uz" class="no-js">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Biz haqimizda — YasinDoors</title>
-  <meta name="description" content="YasinDoors — faqat MDF eshiklarga ixtisoslashgan kompaniya: sifat, dizayn va ishonch.">
+  <meta name="description" content="YasinDoors — MDF eshiklar ishlab chiqarish va sotishga ixtisoslashgan kompaniya. Ishlab chiqarish, materiallar, buyurtma asosida tayyorlash, yetkazib berish va o‘rnatish.">
+  <meta name="theme-color" content="#f7f5f1">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="canonical" href="/about.html">
-  <meta property="og:title" content="Biz haqimizda — YasinDoors"><meta property="og:type" content="website"><meta property="og:locale" content="uz_UZ">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
-  <script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/loader.css">
+  <script src="assets/js/theme-init.js"></script>
+  <script src="assets/js/loader.js"></script>
 </head>
 <body data-page="about">
-  <a class="skip" href="#main">Asosiy kontentga o‘tish</a>
-  <header class="header" id="site-header"></header>
-  <main id="main">
-    <section class="phero"><div class="container reveal"><p class="eyebrow">YasinDoors</p><h1>Biz haqimizda</h1><p>YasinDoors — faqat MDF eshiklarga ixtisoslashgan kompaniya.</p></div></section>
-    <section class="section"><div class="container split">
-      <div class="reveal"><p class="eyebrow">YasinDoors</p><h2>Faqat MDF eshiklar</h2>
-        <p>YasinDoors — MDF eshiklar ishlab chiqarish va sotishga e’tibor qaratgan kompaniya. Barcha modellarimiz bitta maqsadga xizmat qiladi: uyingizga mos, chiroyli va ishonchli eshik taklif qilish.</p>
-        <a href="doors.html" class="btn btn--p">Katalogni ko‘rish</a></div>
-      <div class="vis reveal"><img data-door="3" alt="Klassik MDF eshik illyustratsiyasi" width="300" height="400"></div>
-    </div></section>
-    <section class="section section--alt"><div class="container">
-      <div class="head reveal"><p class="eyebrow">Bizning yondashuvimiz</p><h2>Sifat + dizayn + funksionallik</h2></div>
-      <div class="cards4">
-        <article class="box reveal"><span class="no">01</span><h3>MDF sifati</h3><p>MDF mustahkam, barqaror va yuzasi silliq material. Namlik va harorat o‘zgarishiga chidamli, parvarishi oson.</p></article>
-        <article class="box reveal"><span class="no">02</span><h3>Dizayn</h3><p>Minimal, modern va classic uslubdagi modellar turli interyerlarga uyg‘un keladi.</p></article>
-        <article class="box reveal"><span class="no">03</span><h3>Funksionallik</h3><p>Kundalik foydalanishga mo‘ljallangan, ishonchli va uzoq xizmat qiladigan konstruksiya.</p></article>
-        <article class="box reveal"><span class="no">04</span><h3>Tanlov</h3><p>Oq, qora, jigarrang va yog‘och ranglaridagi eshiklar orasidan tanlang.</p></article>
-      </div></div></section>
-    <section class="section"><div class="container">
-      <div class="head reveal"><p class="eyebrow">Jarayon</p><h2>Ishlab chiqarish jarayoni</h2></div>
-      <ol class="timeline">
-        <li class="reveal scale"><b>01</b>Design</li><li class="reveal scale"><b>02</b>Material</li><li class="reveal scale"><b>03</b>Production</li><li class="reveal scale"><b>04</b>Quality Control</li><li class="reveal scale"><b>05</b>Final Product</li>
-      </ol></div></section>
-    <section class="section section--alt"><div class="container">
-      <div class="head reveal"><p class="eyebrow">Qadriyatlar</p><h2>Bizning qadriyatlarimiz</h2></div>
-      <div class="cards4">
-        <article class="box reveal"><h3>Sifat</h3><p>Har bir detalga e’tibor.</p></article>
-        <article class="box reveal"><h3>Ishonch</h3><p>Ochiq va halol munosabat.</p></article>
-        <article class="box reveal"><h3>Dizayn</h3><p>Vaqt sinovidan o‘tadigan estetika.</p></article>
-        <article class="box reveal"><h3>Mijoz</h3><p>Sizning qulayligingiz — birinchi o‘rinda.</p></article>
-      </div></div></section>
-    <section class="cta" id="site-cta"></section>
+  <div data-include="header"></div>
+
+  <!--
+    ESLATMA: bu sahifada faqat umumiy, tasdiqlash talab qilmaydigan ma’lumotlar berilgan.
+    [To‘ldiriladi] bilan belgilangan joylarga kompaniyaning haqiqiy ma’lumotlarini kiriting
+    (tashkil topgan yil, ishlab chiqarish manzili, uskunalar, kafolat shartlari va h.k.).
+    Sertifikat yoki kafolatlarni faqat ular rasman mavjud bo‘lsa qo‘shing.
+  -->
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Bosh sahifa</a><span>/</span><span aria-current="page">Biz haqimizda</span></nav>
+        <h1 class="title-lg">Biz haqimizda</h1>
+        <p>YasinDoors — faqat MDF eshiklar ishlab chiqarish va sotishga ixtisoslashgan biznes.</p>
+      </div>
+    </section>
+
+    <!-- Kompaniya haqida -->
+    <section class="section">
+      <div class="container split">
+        <div class="reveal">
+          <span class="eyebrow">Kompaniya haqida</span>
+          <h2 class="title-lg">Bitta mahsulot — to‘liq e’tibor</h2>
+          <p class="lead">Biz boshqa mebel turlariga chalg‘imaymiz: butun diqqatimiz MDF eshiklarni loyihalash, tayyorlash va mijozga yetkazishga qaratilgan.</p>
+          <p>Maqsadimiz — uyingiz yoki ofisingiz interyeriga mos, chiroyli va kundalik foydalanishda qulay eshiklarni taklif qilish. Har bir buyurtmada o‘lcham, rang va dizaynni mijoz bilan birga aniqlashtiramiz.</p>
+          <ul class="check-list">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>Faqat MDF eshiklarga ixtisoslashuv</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>Klassikdan loftgacha bo‘lgan turli uslublar</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>Buyurtma asosida tayyorlash imkoniyati</span></li>
+          </ul>
+          <p class="note" style="margin-top:24px"><svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg><span>Tashkil topgan yil, ishlab chiqarish quvvati va jamoa haqidagi ma’lumotlar: <em>[to‘ldiriladi]</em></span></p>
+        </div>
+        <div class="split-media reveal">
+          <img src="assets/img/doors/neo-arka.svg" alt="Neo Arka — neoklassik MDF eshik" loading="lazy" width="480" height="600">
+        </div>
+      </div>
+    </section>
+
+    <!-- MDF eshiklar haqida -->
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head reveal">
+          <div>
+            <span class="eyebrow">MDF eshiklar haqida</span>
+            <h2 class="title-lg">Nima uchun MDF?</h2>
+          </div>
+          <p>MDF (o‘rtacha zichlikdagi yog‘och tolali plita) — ichki eshiklar uchun keng qo‘llaniladigan material.</p>
+        </div>
+        <div class="about-grid">
+          <div class="feature reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg></div>
+            <h3>Bir jinsli tuzilma</h3>
+            <p>MDF bir tekis zichlikka ega, shu sababli unga frezalash orqali turli naqsh va panellar berish qulay.</p>
+          </div>
+          <div class="feature reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-spark"></use></svg></div>
+            <h3>Dizayn erkinligi</h3>
+            <p>Bo‘yoq (emal), plyonka yoki teksturali qoplamalar yordamida deyarli istalgan rang va ko‘rinishga erishish mumkin.</p>
+          </div>
+          <div class="feature reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-door"></use></svg></div>
+            <h3>Ichki eshiklar uchun</h3>
+            <p>MDF eshiklar xonalar, koridor, oshxona va ofislar uchun mo‘ljallangan. Tanlashda xona sharoitini (masalan, namlik) menejer bilan maslahatlashing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ishlab chiqarish jarayoni -->
+    <section class="section dark-band">
+      <div class="container">
+        <div class="section-head reveal">
+          <div>
+            <span class="eyebrow">Ishlab chiqarish jarayoni</span>
+            <h2 class="title-lg">G‘oyadan tayyor eshikkacha</h2>
+          </div>
+          <p>Jarayonning umumiy bosqichlari. Batafsil texnologik ma’lumotlar: [to‘ldiriladi].</p>
+        </div>
+        <div class="steps process">
+          <div class="step reveal"><h3>Loyihalash</h3><p>Model, o‘lcham va dizayn tanlanadi.</p></div>
+          <div class="step reveal"><h3>Kesish</h3><p>MDF plitalar kerakli o‘lchamda kesiladi.</p></div>
+          <div class="step reveal"><h3>Frezalash</h3><p>Panellar va dekor naqshlar ishlanadi.</p></div>
+          <div class="step reveal"><h3>Qoplama</h3><p>Bo‘yoq yoki plyonka qoplamasi beriladi.</p></div>
+          <div class="step reveal"><h3>Tekshiruv</h3><p>Tayyor eshik qadoqlashdan oldin ko‘rikdan o‘tkaziladi.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Materiallar va sifat nazorati -->
+    <section class="section">
+      <div class="container split">
+        <div class="split-media reveal">
+          <img src="assets/img/doors/walnut-glass.svg" alt="Walnut Glass — yong‘oq teksturali shishali MDF eshik" loading="lazy" width="480" height="600">
+        </div>
+        <div class="reveal">
+          <span class="eyebrow">Materiallar va sifat nazorati</span>
+          <h2 class="title-lg">Har bir detalga e’tibor</h2>
+          <p>Eshik sifati material, qoplama va furnitura uyg‘unligiga bog‘liq. Shu sababli har bir bosqichda tekshiruv o‘tkazishga intilamiz.</p>
+          <ul class="check-list">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>Asosiy material: MDF plita. Yetkazib beruvchilar va plita xususiyatlari: <em class="placeholder">[to‘ldiriladi]</em></span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>Qoplama turlari: bo‘yoq (emal), matovaya va teksturali plyonka.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>Shishali modellarda xira yoki tiniq shisha qo‘llaniladi.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>Kafolat shartlari: <em class="placeholder">[to‘ldiriladi]</em></span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Buyurtma asosida tayyorlash -->
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head reveal">
+          <div>
+            <span class="eyebrow">Buyurtma asosida tayyorlash</span>
+            <h2 class="title-lg">Sizning xonangizga moslab</h2>
+          </div>
+          <p>Standart o‘lchamlar (600–900 × 2000 mm) bilan bir qatorda individual o‘lcham va ranglarni ham muhokama qilamiz.</p>
+        </div>
+        <div class="about-grid">
+          <div class="feature reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-ruler"></use></svg></div>
+            <h3>O‘lcham</h3>
+            <p>Eshik o‘rnining aniq o‘lchamlari asosida tayyorlash. O‘lchov olish tartibi: [to‘ldiriladi].</p>
+          </div>
+          <div class="feature reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-spark"></use></svg></div>
+            <h3>Rang va qoplama</h3>
+            <p>Katalogdagi ranglardan tashqari boshqa variantlar imkoniyatini menejer bilan aniqlashtiring.</p>
+          </div>
+          <div class="feature reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg></div>
+            <h3>Tayyorlash muddati</h3>
+            <p>Muddat model va buyurtma hajmiga bog‘liq va buyurtma tasdiqlanayotganda aytiladi.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Yetkazib berish va o‘rnatish -->
+    <section class="section" id="delivery">
+      <div class="container split">
+        <div class="reveal">
+          <span class="eyebrow">Yetkazib berish va o‘rnatish</span>
+          <h2 class="title-lg">Eshigingiz joyiga yetguncha</h2>
+          <p>Buyurtma tasdiqlangach, yetkazib berish va o‘rnatish vaqtini siz bilan kelishib olamiz.</p>
+          <ul class="check-list">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg><span>Yetkazib berish hududlari va narxi: <em class="placeholder">[to‘ldiriladi]</em></span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-tool"></use></svg><span>O‘rnatish xizmati: buyurtma vaqtida so‘raladi, narxi alohida kelishiladi.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-chat"></use></svg><span>Savollar bo‘yicha menejer bilan bog‘lanishingiz mumkin.</span></li>
+          </ul>
+          <div class="hero-actions" style="margin-top:28px">
+            <a class="btn btn--gold" href="products.html">Eshik tanlash</a>
+            <a class="btn btn--outline" href="contact.html">Bog‘lanish</a>
+          </div>
+        </div>
+        <div class="split-media reveal">
+          <img src="assets/img/doors/vetro-bianco.svg" alt="Vetro Bianco — oq shishali MDF eshik" loading="lazy" width="480" height="600">
+        </div>
+      </div>
+    </section>
   </main>
-  <footer class="footer" id="site-footer"></footer>
-  <script src="script.js"></script>
+
+  <div data-include="footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/scroll.js"></script>
 </body>
 </html>
